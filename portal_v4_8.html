@@ -1,0 +1,3381 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BrasilTerrenos — Portal Corporativo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   DESIGN SYSTEM — BrasilTerrenos Portal v3
+   Arquiteto de Software Sênior + Dev Full Stack Sênior + UX/UI Sênior
+   ═══════════════════════════════════════════════════════════════ */
+:root {
+  /* Brand */
+  --brand-50:  #f0faf2;
+  --brand-100: #d8f3de;
+  --brand-200: #b3e6bc;
+  --brand-300: #7dd190;
+  --brand-400: #4ab861;
+  --brand-500: #2a9d45;
+  --brand-600: #1e7d34;
+  --brand-700: #1a6229;
+  --brand-800: #174f23;
+  --brand-900: #0f3317;
+  --brand-950: #081c0d;
+
+  /* Neutrals — cool gray (not warm) */
+  --gray-0:   #ffffff;
+  --gray-25:  #fafafa;
+  --gray-50:  #f5f5f6;
+  --gray-100: #ececed;
+  --gray-200: #d8d8da;
+  --gray-300: #b8b8bc;
+  --gray-400: #8f8f96;
+  --gray-500: #6b6b74;
+  --gray-600: #4e4e57;
+  --gray-700: #35353e;
+  --gray-800: #232329;
+  --gray-900: #141418;
+  --gray-950: #0a0a0d;
+
+  /* Semantic */
+  --success-50:  #f0faf2; --success-500: #2a9d45; --success-700: #1a6229;
+  --warning-50:  #fffbeb; --warning-500: #d97706; --warning-700: #92400e;
+  --danger-50:   #fef2f2; --danger-500:  #ef4444; --danger-700:  #b91c1c;
+  --info-50:     #eff6ff; --info-500:    #3b82f6; --info-700:    #1d4ed8;
+
+  /* Sidebar */
+  --sidebar-bg:     var(--gray-950);
+  --sidebar-border: rgba(255,255,255,.06);
+  --sidebar-hover:  rgba(255,255,255,.06);
+  --sidebar-active: rgba(42,157,69,.18);
+  --sidebar-text:   rgba(255,255,255,.55);
+  --sidebar-active-text: #6ee28a;
+  --sidebar-w: 224px;
+  --sidebar-collapsed: 60px;
+
+  /* Layout */
+  --topbar-h: 58px;
+  --content-px: 32px;
+  --content-py: 28px;
+
+  /* Typography */
+  --font: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+
+  /* Radii */
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 14px;
+  --r-xl: 20px;
+
+  /* Shadows */
+  --shadow-xs: 0 1px 2px rgba(0,0,0,.05);
+  --shadow-sm: 0 1px 4px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+  --shadow-md: 0 4px 12px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.04);
+  --shadow-lg: 0 10px 32px rgba(0,0,0,.1), 0 4px 8px rgba(0,0,0,.05);
+  --shadow-xl: 0 20px 60px rgba(0,0,0,.14);
+
+  /* Transitions */
+  --ease: cubic-bezier(.4,0,.2,1);
+  --t-fast: 150ms var(--ease);
+  --t-base: 220ms var(--ease);
+  --t-slow: 350ms var(--ease);
+}
+
+/* ─── Reset ─────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 14px; scroll-behavior: smooth; height: 100%; }
+body {
+  font-family: var(--font);
+  background: var(--gray-50);
+  color: var(--gray-800);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  height: 100%;
+  overflow: hidden;
+}
+a { color: inherit; text-decoration: none; }
+button { font-family: var(--font); cursor: pointer; border: none; background: none; }
+input, select, textarea { font-family: var(--font); }
+ul { list-style: none; }
+
+/* ═══════════════════════════════════════════════════════════════
+   LOGIN SCREEN
+   ═══════════════════════════════════════════════════════════════ */
+#screen-login {
+  position: fixed; inset: 0; z-index: 1000;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--gray-950);
+  overflow: hidden;
+}
+.login-bg {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 70% 55% at 15% 85%, rgba(42,157,69,.18) 0%, transparent 55%),
+    radial-gradient(ellipse 55% 45% at 85% 15%, rgba(30,125,52,.12) 0%, transparent 50%);
+}
+.login-grid {
+  position: absolute; inset: 0;
+  background-image: linear-gradient(rgba(42,157,69,.04) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(42,157,69,.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+.login-wrap {
+  position: relative; z-index: 2;
+  display: flex; gap: 0;
+  width: 880px; max-width: calc(100vw - 40px);
+  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: var(--r-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-xl);
+}
+.login-left {
+  flex: 1;
+  background: linear-gradient(160deg, rgba(42,157,69,.25) 0%, rgba(8,28,13,.8) 100%);
+  padding: 52px 44px;
+  display: flex; flex-direction: column; justify-content: space-between;
+  min-height: 540px;
+}
+.login-left-brand { display: flex; align-items: center; gap: 10px; }
+.login-left-mark {
+  width: 38px; height: 38px;
+  background: linear-gradient(135deg, var(--brand-400), var(--brand-600));
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 6px 20px rgba(42,157,69,.35);
+}
+.login-left-mark i { color: #fff; font-size: 16px; }
+.login-left-name {
+  font-size: 16px; font-weight: 700; color: #fff; letter-spacing: -.2px;
+}
+.login-left-sub { font-size: 10px; color: var(--brand-300); letter-spacing: 1.4px; text-transform: uppercase; }
+.login-left-body { }
+.login-left-tagline {
+  font-size: 28px; font-weight: 800; color: #fff; line-height: 1.22;
+  letter-spacing: -.5px; margin-bottom: 14px;
+}
+.login-left-desc { font-size: 13.5px; color: rgba(255,255,255,.45); line-height: 1.7; }
+.login-left-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 24px; }
+.login-left-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 12px; border-radius: 99px;
+  background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.1);
+  color: rgba(255,255,255,.6); font-size: 11.5px; font-weight: 500;
+}
+.login-left-pill i { font-size: 10px; color: var(--brand-300); }
+.login-right {
+  width: 380px; flex-shrink: 0;
+  background: rgba(255,255,255,.04);
+  padding: 48px 40px;
+  display: flex; flex-direction: column; justify-content: center;
+}
+.login-right-title { font-size: 22px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+.login-right-sub { font-size: 13px; color: rgba(255,255,255,.4); margin-bottom: 32px; }
+.lf-group { margin-bottom: 16px; }
+.lf-label { display: block; font-size: 11.5px; font-weight: 600; letter-spacing: .5px; text-transform: uppercase; color: rgba(255,255,255,.45); margin-bottom: 7px; }
+.lf-wrap { position: relative; }
+.lf-wrap i.lf-icon { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); font-size: 13px; color: rgba(255,255,255,.25); pointer-events: none; }
+.lf-input {
+  width: 100%; height: 44px; padding: 0 40px 0 38px;
+  background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1);
+  border-radius: var(--r-md); color: #fff; font-size: 14px;
+  font-family: var(--font); outline: none; transition: all var(--t-base);
+}
+.lf-input::placeholder { color: rgba(255,255,255,.2); }
+.lf-input:focus { background: rgba(255,255,255,.09); border-color: var(--brand-400); box-shadow: 0 0 0 3px rgba(42,157,69,.18); }
+.lf-eye { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: rgba(255,255,255,.3); font-size: 13px; cursor: pointer; transition: color var(--t-fast); }
+.lf-eye:hover { color: rgba(255,255,255,.6); }
+.lf-forgot { text-align: right; margin-bottom: 22px; }
+.lf-forgot a { font-size: 12px; color: var(--brand-300); transition: color var(--t-fast); }
+.lf-forgot a:hover { color: var(--brand-200); }
+.btn-login-submit {
+  width: 100%; height: 44px;
+  background: linear-gradient(135deg, var(--brand-400) 0%, var(--brand-600) 100%);
+  color: #fff; font-size: 14px; font-weight: 600; border-radius: var(--r-md);
+  border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+  transition: all var(--t-base); box-shadow: 0 4px 16px rgba(42,157,69,.35);
+  font-family: var(--font);
+}
+.btn-login-submit:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(42,157,69,.45); }
+.btn-login-submit:active { transform: none; }
+.lf-error {
+  display: none; margin-top: 12px; padding: 10px 14px;
+  background: rgba(239,68,68,.12); border: 1px solid rgba(239,68,68,.25);
+  border-radius: var(--r-sm); color: #fca5a5; font-size: 12.5px;
+  align-items: center; gap: 8px;
+}
+.login-footer { font-size: 11px; color: rgba(255,255,255,.18); text-align: center; margin-top: 28px; }
+
+/* ═══════════════════════════════════════════════════════════════
+   WELCOME SCREEN
+   ═══════════════════════════════════════════════════════════════ */
+#screen-welcome {
+  display: none; position: fixed; inset: 0; z-index: 900;
+  background: var(--gray-50);
+  align-items: center; justify-content: center;
+}
+.welcome-card {
+  text-align: center; max-width: 480px; padding: 20px;
+  animation: welcomeIn .5s var(--ease) both;
+}
+@keyframes welcomeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.welcome-avatar-wrap {
+  position: relative; display: inline-block; margin-bottom: 28px;
+}
+.welcome-avatar {
+  width: 80px; height: 80px; border-radius: 24px;
+  background: linear-gradient(135deg, var(--brand-400), var(--brand-700));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px; font-weight: 800; color: #fff;
+  box-shadow: 0 12px 40px rgba(42,157,69,.35);
+  margin: 0 auto;
+}
+.welcome-badge {
+  position: absolute; bottom: -6px; right: -6px;
+  width: 28px; height: 28px; border-radius: 8px;
+  background: var(--brand-500); border: 3px solid var(--gray-50);
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 11px;
+}
+.welcome-greeting { font-size: 13px; font-weight: 600; color: var(--brand-500); text-transform: uppercase; letter-spacing: .8px; margin-bottom: 8px; }
+.welcome-name { font-size: 32px; font-weight: 800; color: var(--gray-900); letter-spacing: -.5px; margin-bottom: 10px; }
+.welcome-role { font-size: 14px; color: var(--gray-400); margin-bottom: 32px; }
+.welcome-desc { font-size: 14.5px; color: var(--gray-500); line-height: 1.7; margin-bottom: 36px; max-width: 380px; margin-left: auto; margin-right: auto; }
+.welcome-chips { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 36px; }
+.welcome-chip {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 7px 14px; border-radius: 99px;
+  background: var(--brand-50); border: 1px solid var(--brand-100);
+  color: var(--brand-700); font-size: 12.5px; font-weight: 600;
+}
+.welcome-chip i { font-size: 11px; }
+.btn-welcome {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 0 28px; height: 46px; border-radius: var(--r-md);
+  background: linear-gradient(135deg, var(--brand-400), var(--brand-600));
+  color: #fff; font-size: 14px; font-weight: 700;
+  box-shadow: 0 6px 20px rgba(42,157,69,.3); cursor: pointer; border: none;
+  font-family: var(--font); transition: all var(--t-base);
+}
+.btn-welcome:hover { transform: translateY(-1px); box-shadow: 0 10px 28px rgba(42,157,69,.4); }
+
+/* ═══════════════════════════════════════════════════════════════
+   APP SHELL
+   ═══════════════════════════════════════════════════════════════ */
+#screen-app {
+  display: none; position: fixed; inset: 0;
+  flex-direction: row;
+}
+#screen-app.visible { display: flex; }
+
+/* ─── Sidebar ────────────────────────────────────────────────── */
+.sidebar {
+  width: var(--sidebar-collapsed);
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--sidebar-border);
+  display: flex; flex-direction: column;
+  transition: width var(--t-slow);
+  flex-shrink: 0;
+  overflow: hidden;
+  z-index: 100;
+}
+.sidebar:hover { width: var(--sidebar-w); }
+.sidebar:hover ~ .app-body .topbar-breadcrumb { opacity: 1; }
+
+.sb-header {
+  height: var(--topbar-h); display: flex; align-items: center;
+  padding: 0 12px; gap: 10px; flex-shrink: 0;
+  border-bottom: 1px solid var(--sidebar-border);
+  overflow: hidden; white-space: nowrap;
+}
+.sb-mark {
+  width: 36px; height: 36px; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--brand-400), var(--brand-600));
+  border-radius: 10px; display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 12px rgba(42,157,69,.3);
+}
+.sb-mark i { color: #fff; font-size: 15px; }
+.sb-brand { overflow: hidden; }
+.sb-name { font-size: 13.5px; font-weight: 700; color: #fff; white-space: nowrap; }
+.sb-tag { font-size: 9.5px; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase; color: var(--brand-400); }
+
+.sb-nav { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 10px 0; }
+.sb-nav::-webkit-scrollbar { width: 3px; }
+.sb-nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,.08); border-radius: 99px; }
+
+.sb-section-label {
+  font-size: 9px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase;
+  color: rgba(255,255,255,.2); padding: 14px 16px 4px;
+  white-space: nowrap; opacity: 0; transition: opacity var(--t-base);
+}
+.sidebar:hover .sb-section-label { opacity: 1; }
+
+.sb-item { position: relative; }
+.sb-link {
+  display: flex; align-items: center; gap: 0;
+  padding: 8px 12px; margin: 1px 6px;
+  border-radius: var(--r-md); color: var(--sidebar-text);
+  font-size: 13px; font-weight: 500; cursor: pointer;
+  transition: all var(--t-fast); white-space: nowrap; overflow: hidden;
+  position: relative;
+}
+.sb-link:hover { background: var(--sidebar-hover); color: rgba(255,255,255,.85); }
+.sb-link.active { background: var(--sidebar-active); color: var(--sidebar-active-text); }
+.sb-link.active::before {
+  content: ''; position: absolute; left: -6px; top: 50%; transform: translateY(-50%);
+  width: 3px; height: 18px; background: var(--brand-400); border-radius: 0 3px 3px 0;
+}
+.sb-icon {
+  width: 36px; height: 36px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; border-radius: 8px;
+}
+.sb-label { flex: 1; overflow: hidden; text-overflow: ellipsis; margin-left: 2px; }
+.sb-chevron { font-size: 9px; opacity: .45; flex-shrink: 0; margin-left: 4px; transition: transform var(--t-base); }
+.sb-item.open .sb-chevron { transform: rotate(90deg); }
+
+/* Submenu — FIX: quando sidebar recolhe, texto não vaza */
+.sb-submenu { max-height: 0; overflow: hidden; transition: max-height var(--t-slow); }
+.sb-item.open .sb-submenu { max-height: 600px; }
+/* CRITICAL: força colapso do submenu quando sidebar não está hover */
+.sidebar:not(:hover) .sb-submenu { max-height: 0 !important; overflow: hidden !important; }
+.sidebar:not(:hover) .sb-group-label { opacity: 0; }
+.sidebar:not(:hover) .sb-sublink { opacity: 0; }
+.sb-group-label {
+  font-size: 9px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+  color: rgba(255,255,255,.18); padding: 8px 12px 3px 50px; white-space: nowrap;
+}
+.sb-sublink {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 12px 7px 50px; margin: 0 6px;
+  border-radius: var(--r-sm); color: rgba(255,255,255,.4);
+  font-size: 12.5px; font-weight: 500; cursor: pointer;
+  transition: all var(--t-fast); white-space: nowrap;
+}
+.sb-sublink:hover { background: var(--sidebar-hover); color: rgba(255,255,255,.75); }
+.sb-sublink.active { color: var(--brand-300); background: rgba(42,157,69,.1); }
+.sb-sublink i { font-size: 10.5px; width: 12px; text-align: center; opacity: .7; }
+
+.sb-footer {
+  padding: 10px 6px; border-top: 1px solid var(--sidebar-border);
+  flex-shrink: 0;
+}
+.sb-user {
+  display: flex; align-items: center; gap: 0;
+  padding: 8px 6px; border-radius: var(--r-md);
+  cursor: pointer; transition: background var(--t-fast); overflow: hidden; white-space: nowrap;
+}
+.sb-user:hover { background: var(--sidebar-hover); }
+.sb-avatar {
+  width: 36px; height: 36px; flex-shrink: 0;
+  border-radius: 10px; background: linear-gradient(135deg, var(--brand-500), var(--brand-800));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700; color: #fff;
+}
+.sb-user-info { margin-left: 10px; overflow: hidden; }
+.sb-user-name { font-size: 12.5px; font-weight: 600; color: rgba(255,255,255,.75); overflow: hidden; text-overflow: ellipsis; }
+.sb-user-role { font-size: 11px; color: rgba(255,255,255,.3); overflow: hidden; text-overflow: ellipsis; }
+
+/* ─── App Body ───────────────────────────────────────────────── */
+.app-body {
+  flex: 1; display: flex; flex-direction: column; overflow: hidden;
+  min-width: 0;
+}
+
+/* ─── Topbar ─────────────────────────────────────────────────── */
+.topbar {
+  height: var(--topbar-h); flex-shrink: 0;
+  background: var(--gray-0); border-bottom: 1px solid var(--gray-100);
+  display: flex; align-items: center; padding: 0 24px; gap: 12px;
+}
+.topbar-breadcrumb {
+  flex: 1; display: flex; align-items: center; gap: 6px;
+  font-size: 13px;
+}
+.bc-item { color: var(--gray-400); }
+.bc-sep { color: var(--gray-200); font-size: 10px; }
+.bc-current { color: var(--gray-800); font-weight: 600; }
+.topbar-search {
+  position: relative; width: 220px;
+}
+.topbar-search i { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 12px; color: var(--gray-300); pointer-events: none; }
+.topbar-search input {
+  width: 100%; height: 34px; padding: 0 10px 0 32px;
+  background: var(--gray-50); border: 1px solid var(--gray-100);
+  border-radius: var(--r-md); font-size: 13px; color: var(--gray-700);
+  outline: none; transition: all var(--t-base); font-family: var(--font);
+}
+.topbar-search input::placeholder { color: var(--gray-300); }
+.topbar-search input:focus { background: #fff; border-color: var(--brand-400); box-shadow: 0 0 0 3px rgba(42,157,69,.1); }
+.topbar-actions { display: flex; align-items: center; gap: 6px; }
+.topbar-btn {
+  width: 34px; height: 34px; border-radius: var(--r-md); border: 1px solid var(--gray-100);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--gray-400); font-size: 14px; cursor: pointer; position: relative;
+  transition: all var(--t-fast); background: transparent;
+}
+.topbar-btn:hover { background: var(--gray-50); color: var(--gray-700); border-color: var(--gray-200); }
+.topbar-notif { width: 6px; height: 6px; background: var(--brand-500); border-radius: 50%; position: absolute; top: 7px; right: 7px; border: 1.5px solid #fff; }
+.topbar-user-btn {
+  width: 34px; height: 34px; border-radius: 10px;
+  background: linear-gradient(135deg, var(--brand-500), var(--brand-800));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; color: #fff; cursor: pointer;
+  flex-shrink: 0;
+}
+
+/* ─── Content ────────────────────────────────────────────────── */
+.content-area {
+  flex: 1; overflow-y: auto; overflow-x: hidden;
+}
+.content-area::-webkit-scrollbar { width: 6px; }
+.content-area::-webkit-scrollbar-track { background: transparent; }
+.content-area::-webkit-scrollbar-thumb { background: var(--gray-200); border-radius: 99px; }
+
+.page { display: none; padding: var(--content-py) var(--content-px); animation: pageIn .2s var(--ease) both; }
+.page.active { display: block; }
+@keyframes pageIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* ═══════════════════════════════════════════════════════════════
+   COMMON COMPONENTS
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Page Header */
+.ph { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
+.ph-left { }
+.ph-title { font-size: 22px; font-weight: 800; color: var(--gray-900); letter-spacing: -.3px; line-height: 1.2; }
+.ph-sub { font-size: 13px; color: var(--gray-400); margin-top: 3px; }
+.ph-right { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+
+/* Buttons */
+.btn { display: inline-flex; align-items: center; gap: 6px; padding: 0 16px; height: 36px; border-radius: var(--r-md); font-size: 13px; font-weight: 600; cursor: pointer; transition: all var(--t-fast); border: none; font-family: var(--font); white-space: nowrap; }
+.btn-primary { background: linear-gradient(135deg, var(--brand-400), var(--brand-600)); color: #fff; box-shadow: 0 2px 8px rgba(42,157,69,.25); }
+.btn-primary:hover { box-shadow: 0 4px 14px rgba(42,157,69,.35); transform: translateY(-1px); }
+.btn-secondary { background: var(--gray-0); color: var(--gray-700); border: 1px solid var(--gray-200); box-shadow: var(--shadow-xs); }
+.btn-secondary:hover { background: var(--gray-50); border-color: var(--gray-300); }
+.btn-danger { background: var(--danger-500); color: #fff; }
+.btn-danger:hover { background: var(--danger-700); }
+.btn-ghost { background: transparent; color: var(--gray-500); }
+.btn-ghost:hover { background: var(--gray-100); color: var(--gray-800); }
+.btn-sm { height: 30px; padding: 0 12px; font-size: 12px; }
+.btn-icon { width: 32px; height: 32px; padding: 0; justify-content: center; border-radius: var(--r-md); }
+.btn i { font-size: 12px; }
+
+/* Cards */
+.card { background: var(--gray-0); border: 1px solid var(--gray-100); border-radius: var(--r-lg); box-shadow: var(--shadow-sm); }
+.card-hd { padding: 18px 20px 14px; border-bottom: 1px solid var(--gray-50); display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.card-hd-left { }
+.card-title { font-size: 14px; font-weight: 700; color: var(--gray-900); }
+.card-sub { font-size: 12px; color: var(--gray-400); margin-top: 1px; }
+.card-bd { padding: 20px; }
+
+/* ─── KPI Cards v3 (Home) ────────────────────────────────────── */
+.stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px; }
+.stat-card {
+  background: var(--gray-0); border: 1px solid var(--gray-100); border-radius: var(--r-lg);
+  padding: 20px 22px; box-shadow: var(--shadow-sm); transition: all var(--t-fast); cursor: default;
+  position: relative; overflow: hidden;
+}
+.stat-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; border-radius: var(--r-lg) var(--r-lg) 0 0;
+}
+.stat-card:nth-child(1)::before { background: linear-gradient(90deg, var(--brand-400), var(--brand-300)); }
+.stat-card:nth-child(2)::before { background: linear-gradient(90deg, var(--warning-500), #fbbf24); }
+.stat-card:nth-child(3)::before { background: linear-gradient(90deg, var(--danger-500), #f87171); }
+.stat-card:nth-child(4)::before { background: linear-gradient(90deg, var(--info-500), #60a5fa); }
+.stat-card:hover { border-color: var(--gray-200); box-shadow: var(--shadow-md); transform: translateY(-2px); }
+.stat-card-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px; }
+.stat-icon-wrap { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+.stat-icon-wrap.green { background: var(--brand-50); color: var(--brand-600); }
+.stat-icon-wrap.amber { background: var(--warning-50); color: var(--warning-500); }
+.stat-icon-wrap.red { background: var(--danger-50); color: var(--danger-500); }
+.stat-icon-wrap.blue { background: var(--info-50); color: var(--info-500); }
+.stat-val { font-size: 38px; font-weight: 800; color: var(--gray-900); line-height: 1; letter-spacing: -2px; }
+.stat-label { font-size: 13px; color: var(--gray-500); font-weight: 500; margin-top: 4px; }
+.stat-trend { font-size: 11.5px; display: inline-flex; align-items: center; gap: 4px; margin-top: 10px; padding: 3px 8px; border-radius: 99px; font-weight: 600; }
+.stat-trend.up { background: var(--brand-50); color: var(--brand-700); }
+.stat-trend.down { background: var(--danger-50); color: var(--danger-700); }
+.stat-trend.neutral { background: var(--gray-100); color: var(--gray-600); }
+.stat-trend i { font-size: 9px; }
+
+/* Table */
+.tbl-wrap { overflow-x: auto; }
+.tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
+.tbl thead th { padding: 10px 16px; text-align: left; font-size: 11px; font-weight: 700; letter-spacing: .7px; text-transform: uppercase; color: var(--gray-400); background: var(--gray-50); border-bottom: 1px solid var(--gray-100); white-space: nowrap; }
+.tbl thead th:first-child { border-radius: var(--r-sm) 0 0 0; }
+.tbl thead th:last-child { border-radius: 0 var(--r-sm) 0 0; }
+.tbl tbody tr { border-bottom: 1px solid var(--gray-50); transition: background var(--t-fast); }
+.tbl tbody tr:last-child { border-bottom: none; }
+.tbl tbody tr:hover { background: var(--gray-25); }
+.tbl td { padding: 13px 16px; color: var(--gray-700); vertical-align: middle; }
+.td-bold { font-weight: 600; color: var(--gray-900); }
+
+/* Badges */
+.badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 99px; font-size: 11.5px; font-weight: 600; white-space: nowrap; }
+.badge i { font-size: 8.5px; }
+.badge-green { background: var(--brand-50); color: var(--brand-700); }
+.badge-red { background: var(--danger-50); color: var(--danger-700); }
+.badge-amber { background: var(--warning-50); color: var(--warning-700); }
+.badge-blue { background: var(--info-50); color: var(--info-700); }
+.badge-gray { background: var(--gray-100); color: var(--gray-500); }
+
+/* Toolbar */
+.toolbar { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+.search-wrap { position: relative; flex: 1; min-width: 180px; max-width: 280px; }
+.search-wrap i { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 12px; color: var(--gray-300); pointer-events: none; }
+.search-input { width: 100%; height: 34px; padding: 0 10px 0 32px; background: var(--gray-0); border: 1px solid var(--gray-200); border-radius: var(--r-md); font-size: 13px; color: var(--gray-800); outline: none; font-family: var(--font); transition: all var(--t-base); }
+.search-input:focus { border-color: var(--brand-400); box-shadow: 0 0 0 3px rgba(42,157,69,.1); }
+.filter-select { height: 34px; padding: 0 10px; background: var(--gray-0); border: 1px solid var(--gray-200); border-radius: var(--r-md); font-size: 13px; color: var(--gray-700); font-family: var(--font); outline: none; cursor: pointer; }
+.filter-select:focus { border-color: var(--brand-400); }
+
+/* Form */
+.form-grid { display: grid; gap: 14px; }
+.fg-2 { grid-template-columns: 1fr 1fr; }
+.fg-3 { grid-template-columns: 1fr 1fr 1fr; }
+.form-group { display: flex; flex-direction: column; gap: 5px; }
+.form-label { font-size: 11px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; color: var(--gray-500); }
+.form-input, .form-select { height: 38px; padding: 0 12px; background: var(--gray-0); border: 1px solid var(--gray-200); border-radius: var(--r-md); font-size: 13.5px; color: var(--gray-800); font-family: var(--font); outline: none; transition: all var(--t-base); width: 100%; }
+.form-input:focus, .form-select:focus { border-color: var(--brand-400); box-shadow: 0 0 0 3px rgba(42,157,69,.1); }
+.form-textarea { min-height: 80px; padding: 10px 12px; background: var(--gray-0); border: 1px solid var(--gray-200); border-radius: var(--r-md); font-size: 13.5px; color: var(--gray-800); font-family: var(--font); outline: none; width: 100%; resize: vertical; transition: all var(--t-base); }
+.form-textarea:focus { border-color: var(--brand-400); box-shadow: 0 0 0 3px rgba(42,157,69,.1); }
+
+/* Toggle */
+.toggle-label { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+.toggle-input { display: none; }
+.toggle-track {
+  width: 38px; height: 22px; border-radius: 99px; background: var(--gray-200);
+  position: relative; transition: background var(--t-base); flex-shrink: 0;
+}
+.toggle-track::after {
+  content: ''; position: absolute; top: 3px; left: 3px;
+  width: 16px; height: 16px; border-radius: 50%; background: #fff;
+  transition: transform var(--t-base); box-shadow: var(--shadow-xs);
+}
+.toggle-input:checked + .toggle-track { background: var(--brand-500); }
+.toggle-input:checked + .toggle-track::after { transform: translateX(16px); }
+.toggle-text { font-size: 13.5px; color: var(--gray-700); }
+
+/* Two-col layout */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+
+/* Modal */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4); backdrop-filter: blur(4px); z-index: 800; align-items: center; justify-content: center; padding: 20px; }
+.modal-overlay.open { display: flex; }
+.modal { background: var(--gray-0); border-radius: var(--r-xl); box-shadow: var(--shadow-xl); width: 100%; max-width: 540px; max-height: 90vh; overflow-y: auto; animation: modalIn .2s var(--ease); }
+.modal-lg { max-width: 660px; }
+@keyframes modalIn { from { opacity: 0; transform: scale(.97) translateY(8px); } to { opacity: 1; transform: none; } }
+.modal-hd { padding: 22px 24px 18px; border-bottom: 1px solid var(--gray-100); display: flex; align-items: center; justify-content: space-between; }
+.modal-title { font-size: 17px; font-weight: 800; color: var(--gray-900); }
+.modal-close { width: 30px; height: 30px; border-radius: 8px; background: var(--gray-100); border: none; color: var(--gray-500); font-size: 13px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all var(--t-fast); }
+.modal-close:hover { background: var(--gray-200); color: var(--gray-800); }
+.modal-bd { padding: 22px 24px; }
+.modal-ft { padding: 14px 24px 22px; display: flex; justify-content: flex-end; gap: 8px; }
+
+/* Toast */
+.toast-wrap { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
+.toast { display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: var(--gray-0); border-radius: var(--r-md); box-shadow: var(--shadow-lg); border-left: 3px solid var(--brand-500); font-size: 13.5px; color: var(--gray-800); min-width: 260px; max-width: 360px; animation: toastIn .25s var(--ease); }
+.toast.success { border-left-color: var(--brand-500); }
+.toast.error { border-left-color: var(--danger-500); }
+.toast.warning { border-left-color: var(--warning-500); }
+.toast i { font-size: 15px; flex-shrink: 0; }
+.toast.success i { color: var(--brand-500); }
+.toast.error i { color: var(--danger-500); }
+.toast.warning i { color: var(--warning-500); }
+@keyframes toastIn { from { opacity: 0; transform: translateX(16px); } to { opacity: 1; transform: none; } }
+
+/* Divider */
+.divider { height: 1px; background: var(--gray-100); margin: 18px 0; }
+
+/* Section separator */
+.section-gap { margin-bottom: 16px; }
+
+/* Activity list */
+.activity-list { display: flex; flex-direction: column; }
+.activity-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--gray-50); }
+.activity-item:last-child { border-bottom: none; }
+.activity-icon { width: 34px; height: 34px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
+.activity-info { flex: 1; min-width: 0; }
+.activity-title { font-size: 13px; font-weight: 600; color: var(--gray-800); }
+.activity-sub { font-size: 12px; color: var(--gray-400); margin-top: 1px; }
+.activity-time { font-size: 11.5px; color: var(--gray-400); white-space: nowrap; text-align: right; flex-shrink: 0; }
+.activity-time-date { font-size: 10.5px; color: var(--gray-300); }
+
+/* Bar chart */
+.bar-row { margin-bottom: 14px; }
+.bar-row:last-child { margin-bottom: 0; }
+.bar-meta { display: flex; justify-content: space-between; margin-bottom: 5px; }
+.bar-name { font-size: 13px; font-weight: 600; color: var(--gray-700); }
+.bar-count { font-size: 12.5px; font-weight: 700; color: var(--gray-500); }
+.bar-track { height: 7px; background: var(--gray-100); border-radius: 99px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 99px; transition: width .6s var(--ease); }
+
+/* Expedient grid */
+.exp-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-bottom: 20px; }
+.exp-day { border-radius: var(--r-md); border: 1px solid var(--gray-200); background: var(--gray-0); padding: 12px 8px; text-align: center; cursor: pointer; transition: all var(--t-fast); }
+.exp-day:hover { border-color: var(--brand-300); }
+.exp-day.active { border-color: var(--brand-400); background: var(--brand-50); }
+.exp-day-label { display: flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 6px; }
+.exp-day-cb { width: 15px; height: 15px; accent-color: var(--brand-500); cursor: pointer; }
+.exp-day-name { font-size: 11.5px; font-weight: 700; color: var(--gray-500); letter-spacing: .3px; }
+.exp-day.active .exp-day-name { color: var(--brand-700); }
+.exp-day-time { font-size: 11px; color: var(--gray-400); }
+.exp-day.active .exp-day-time { color: var(--brand-600); }
+
+/* Permission matrix */
+.perm-grid { overflow-x: auto; }
+.perm-tbl { min-width: 650px; }
+.perm-tbl thead th { text-align: center; }
+.perm-tbl thead th:first-child { text-align: left; min-width: 160px; }
+.perm-tbl td { text-align: center; }
+.perm-tbl td:first-child { text-align: left; font-weight: 600; color: var(--gray-800); }
+.perm-cb { width: 16px; height: 16px; accent-color: var(--brand-500); cursor: pointer; }
+
+/* Access level badges */
+.access-level { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: var(--r-sm); font-size: 12px; font-weight: 600; }
+.access-full { background: var(--brand-50); color: var(--brand-700); border: 1px solid var(--brand-100); }
+.access-partial { background: var(--info-50); color: var(--info-700); border: 1px solid #bfdbfe; }
+.access-none { background: var(--gray-50); color: var(--gray-400); border: 1px solid var(--gray-200); }
+
+/* Power BI specific */
+.pbi-badge { display: inline-flex; align-items: center; gap: 5px; padding: 2px 8px; border-radius: var(--r-sm); background: #f0f4ff; border: 1px solid #d8e3fe; color: #3450c9; font-size: 11px; font-weight: 700; }
+.pbi-badge i { font-size: 9px; }
+
+/* Security item */
+.sec-item { display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; border-radius: var(--r-md); background: var(--gray-0); border: 1px solid var(--gray-100); }
+.sec-item + .sec-item { margin-top: 8px; }
+.sec-status { width: 26px; height: 26px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 11px; flex-shrink: 0; }
+.sec-ok { background: var(--brand-50); color: var(--brand-600); }
+.sec-warn { background: var(--warning-50); color: var(--warning-500); }
+.sec-info { flex: 1; }
+.sec-name { font-size: 13px; font-weight: 600; color: var(--gray-800); }
+.sec-desc { font-size: 12px; color: var(--gray-400); margin-top: 2px; }
+
+/* Status card */
+.status-pill { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 99px; font-size: 12px; font-weight: 600; }
+.status-online { background: var(--brand-50); color: var(--brand-700); border: 1px solid var(--brand-100); }
+.status-dot { width: 7px; height: 7px; border-radius: 50%; }
+.status-dot.green { background: var(--brand-500); }
+
+/* ─── Blocked page ───────────────────────────────────────────── */
+.blocked-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 60vh; text-align: center; padding: 40px; }
+.blocked-icon-wrap { width: 72px; height: 72px; border-radius: 20px; background: var(--warning-50); display: flex; align-items: center; justify-content: center; font-size: 30px; color: var(--warning-500); margin: 0 auto 22px; }
+.blocked-title { font-size: 24px; font-weight: 800; color: var(--gray-900); margin-bottom: 8px; }
+.blocked-desc { font-size: 14px; color: var(--gray-500); max-width: 400px; line-height: 1.7; margin-bottom: 28px; }
+.blocked-info-row { display: flex; gap: 16px; justify-content: center; margin-bottom: 28px; }
+.blocked-info-card { background: var(--gray-0); border: 1px solid var(--gray-100); border-radius: var(--r-lg); padding: 14px 22px; text-align: center; box-shadow: var(--shadow-sm); }
+.blocked-info-label { font-size: 10.5px; font-weight: 700; letter-spacing: .6px; text-transform: uppercase; color: var(--gray-400); margin-bottom: 4px; }
+.blocked-info-val { font-size: 20px; font-weight: 800; color: var(--gray-900); }
+
+/* ─── Admin summary cards ────────────────────────────────────── */
+.admin-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+.admin-quick-card { background: var(--gray-0); border: 1px solid var(--gray-100); border-radius: var(--r-lg); padding: 18px 18px; cursor: pointer; transition: all var(--t-fast); display: flex; align-items: center; gap: 14px; }
+.admin-quick-card:hover { border-color: var(--brand-300); box-shadow: var(--shadow-md); transform: translateY(-1px); }
+.admin-qc-icon { width: 40px; height: 40px; border-radius: 10px; background: var(--brand-50); color: var(--brand-600); display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+.admin-qc-val { font-size: 22px; font-weight: 800; color: var(--gray-900); line-height: 1; }
+.admin-qc-label { font-size: 11.5px; color: var(--gray-400); font-weight: 500; margin-top: 2px; }
+
+/* ─── Workspace tiles (Relatórios → Workspace screen) ───────── */
+.ws-tiles { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 20px; }
+.ws-tile {
+  background: var(--gray-0); border: 1px solid var(--gray-100); border-radius: var(--r-lg);
+  padding: 22px; box-shadow: var(--shadow-sm); transition: all var(--t-fast);
+  cursor: pointer; position: relative; overflow: hidden;
+}
+.ws-tile::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(42,157,69,.04) 0%, transparent 60%);
+  opacity: 0; transition: opacity var(--t-fast);
+}
+.ws-tile:hover { border-color: var(--brand-300); box-shadow: var(--shadow-md); transform: translateY(-2px); }
+.ws-tile:hover::after { opacity: 1; }
+.ws-tile-chevron {
+  position: absolute; top: 50%; right: 20px; transform: translateY(-50%);
+  width: 28px; height: 28px; border-radius: 8px;
+  background: var(--gray-50); color: var(--gray-400);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; transition: all var(--t-fast);
+}
+.ws-tile:hover .ws-tile-chevron { background: var(--brand-50); color: var(--brand-600); }
+.ws-tile-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; padding-right: 40px; }
+.ws-tile-icon { width: 46px; height: 46px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+.ws-tile-name { font-size: 17px; font-weight: 700; color: var(--gray-900); }
+.ws-tile-sub { font-size: 12.5px; color: var(--gray-400); margin-top: 2px; }
+.ws-tile-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding-top: 16px; border-top: 1px solid var(--gray-100); }
+.ws-stat-val { font-size: 24px; font-weight: 800; color: var(--gray-900); line-height: 1; }
+.ws-stat-label { font-size: 10px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; color: var(--gray-400); margin-top: 3px; }
+
+/* ─── Workspace detail (relatórios do workspace) ────────────── */
+.ws-detail-back { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--gray-500); cursor: pointer; margin-bottom: 20px; padding: 6px 12px; border-radius: var(--r-md); transition: all var(--t-fast); }
+.ws-detail-back:hover { background: var(--gray-100); color: var(--gray-800); }
+.ws-detail-banner { display: flex; align-items: center; gap: 16px; padding: 20px 24px; border-radius: var(--r-lg); margin-bottom: 20px; }
+.ws-detail-banner-icon { width: 52px; height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+.ws-detail-banner-name { font-size: 22px; font-weight: 800; color: var(--gray-900); letter-spacing: -.3px; }
+.ws-detail-banner-meta { font-size: 13px; color: var(--gray-500); margin-top: 2px; }
+.ws-detail-kpis { display: flex; gap: 14px; margin-left: auto; flex-shrink: 0; }
+.ws-detail-kpi { text-align: center; padding: 10px 18px; background: rgba(255,255,255,.7); border-radius: var(--r-md); border: 1px solid rgba(255,255,255,.6); }
+.ws-detail-kpi-val { font-size: 20px; font-weight: 800; color: var(--gray-900); line-height: 1; }
+.ws-detail-kpi-label { font-size: 10px; font-weight: 700; letter-spacing: .4px; text-transform: uppercase; color: var(--gray-500); margin-top: 2px; }
+
+/* ─── Critical Events (Painel Gerencial) ────────────────────── */
+.crit-event { display: flex; align-items: flex-start; gap: 12px; padding: 14px; border-radius: var(--r-md); border: 1px solid var(--gray-100); background: var(--gray-0); margin-bottom: 8px; }
+.crit-event:last-child { margin-bottom: 0; }
+.crit-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+.crit-body { flex: 1; min-width: 0; }
+.crit-title { font-size: 13px; font-weight: 600; color: var(--gray-800); }
+.crit-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 5px; }
+.crit-tag { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; color: var(--gray-500); background: var(--gray-50); border: 1px solid var(--gray-100); border-radius: 4px; padding: 2px 7px; }
+.crit-tag i { font-size: 10px; }
+.crit-detail { font-size: 12px; color: var(--gray-500); margin-top: 5px; line-height: 1.4; }
+.crit-actions { display: flex; gap: 6px; margin-top: 8px; }
+.crit-time { font-size: 11.5px; color: var(--gray-400); white-space: nowrap; flex-shrink: 0; }
+
+/* ─── Access Control enhanced ──────────────────────────────── */
+.access-panel { background: var(--gray-0); border: 1px solid var(--gray-100); border-radius: var(--r-lg); box-shadow: var(--shadow-sm); overflow: hidden; }
+.access-panel-hd { padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--gray-100); }
+.access-panel-title { font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.access-count-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 22px; height: 22px; border-radius: 99px; font-size: 11px; font-weight: 700; padding: 0 6px; }
+.count-red { background: var(--danger-50); color: var(--danger-700); }
+.count-green { background: var(--brand-50); color: var(--brand-700); }
+.access-row { display: flex; align-items: center; gap: 12px; padding: 13px 20px; border-bottom: 1px solid var(--gray-50); transition: background var(--t-fast); }
+.access-row:last-child { border-bottom: none; }
+.access-row:hover { background: var(--gray-25); }
+.access-row-icon { width: 34px; height: 34px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
+.access-row-info { flex: 1; min-width: 0; }
+.access-row-name { font-size: 13px; font-weight: 600; color: var(--gray-800); }
+.access-row-meta { font-size: 12px; color: var(--gray-400); margin-top: 1px; }
+.access-type-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 4px; margin-top: 4px; }
+.type-group { background: var(--info-50); color: var(--info-700); }
+.type-user { background: var(--brand-50); color: var(--brand-700); }
+
+/* ─── Info alert ─────────────────────────────────────────────── */
+.info-alert { display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; background: var(--brand-50); border: 1px solid var(--brand-100); border-radius: var(--r-md); margin-bottom: 16px; }
+.info-alert i { color: var(--brand-500); margin-top: 1px; flex-shrink: 0; }
+.info-alert span { font-size: 13px; color: var(--brand-700); line-height: 1.5; }
+
+/* Responsive */
+@media (max-width: 900px) {
+  .stats-row { grid-template-columns: repeat(2, 1fr); }
+  .two-col, .three-col, .admin-cards { grid-template-columns: 1fr; }
+  .exp-grid { grid-template-columns: repeat(4, 1fr); }
+  .login-left { display: none; }
+  .login-wrap { width: 400px; }
+  .sidebar { width: var(--sidebar-w) !important; position: fixed; top: 0; bottom: 0; transform: translateX(-100%); transition: transform var(--t-slow); z-index: 200; }
+  .sidebar.mobile-open { transform: translateX(0); }
+  .app-body { margin-left: 0 !important; }
+  .mobile-overlay { display: block !important; }
+  .mobile-menu-btn { display: flex !important; }
+  .content-area { }
+  --content-px: 16px;
+}
+@media (max-width: 540px) {
+  .stats-row { grid-template-columns: 1fr; }
+  .login-wrap { width: 340px; }
+  .login-right { padding: 32px 24px; }
+  .page { padding: 20px 16px; }
+  .admin-cards { grid-template-columns: repeat(2, 1fr); }
+}
+
+.mobile-menu-btn { display: none; position: fixed; top: 12px; left: 12px; z-index: 300; width: 36px; height: 36px; background: var(--brand-700); border: none; border-radius: var(--r-md); color: #fff; font-size: 15px; align-items: center; justify-content: center; cursor: pointer; }
+.mobile-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 150; backdrop-filter: blur(2px); }
+</style>
+</head>
+<body>
+
+<!-- ═══ LOGIN ═════════════════════════════════════════════════ -->
+<div id="screen-login">
+  <div class="login-bg"></div>
+  <div class="login-grid"></div>
+  <div class="login-wrap">
+    <div class="login-left">
+      <div class="login-left-brand">
+        <div class="login-left-mark"><i class="fas fa-seedling"></i></div>
+        <div>
+          <div class="login-left-name">BrasilTerrenos</div>
+          <div style="font-size:9.5px;color:var(--brand-400);letter-spacing:1.2px;text-transform:uppercase;font-weight:600">Portal Corporativo</div>
+        </div>
+      </div>
+      <div class="login-left-body">
+        <div class="login-left-tagline">Gestão inteligente<br>de dados corporativos</div>
+        <div class="login-left-desc">Controle de acesso granular aos relatórios Power BI Embedded com permissões por workspace e por relatório individual.</div>
+        <div class="login-left-pills">
+          <span class="login-left-pill"><i class="fas fa-shield-halved"></i> RBAC Granular</span>
+          <span class="login-left-pill"><i class="fas fa-chart-pie"></i> Power BI Embedded</span>
+          <span class="login-left-pill"><i class="fas fa-clock"></i> Controle de Expediente</span>
+          <span class="login-left-pill"><i class="fas fa-scroll"></i> Auditoria Completa</span>
+        </div>
+      </div>
+    </div>
+    <div class="login-right">
+      <div class="login-right-title">Bem-vindo</div>
+      <div class="login-right-sub">Acesse o portal com suas credenciais</div>
+
+      <div class="lf-group">
+        <label class="lf-label">E-mail ou usuário</label>
+        <div class="lf-wrap">
+          <i class="fas fa-at lf-icon"></i>
+          <input type="text" class="lf-input" id="l-user" placeholder="seu@email.com">
+        </div>
+      </div>
+      <div class="lf-group">
+        <label class="lf-label">Senha</label>
+        <div class="lf-wrap">
+          <i class="fas fa-lock lf-icon"></i>
+          <input type="password" class="lf-input" id="l-pass" placeholder="••••••••">
+          <i class="fas fa-eye lf-eye" id="l-eye"></i>
+        </div>
+      </div>
+      <div class="lf-forgot"><a href="#" id="l-forgot">Esqueci minha senha</a></div>
+      <button class="btn-login-submit" id="l-btn">
+        <i class="fas fa-right-to-bracket"></i> Entrar
+      </button>
+      <div class="lf-error" id="l-error">
+        <i class="fas fa-circle-exclamation"></i>
+        <span id="l-error-msg">Credenciais inválidas. Verifique e tente novamente.</span>
+      </div>
+      <div class="login-footer">BrasilTerrenos © 2025 · Acesso restrito e monitorado</div>
+      <div style="margin-top:14px;padding:10px 12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:var(--r-md)">
+        <div style="font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:8px">Acessos de demonstração</div>
+        <div style="display:flex;flex-direction:column;gap:4px">
+          <button onclick="fillLogin('admin@bt.com','Admin@2025')" style="text-align:left;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);border-radius:6px;padding:5px 9px;cursor:pointer;color:rgba(255,255,255,.5);font-size:11px;font-family:inherit;transition:all .15s" onmouseover="this.style.background='rgba(255,255,255,.1)'" onmouseout="this.style.background='rgba(255,255,255,.05)'">
+            <i class="fas fa-shield-halved" style="color:var(--brand-400);margin-right:5px"></i><strong style="color:rgba(255,255,255,.7)">Super Admin</strong> · admin@bt.com
+          </button>
+          <button onclick="fillLogin('carlos@bt.com','Carlos@123')" style="text-align:left;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);border-radius:6px;padding:5px 9px;cursor:pointer;color:rgba(255,255,255,.5);font-size:11px;font-family:inherit;transition:all .15s" onmouseover="this.style.background='rgba(255,255,255,.1)'" onmouseout="this.style.background='rgba(255,255,255,.05)'">
+            <i class="fas fa-user-tie" style="color:#60a5fa;margin-right:5px"></i><strong style="color:rgba(255,255,255,.7)">Gerente</strong> · carlos@bt.com · Workspace: Controladoria
+          </button>
+          <button onclick="fillLogin('mariana@bt.com','Mariana@123')" style="text-align:left;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);border-radius:6px;padding:5px 9px;cursor:pointer;color:rgba(255,255,255,.5);font-size:11px;font-family:inherit;transition:all .15s" onmouseover="this.style.background='rgba(255,255,255,.1)'" onmouseout="this.style.background='rgba(255,255,255,.05)'">
+            <i class="fas fa-user" style="color:#f97316;margin-right:5px"></i><strong style="color:rgba(255,255,255,.7)">Operador</strong> · mariana@bt.com · Workspace: Marketing
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ WELCOME ═══════════════════════════════════════════════ -->
+<div id="screen-welcome">
+  <div class="welcome-card">
+    <div class="welcome-avatar-wrap">
+      <div class="welcome-avatar" id="wc-avatar">AD</div>
+      <div class="welcome-badge"><i class="fas fa-check"></i></div>
+    </div>
+    <div class="welcome-greeting">Bem-vindo ao portal</div>
+    <div class="welcome-name" id="wc-name">Olá, Roberto</div>
+    <div class="welcome-role" id="wc-role">Super Administrador · BrasilTerrenos</div>
+    <div class="welcome-desc">Você tem acesso completo ao portal corporativo. Gerencie usuários, permissões, workspaces e relatórios Power BI Embedded com controle granular de acesso.</div>
+    <div class="welcome-chips" id="wc-chips">
+      <span class="welcome-chip"><i class="fas fa-users"></i> 48 usuários</span>
+      <span class="welcome-chip"><i class="fas fa-building"></i> 4 workspaces</span>
+      <span class="welcome-chip"><i class="fas fa-chart-bar"></i> 126 relatórios</span>
+    </div>
+    <button class="btn-welcome" id="wc-btn">
+      <i class="fas fa-arrow-right"></i> Acessar o portal
+    </button>
+  </div>
+</div>
+
+<!-- ═══ APP ════════════════════════════════════════════════════ -->
+<div id="screen-app">
+  <button class="mobile-menu-btn" id="mobile-menu-btn"><i class="fas fa-bars"></i></button>
+  <div class="mobile-overlay" id="mobile-overlay"></div>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-header">
+      <div class="sb-mark"><i class="fas fa-seedling"></i></div>
+      <div class="sb-brand">
+        <div class="sb-name">BrasilTerrenos</div>
+        <div class="sb-tag">Portal</div>
+      </div>
+    </div>
+
+    <nav class="sb-nav">
+      <div class="sb-item">
+        <div class="sb-link active" data-page="dashboard">
+          <div class="sb-icon"><i class="fas fa-house"></i></div>
+          <span class="sb-label">Home</span>
+        </div>
+      </div>
+      <div class="sb-item">
+        <div class="sb-link" data-page="reports">
+          <div class="sb-icon"><i class="fas fa-building-columns"></i></div>
+          <span class="sb-label">Workspace</span>
+        </div>
+      </div>
+      <div class="sb-item">
+        <div class="sb-link" data-page="favorites">
+          <div class="sb-icon"><i class="fas fa-bookmark"></i></div>
+          <span class="sb-label">Favoritos</span>
+        </div>
+      </div>
+
+      <!-- ADMIN -->
+      <div class="sb-item" id="admin-nav" style="display:none">
+        <div class="sb-link" id="admin-toggle">
+          <div class="sb-icon"><i class="fas fa-shield-halved"></i></div>
+          <span class="sb-label">Administrador</span>
+          <i class="fas fa-chevron-right sb-chevron"></i>
+        </div>
+        <div class="sb-submenu">
+          <div class="sb-group-label">Visão Geral</div>
+          <div class="sb-sublink" data-page="admin-summary"><i class="fas fa-chart-pie"></i> Painel Gerencial</div>
+
+          <div class="sb-group-label">Gestão de Acesso</div>
+          <div class="sb-sublink" data-page="users"><i class="fas fa-users"></i> Usuários</div>
+          <div class="sb-sublink" data-page="permissions"><i class="fas fa-key"></i> Permissões</div>
+          <div class="sb-sublink" data-page="access-control"><i class="fas fa-toggle-on"></i> Acessos</div>
+          <div class="sb-sublink" data-page="exception-groups"><i class="fas fa-layer-group"></i> Grupos Exceção</div>
+          <div class="sb-sublink" data-page="workspaces"><i class="fas fa-building"></i> Workspaces</div>
+
+          <div class="sb-group-label">Governança</div>
+          <div class="sb-sublink" data-page="schedule"><i class="fas fa-clock"></i> Expediente</div>
+          <div class="sb-sublink" data-page="logs"><i class="fas fa-scroll"></i> Logs Auditoria</div>
+          <div class="sb-sublink" data-page="security"><i class="fas fa-lock"></i> Segurança</div>
+        </div>
+      </div>
+
+      <div class="sb-item">
+        <div class="sb-link" data-page="settings">
+          <div class="sb-icon"><i class="fas fa-gear"></i></div>
+          <span class="sb-label">Configurações</span>
+        </div>
+      </div>
+    </nav>
+
+    <div class="sb-footer">
+      <div class="sb-user" id="sb-user-card">
+        <div class="sb-avatar" id="sb-avatar">RN</div>
+        <div class="sb-user-info">
+          <div class="sb-user-name" id="sb-name">Roberto Neto</div>
+          <div class="sb-user-role" id="sb-role">Super Admin</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- APP BODY -->
+  <div class="app-body">
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="topbar-breadcrumb">
+        <span class="bc-item">Portal</span>
+        <span class="bc-sep"><i class="fas fa-chevron-right"></i></span>
+        <span class="bc-current" id="bc-title">Home</span>
+      </div>
+      <div class="topbar-search">
+        <i class="fas fa-search"></i>
+        <input type="text" placeholder="Buscar...">
+      </div>
+      <div class="topbar-actions">
+        <button class="topbar-btn" title="Notificações">
+          <i class="fas fa-bell"></i>
+          <span class="topbar-notif"></span>
+        </button>
+        <button class="topbar-btn" id="logout-btn" title="Sair">
+          <i class="fas fa-right-from-bracket"></i>
+        </button>
+        <div class="topbar-user-btn" id="topbar-avatar">RN</div>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <div class="content-area">
+
+      <!-- ╔══ HOME (era Dashboard) ═══════════════════════════════╗ -->
+      <div class="page active" id="page-dashboard">
+
+        <div class="ph">
+          <div class="ph-left">
+            <div class="ph-title">Home</div>
+            <div class="ph-sub">Visão geral do portal e dos acessos Power BI</div>
+          </div>
+        </div>
+
+        <!-- KPI Cards — admin only -->
+        <div class="stats-row" id="dash-kpi-admin">
+          <div class="stat-card">
+            <div class="stat-card-top">
+              <div>
+                <div class="stat-val">124</div>
+                <div class="stat-label">Usuários ativos</div>
+              </div>
+              <div class="stat-icon-wrap green"><i class="fas fa-users"></i></div>
+            </div>
+            <span class="stat-trend up"><i class="fas fa-arrow-up"></i> +8 este mês</span>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-top">
+              <div>
+                <div class="stat-val">7</div>
+                <div class="stat-label">Usuários bloqueados</div>
+              </div>
+              <div class="stat-icon-wrap amber"><i class="fas fa-user-lock"></i></div>
+            </div>
+            <span class="stat-trend down"><i class="fas fa-arrow-up"></i> +2 hoje</span>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-top">
+              <div>
+                <div class="stat-val">12</div>
+                <div class="stat-label">Acessos negados hoje</div>
+              </div>
+              <div class="stat-icon-wrap red"><i class="fas fa-ban"></i></div>
+            </div>
+            <span class="stat-trend down"><i class="fas fa-clock"></i> fora expediente</span>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-top">
+              <div>
+                <div class="stat-val">4</div>
+                <div class="stat-label">Workspaces ativos</div>
+              </div>
+              <div class="stat-icon-wrap blue"><i class="fas fa-building"></i></div>
+            </div>
+            <span class="stat-trend neutral"><i class="fas fa-check"></i> 100% online</span>
+          </div>
+        </div>
+
+        <!-- KPI Cards — operator view (só o que lhe pertence) -->
+        <div class="stats-row" id="dash-kpi-operator" style="display:none">
+          <div class="stat-card">
+            <div class="stat-card-top">
+              <div>
+                <div class="stat-val" id="op-kpi-reports">—</div>
+                <div class="stat-label">Meus relatórios</div>
+              </div>
+              <div class="stat-icon-wrap blue"><i class="fas fa-chart-bar"></i></div>
+            </div>
+            <span class="stat-trend neutral"><i class="fas fa-eye"></i> acesso liberado</span>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-top">
+              <div>
+                <div class="stat-val" id="op-kpi-ws">—</div>
+                <div class="stat-label">Meus workspaces</div>
+              </div>
+              <div class="stat-icon-wrap green"><i class="fas fa-building"></i></div>
+            </div>
+            <span class="stat-trend neutral"><i class="fas fa-check"></i> ativo</span>
+          </div>
+        </div>
+
+        <!-- Eventos + Barras (admin vê todos; operador vê card simplificado) -->
+        <div class="two-col" style="margin-bottom:16px" id="dash-two-col-admin">
+          <div class="card">
+            <div class="card-hd">
+              <div class="card-hd-left">
+                <div class="card-title">Eventos Recentes</div>
+                <div class="card-sub">Últimas atividades no portal</div>
+              </div>
+              <button class="btn btn-ghost btn-sm" onclick="navigateTo('logs')">Ver todos <i class="fas fa-arrow-right"></i></button>
+            </div>
+            <div class="card-bd" style="padding:8px 12px">
+              <div class="activity-list" id="dash-events"></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-hd">
+              <div class="card-hd-left">
+                <div class="card-title">Distribuição por Workspace</div>
+                <div class="card-sub">Usuários por departamento</div>
+              </div>
+            </div>
+            <div class="card-bd">
+              <div id="dash-bars"></div>
+              <div style="margin-top:16px;padding:12px 16px;background:var(--brand-50);border:1px solid var(--brand-100);border-radius:var(--r-md);display:flex;align-items:center;justify-content:space-between">
+                <div style="display:flex;align-items:center;gap:8px">
+                  <i class="fas fa-clock" style="color:var(--brand-500);font-size:14px"></i>
+                  <div>
+                    <div style="font-size:13px;font-weight:600;color:var(--brand-800)">Expediente ativo</div>
+                    <div style="font-size:12px;color:var(--brand-600)">08:00 — 18:00 · Acesso normal</div>
+                  </div>
+                </div>
+                <span class="status-pill status-online"><span class="status-dot green"></span>Online</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card de atividade recente simplificado para operadores -->
+        <div class="card" id="dash-operator-events" style="display:none;margin-bottom:16px">
+          <div class="card-hd">
+            <div class="card-hd-left">
+              <div class="card-title">Minha Atividade Recente</div>
+              <div class="card-sub">Últimas ações no portal</div>
+            </div>
+          </div>
+          <div class="card-bd" style="padding:8px 12px">
+            <div class="activity-list" id="dash-events-operator"></div>
+          </div>
+        </div>
+
+        <!-- Tabela Acessos PBI — somente admin -->
+        <div class="card" id="dash-pbi-table-admin">
+          <div class="card-hd">
+            <div class="card-hd-left">
+              <div class="card-title">Acessos Power BI por Workspace</div>
+              <div class="card-sub">Controle de permissões de relatórios</div>
+            </div>
+            <span class="pbi-badge"><i class="fas fa-chart-pie"></i> Power BI Embedded</span>
+          </div>
+          <div class="card-bd" style="padding:0">
+            <div class="tbl-wrap">
+              <table class="tbl">
+                <thead><tr>
+                  <th>Workspace</th><th>Relatórios</th>
+                  <th>Usuários com acesso total</th>
+                  <th>Usuários com acesso parcial</th>
+                  <th>Status</th>
+                </tr></thead>
+                <tbody>
+                  <tr><td class="td-bold">Administrativo</td><td>32</td><td>12</td><td>8</td><td><span class="badge badge-green"><i class="fas fa-circle-check"></i>Ativo</span></td></tr>
+                  <tr><td class="td-bold">Controladoria</td><td>45</td><td>6</td><td>14</td><td><span class="badge badge-green"><i class="fas fa-circle-check"></i>Ativo</span></td></tr>
+                  <tr><td class="td-bold">Marketing</td><td>28</td><td>9</td><td>6</td><td><span class="badge badge-green"><i class="fas fa-circle-check"></i>Ativo</span></td></tr>
+                  <tr><td class="td-bold">SAC</td><td>21</td><td>11</td><td>4</td><td><span class="badge badge-green"><i class="fas fa-circle-check"></i>Ativo</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ╔══ WORKSPACE (era Relatórios) ════════════════════════╗ -->
+      <div class="page" id="page-reports">
+        <div class="ph">
+          <div class="ph-left">
+            <div class="ph-title">Workspace</div>
+            <div class="ph-sub">Departamentos, relatórios e controle de acesso Power BI</div>
+          </div>
+          <div class="ph-right" id="ws-page-admin-actions">
+            <span class="pbi-badge"><i class="fas fa-chart-pie"></i> Power BI Embedded</span>
+            <button class="btn btn-primary" id="btn-new-workspace-tile"><i class="fas fa-plus"></i> Novo Workspace</button>
+          </div>
+        </div>
+
+        <!-- Tiles de departamentos com: usuários, online%, bloqueados -->
+        <div class="ws-tiles" id="ws-tiles-home"></div>
+
+        <!-- Tabela de relatórios -->
+        <div style="margin-top:20px">
+          <div class="card">
+            <div class="card-hd">
+              <div class="card-hd-left">
+                <div class="card-title">Relatórios disponíveis</div>
+                <div class="card-sub">Biblioteca de relatórios Power BI Embedded</div>
+              </div>
+              <button class="btn btn-secondary btn-sm" id="btn-new-report"><i class="fas fa-plus"></i> Novo Relatório</button>
+            </div>
+            <div class="card-bd" style="padding:16px">
+              <div class="toolbar">
+                <div class="search-wrap"><i class="fas fa-search"></i><input type="text" class="search-input" placeholder="Buscar relatório..."></div>
+                <select class="filter-select"><option>Todos os workspaces</option><option>Administrativo</option><option>Controladoria</option><option>Marketing</option><option>SAC</option></select>
+                <select class="filter-select"><option>Todas as categorias</option><option>Financeiro</option><option>Operacional</option><option>Estratégico</option></select>
+              </div>
+            </div>
+            <div class="tbl-wrap">
+              <table class="tbl">
+                <thead><tr>
+                  <th style="width:40px"></th>
+                  <th>Relatório</th><th>Workspace</th><th>Categoria</th><th>Status</th><th>Atualizado</th><th>Ações</th>
+                </tr></thead>
+                <tbody id="reports-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div><!-- /page-reports -->
+
+      <!-- ╔══ FAVORITES ══════════════════════════════════════════╗ -->
+      <div class="page" id="page-favorites">
+        <div class="ph">
+          <div class="ph-left">
+            <div class="ph-title">Favoritos</div>
+            <div class="ph-sub">Relatórios marcados para acesso rápido</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="tbl-wrap">
+            <table class="tbl">
+              <thead><tr><th>Item</th><th>Tipo</th><th>Workspace</th><th>Adicionado</th><th>Ações</th></tr></thead>
+              <tbody id="fav-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ╔══ USERS ══════════════════════════════════════════════╗ -->
+      <div class="page" id="page-users">
+        <div class="ph">
+          <div class="ph-left">
+            <div class="ph-title">Usuários</div>
+            <div class="ph-sub">Cadastro e controle de acesso por usuário</div>
+          </div>
+          <div class="ph-right">
+            <button class="btn btn-primary" id="btn-new-user"><i class="fas fa-plus"></i> Novo Usuário</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-bd" style="padding:16px">
+            <div class="toolbar">
+              <div class="search-wrap"><i class="fas fa-search"></i><input type="text" class="search-input" id="user-search" placeholder="Buscar usuário..."></div>
+              <select class="filter-select" id="user-status-filter"><option value="">Todos os status</option><option value="active">Ativo</option><option value="inactive">Inativo</option><option value="blocked">Bloqueado</option></select>
+              <select class="filter-select" id="user-ws-filter"><option value="">Todos os workspaces</option><option>Administrativo</option><option>Controladoria</option><option>Marketing</option><option>SAC</option></select>
+            </div>
+          </div>
+          <div class="tbl-wrap">
+            <table class="tbl">
+              <thead><tr><th>Usuário</th><th>E-mail</th><th>Workspace</th><th>Perfil</th><th>Status</th><th>Último acesso</th><th>Ações</th></tr></thead>
+              <tbody id="users-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ╔══ PERMISSIONS ════════════════════════════════════════╗ -->
+      <div class="page" id="page-permissions">
+        <div class="ph">
+          <div class="ph-left">
+            <div class="ph-title">Permissões</div>
+            <div class="ph-sub">Controle granular por perfil, usuário, workspace e relatório</div>
+          </div>
+          <div class="ph-right">
+            <button class="btn btn-primary" id="btn-save-perms"><i class="fas fa-floppy-disk"></i> Salvar</button>
+          </div>
+        </div>
+
+        <!-- Tabs -->
+        <div style="display:flex;gap:2px;background:var(--gray-100);border-radius:var(--r-md);padding:3px;margin-bottom:16px;width:fit-content">
+          <button class="btn btn-sm perm-tab active" data-tab="role">Por Perfil</button>
+          <button class="btn btn-sm perm-tab" data-tab="user">Por Usuário</button>
+          <button class="btn btn-sm perm-tab" data-tab="workspace">Por Workspace</button>
+          <button class="btn btn-sm perm-tab" data-tab="report">Por Relatório</button>
+        </div>
+
+        <!-- Power BI Access Level info -->
+        <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+          <span class="access-full"><i class="fas fa-building"></i> Acesso ao Workspace inteiro</span>
+          <span class="access-partial"><i class="fas fa-file-chart-column"></i> Acesso a Relatórios específicos</span>
+          <span class="access-none"><i class="fas fa-ban"></i> Sem acesso</span>
+        </div>
+
+        <div class="card">
+          <div class="card-hd">
+            <div class="card-hd-left">
+              <div class="card-title" id="perm-tab-title">Permissões por Perfil</div>
+              <div class="card-sub">Defina o nível de acesso para cada módulo e ação</div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <select class="filter-select" id="perm-target" style="width:180px">
+                <option>Super Admin</option><option>Admin</option><option>Gerente</option><option>Operador</option><option>Visitante</option>
+              </select>
+            </div>
+          </div>
+          <div class="card-bd perm-grid" style="padding:0">
+            <table class="tbl perm-tbl">
+              <thead><tr>
+                <th>Módulo / Ação</th>
+                <th>Visualizar</th><th>Criar</th><th>Editar</th>
+                <th>Excluir</th><th>Exportar</th><th>Gerenciar</th>
+              </tr></thead>
+              <tbody id="perm-body"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- PBI Permissions Section -->
+        <div style="margin-top:16px" id="pbi-perms-section">
+          <div class="card">
+            <div class="card-hd">
+              <div class="card-hd-left">
+                <div class="card-title">Acesso Power BI — Nível de Workspace e Relatório</div>
+                <div class="card-sub">Defina se o perfil selecionado acessa o workspace inteiro ou apenas relatórios específicos</div>
+              </div>
+              <span class="pbi-badge"><i class="fas fa-chart-pie"></i> Power BI</span>
+            </div>
+            <div class="card-bd" style="padding:0">
+              <table class="tbl">
+                <thead><tr>
+                  <th>Workspace</th>
+                  <th>Nível de Acesso</th>
+                  <th>Relatórios Permitidos</th>
+                  <th>Ações</th>
+                </tr></thead>
+                <tbody id="pbi-perm-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ╔══ WORKSPACES ═════════════════════════════════════════╗ -->
+      <div class="page" id="page-workspaces">
+        <div class="ph">
+          <div class="ph-left">
+            <div class="ph-title">Workspaces</div>
+            <div class="ph-sub">Departamentos e estrutura organizacional</div>
+          </div>
+          <div class="ph-right">
+            <button class="btn btn-primary" id="btn-new-ws-admin"><i class="fas fa-plus"></i> Novo Workspace</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="tbl-wrap">
+            <table class="tbl">
+              <thead><tr><th>Workspace</th><th>Usuários</th><th>Relatórios PBI</th><th>Status</th><th>Criado em</th><th>Ações</th></tr></thead>
+              <tbody id="ws-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ╔══ WS DETAIL — relatórios do workspace ══════════════╗ -->
+      <div class="page" id="page-ws-detail">
+        <!-- Conteúdo injetado dinamicamente pelo JS -->
+      </div>
+
+      <!-- ╔══ EXCEPTION GROUPS ═══════════════════════════════════╗ -->
+      <div class="page" id="page-exception-groups">
+        <div class="ph">
+          <div class="ph-left">
+            <div class="ph-title">Grupos de Exceção</div>
+            <div class="ph-sub">Grupos com acesso liberado fora do expediente</div>
+          </div>
+          <div class="ph-right">
+            <button class="btn btn-primary" id="btn-new-group"><i class="fas fa-plus"></i> Novo Grupo</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="tbl-wrap">
+            <table class="tbl">
+              <thead><tr><th>Grupo</th><th>Membros</th><th>Acesso fora expediente</th><th>Status</th><th>Ações</th></tr></thead>
+              <tbody id="groups-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ╔══ SCHEDULE ═══════════════════════════════════════════╗ -->
+      <div class="page" id="page-schedule">
+        <div class="ph">
+          <div class="ph-left">
+            <div class="ph-title">Regras de Expediente</div>
+            <div class="ph-sub">Controle de horário de acesso ao portal</div>
+          </div>
+          <div class="ph-right">
+            <button class="btn btn-primary" id="btn-save-schedule"><i class="fas fa-floppy-disk"></i> Salvar Regras</button>
+          </div>
+        </div>
+
+        <div class="card section-gap">
+          <div class="card-hd"><div class="card-title">Horário Padrão de Acesso</div></div>
+          <div class="card-bd">
+            <div class="exp-grid" id="exp-grid"></div>
+            <div class="form-grid fg-3" style="margin-top:4px">
+              <div class="form-group">
+                <label class="form-label">Horário de Início</label>
+                <input type="time" class="form-input" id="sch-start" value="08:00">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Horário de Fim</label>
+                <input type="time" class="form-input" id="sch-end" value="18:00">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Acesso fora do expediente</label>
+                <label class="toggle-label" style="margin-top:8px">
+                  <input type="checkbox" class="toggle-input" id="sch-block">
+                  <div class="toggle-track"></div>
+                  <span class="toggle-text">Bloquear por padrão</span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-hd">
+            <div class="card-hd-left">
+              <div class="card-title">Exceções de Acesso</div>
+              <div class="card-sub">Usuários e grupos com acesso fora do expediente</div>
+            </div>
+            <button class="btn btn-secondary btn-sm" id="btn-add-exception"><i class="fas fa-plus"></i> Adicionar</button>
+          </div>
+          <div class="tbl-wrap">
+            <table class="tbl">
+              <thead><tr><th>Entidade</th><th>Tipo</th><th>Horário permitido</th><th>Ativo</th><th>Ações</th></tr></thead>
+              <tbody id="exc-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ╔══ LOGS ═══════════════════════════════════════════════╗ -->
+      <div class="page" id="page-logs">
+        <div class="ph">
+          <div class="ph-left">
+            <div class="ph-title">Logs e Auditoria</div>
+            <div class="ph-sub">Rastreabilidade completa de alterações</div>
+          </div>
+          <div class="ph-right">
+            <button class="btn btn-secondary btn-sm"><i class="fas fa-download"></i> Exportar</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-bd" style="padding:16px">
+            <div class="toolbar">
+              <div class="search-wrap"><i class="fas fa-search"></i><input type="text" class="search-input" placeholder="Buscar nos logs..."></div>
+              <select class="filter-select"><option>Todos os tipos</option><option>Usuário</option><option>Permissão</option><option>Acesso</option><option>Auth</option><option>Segurança</option></select>
+              <input type="date" class="filter-select" style="width:130px">
+              <input type="date" class="filter-select" style="width:130px">
+            </div>
+          </div>
+          <div class="tbl-wrap">
+            <table class="tbl">
+              <thead><tr><th>Data / Hora</th><th>Evento</th><th>Alterado por</th><th>Módulo</th><th>Detalhe da Alteração</th><th>IP / Origem</th><th>Ações</th></tr></thead>
+              <tbody id="logs-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ╔══ ACCESS CONTROL ═════════════════════════════════════╗ -->
+      <div class="page" id="page-access-control">
+        <div class="ph">
+          <div class="ph-left">
+            <div class="ph-title">Controle de Acessos</div>
+            <div class="ph-sub">Bloqueios e liberações manuais</div>
+          </div>
+          <div class="ph-right">
+            <button class="btn btn-primary" id="btn-new-access-lib"><i class="fas fa-plus"></i> Nova Liberação</button>
+          </div>
+        </div>
+        <div class="two-col">
+          <div class="access-panel">
+            <div class="access-panel-hd">
+              <div class="access-panel-title" style="color:var(--danger-600)">
+                <i class="fas fa-ban"></i> Bloqueados
+                <span class="access-count-badge count-red" id="blocked-count">0</span>
+              </div>
+            </div>
+            <div id="blocked-list"></div>
+          </div>
+          <div class="access-panel">
+            <div class="access-panel-hd">
+              <div class="access-panel-title" style="color:var(--brand-600)">
+                <i class="fas fa-circle-check"></i> Liberados
+                <span class="access-count-badge count-green" id="allowed-count">0</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" onclick="toast('Revogar todas as liberações?','warning')" style="color:var(--danger-500)">
+                <i class="fas fa-times"></i> Revogar todas
+              </button>
+            </div>
+            <div id="allowed-list"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ╔══ PAINEL GERENCIAL (era Resumo) ════════════════════╗ -->
+      <div class="page" id="page-admin-summary">
+        <div class="ph">
+          <div class="ph-left">
+            <div class="ph-title">Painel Gerencial</div>
+            <div class="ph-sub">Visão executiva e monitoramento de segurança do portal</div>
+          </div>
+          <div class="ph-right">
+            <span class="pbi-badge"><i class="fas fa-chart-pie"></i> Power BI Embedded</span>
+          </div>
+        </div>
+
+        <div class="admin-cards">
+          <div class="admin-quick-card" onclick="navigateTo('users')">
+            <div class="admin-qc-icon"><i class="fas fa-users"></i></div>
+            <div><div class="admin-qc-val">124</div><div class="admin-qc-label">Usuários</div></div>
+          </div>
+          <div class="admin-quick-card" onclick="navigateTo('workspaces')">
+            <div class="admin-qc-icon"><i class="fas fa-building"></i></div>
+            <div><div class="admin-qc-val">4</div><div class="admin-qc-label">Workspaces</div></div>
+          </div>
+          <div class="admin-quick-card" onclick="navigateTo('reports')">
+            <div class="admin-qc-icon"><i class="fas fa-chart-bar"></i></div>
+            <div><div class="admin-qc-val">126</div><div class="admin-qc-label">Relatórios PBI</div></div>
+          </div>
+          <div class="admin-quick-card" onclick="navigateTo('exception-groups')">
+            <div class="admin-qc-icon"><i class="fas fa-layer-group"></i></div>
+            <div><div class="admin-qc-val">4</div><div class="admin-qc-label">Grupos de Exceção</div></div>
+          </div>
+          <div class="admin-quick-card" onclick="navigateTo('logs')">
+            <div class="admin-qc-icon"><i class="fas fa-scroll"></i></div>
+            <div><div class="admin-qc-val">1.432</div><div class="admin-qc-label">Eventos Auditoria</div></div>
+          </div>
+          <div class="admin-quick-card" onclick="navigateTo('security')" style="border-color:var(--danger-100)">
+            <div class="admin-qc-icon" style="background:var(--danger-50);color:var(--danger-600)"><i class="fas fa-shield-exclamation"></i></div>
+            <div><div class="admin-qc-val" style="color:var(--danger-600)">2</div><div class="admin-qc-label">Alertas Críticos</div></div>
+          </div>
+        </div>
+
+        <div class="two-col">
+          <div class="card">
+            <div class="card-hd">
+              <div class="card-hd-left">
+                <div class="card-title">Eventos Críticos Recentes</div>
+                <div class="card-sub">Tentativas suspeitas e acessos fora do padrão</div>
+              </div>
+              <button class="btn btn-ghost btn-sm" onclick="navigateTo('logs')">Ver todos <i class="fas fa-arrow-right"></i></button>
+            </div>
+            <div class="card-bd" id="admin-critical"></div>
+          </div>
+          <div class="card">
+            <div class="card-hd"><div class="card-title">Status do Sistema</div></div>
+            <div class="card-bd" id="sys-status"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ╔══ SECURITY ════════════════════════════════════════════╗ -->
+      <div class="page" id="page-security">
+        <div class="ph">
+          <div class="ph-left">
+            <div class="ph-title">Segurança Administrativa</div>
+            <div class="ph-sub">Monitoramento e configurações de segurança</div>
+          </div>
+        </div>
+        <div class="two-col" style="margin-bottom:16px">
+          <div class="card">
+            <div class="card-hd"><div class="card-title">Checklist de Segurança</div></div>
+            <div class="card-bd" id="sec-checklist"></div>
+          </div>
+          <div class="card">
+            <div class="card-hd"><div class="card-title">Configurações de Sessão</div></div>
+            <div class="card-bd">
+              <div class="form-grid" style="gap:14px">
+                <div class="form-group"><label class="form-label">Timeout de sessão (minutos)</label><input type="number" class="form-input" value="30"></div>
+                <div class="form-group"><label class="form-label">Tentativas antes de bloqueio</label><input type="number" class="form-input" value="5"></div>
+                <div class="form-group"><label class="form-label">Tempo de bloqueio (minutos)</label><input type="number" class="form-input" value="15"></div>
+                <div class="form-group">
+                  <label class="toggle-label"><input type="checkbox" class="toggle-input" checked><div class="toggle-track"></div><span class="toggle-text">Forçar senha forte</span></label>
+                </div>
+                <div class="form-group">
+                  <label class="toggle-label"><input type="checkbox" class="toggle-input"><div class="toggle-track"></div><span class="toggle-text">Habilitar MFA (em breve)</span></label>
+                </div>
+                <button class="btn btn-primary btn-sm" onclick="toast('Configurações salvas.','success')"><i class="fas fa-floppy-disk"></i> Salvar Configurações</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><div class="card-title">Eventos de Segurança</div></div>
+          <div class="card-bd" style="padding:8px 12px"><div class="activity-list" id="sec-events"></div></div>
+        </div>
+      </div>
+
+      <!-- ╔══ SETTINGS ════════════════════════════════════════════╗ -->
+      <div class="page" id="page-settings">
+        <div class="ph">
+          <div class="ph-left"><div class="ph-title">Configurações</div><div class="ph-sub">Preferências e parametrização do portal</div></div>
+          <div class="ph-right"><button class="btn btn-primary" onclick="toast('Configurações salvas.','success')"><i class="fas fa-floppy-disk"></i> Salvar</button></div>
+        </div>
+        <div class="two-col">
+          <div class="card">
+            <div class="card-hd"><div class="card-title">Portal</div></div>
+            <div class="card-bd">
+              <div class="form-grid" style="gap:14px">
+                <div class="form-group"><label class="form-label">Nome do Portal</label><input type="text" class="form-input" value="BrasilTerrenos"></div>
+                <div class="form-group"><label class="form-label">Ambiente</label><select class="form-select"><option>Produção</option><option>Homologação</option></select></div>
+                <div class="form-group"><label class="form-label">URL de embed permitida</label><input type="text" class="form-input" placeholder="https://sistema.exemplo.com"></div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-hd"><div class="card-title">Power BI Embedded</div></div>
+            <div class="card-bd">
+              <div class="form-grid" style="gap:14px">
+                <div class="form-group"><label class="form-label">Client ID</label><input type="text" class="form-input" placeholder="xxxxxxxx-xxxx-xxxx-xxxx"></div>
+                <div class="form-group"><label class="form-label">Tenant ID</label><input type="text" class="form-input" placeholder="xxxxxxxx-xxxx-xxxx-xxxx"></div>
+                <div class="form-group"><label class="form-label">Workspace ID</label><input type="text" class="form-input" placeholder="xxxxxxxx-xxxx-xxxx-xxxx"></div>
+                <div class="form-group">
+                  <label class="toggle-label"><input type="checkbox" class="toggle-input" checked><div class="toggle-track"></div><span class="toggle-text">Integração PBI ativa</span></label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content-area -->
+  </div><!-- /app-body -->
+</div><!-- /screen-app -->
+
+<!-- Modal: Novo Usuário -->
+<div class="modal-overlay" id="modal-user">
+  <div class="modal">
+    <div class="modal-hd">
+      <div class="modal-title">Novo Usuário</div>
+      <button class="modal-close" data-close="modal-user"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-bd">
+      <div class="form-grid fg-2">
+        <div class="form-group"><label class="form-label">Nome completo</label><input type="text" class="form-input" id="nu-name" placeholder="Nome Sobrenome"></div>
+        <div class="form-group"><label class="form-label">E-mail</label><input type="email" class="form-input" id="nu-email" placeholder="nome@empresa.com"></div>
+        <div class="form-group"><label class="form-label">Perfil</label>
+          <select class="form-select" id="nu-role">
+            <option>Visitante</option><option>Operador</option><option>Gerente</option><option>Admin</option><option>Super Admin</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Workspace</label>
+          <select class="form-select" id="nu-ws">
+            <option>Administrativo</option><option>Controladoria</option><option>Marketing</option><option>SAC</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Senha temporária</label><input type="password" class="form-input" id="nu-pass" placeholder="Mínimo 8 caracteres"></div>
+        <div class="form-group"><label class="form-label">Status</label>
+          <select class="form-select" id="nu-status"><option value="active">Ativo</option><option value="inactive">Inativo</option></select>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div style="font-size:12px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--gray-500);margin-bottom:10px">Acesso Power BI</div>
+      <div class="form-group" style="margin-bottom:12px">
+        <label class="form-label">Nível de acesso ao Power BI</label>
+        <select class="form-select" id="nu-pbi-level">
+          <option value="workspace">Workspace inteiro (todos os relatórios)</option>
+          <option value="report">Relatórios específicos</option>
+          <option value="none">Sem acesso ao Power BI</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Grupo de exceção</label>
+        <select class="form-select" id="nu-group">
+          <option value="">Nenhum</option><option>Plantão</option><option>Diretoria</option><option>TI Suporte</option><option>Supervisão Especial</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-secondary" data-close="modal-user">Cancelar</button>
+      <button class="btn btn-primary" id="btn-create-user"><i class="fas fa-check"></i> Criar Usuário</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: PBI Permissions -->
+<div class="modal-overlay" id="modal-pbi-perms">
+  <div class="modal" style="max-width:640px">
+    <div class="modal-hd">
+      <div class="modal-title">Permissões de Relatórios — <span id="pbi-modal-ws">Controladoria</span></div>
+      <button class="modal-close" data-close="modal-pbi-perms"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-bd">
+      <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--brand-50);border:1px solid var(--brand-100);border-radius:var(--r-md);margin-bottom:16px">
+        <i class="fas fa-circle-info" style="color:var(--brand-500)"></i>
+        <span style="font-size:13px;color:var(--brand-700)">Selecione os relatórios que o perfil poderá visualizar neste workspace. O acesso total ao workspace permite ver todos os relatórios automaticamente.</span>
+      </div>
+      <div class="form-group" style="margin-bottom:14px">
+        <label class="form-label">Nível de acesso</label>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px">
+          <label style="display:flex;align-items:center;gap:7px;cursor:pointer;font-size:13.5px">
+            <input type="radio" name="pbi-lvl" value="workspace" checked style="accent-color:var(--brand-500)">
+            <span class="access-full"><i class="fas fa-building"></i> Workspace inteiro</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:7px;cursor:pointer;font-size:13.5px">
+            <input type="radio" name="pbi-lvl" value="reports" style="accent-color:var(--brand-500)">
+            <span class="access-partial"><i class="fas fa-file-chart-column"></i> Relatórios específicos</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:7px;cursor:pointer;font-size:13.5px">
+            <input type="radio" name="pbi-lvl" value="none" style="accent-color:var(--brand-500)">
+            <span class="access-none"><i class="fas fa-ban"></i> Sem acesso</span>
+          </label>
+        </div>
+      </div>
+      <div id="pbi-reports-list">
+        <div style="font-size:11.5px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--gray-400);margin-bottom:8px">Relatórios disponíveis</div>
+        <div style="display:flex;flex-direction:column;gap:6px" id="pbi-reports-checkboxes"></div>
+      </div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-secondary" data-close="modal-pbi-perms">Cancelar</button>
+      <button class="btn btn-primary" onclick="toast('Permissões PBI salvas.','success');closeModal('modal-pbi-perms')"><i class="fas fa-floppy-disk"></i> Salvar Permissões</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toast-wrap"></div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     JAVASCRIPT
+     ═══════════════════════════════════════════════════════════════ -->
+<script>
+/* ─ DATA ─────────────────────────────────────────────────────── */
+const CREDS = [
+  { email:'admin@bt.com',    pass:'Admin@2025',  name:'Roberto Neto',  role:'Super Admin', isAdmin:true,  isSuperAdmin:true,  wsAccess:null, reportAccess:null },
+  { email:'ana@bt.com',      pass:'Ana@123',     name:'Ana Souza',      role:'Admin',       isAdmin:true,  isSuperAdmin:false, wsAccess:null, reportAccess:null },
+  { email:'carlos@bt.com',   pass:'Carlos@123',  name:'Carlos Lima',    role:'Gerente',     isAdmin:false, isSuperAdmin:false, wsAccess:['Controladoria'], reportAccess:['DRE Mensal','Fluxo de Caixa'] },
+  { email:'mariana@bt.com',  pass:'Mariana@123', name:'Mariana Rocha',  role:'Operador',    isAdmin:false, isSuperAdmin:false, wsAccess:['Marketing'], reportAccess:['Pipeline de Vendas'] },
+  { email:'pedro@bt.com',    pass:'Pedro@123',   name:'Pedro Alves',    role:'Operador',    isAdmin:false, isSuperAdmin:false, wsAccess:['SAC'], reportAccess:['Atendimentos SAC'] },
+];
+
+/* Helper: retorna true se o usuário atual tem acesso a um workspace */
+function canAccessWs(wsName) {
+  const u = STATE.currentUser;
+  if (!u || u.isAdmin) return true;
+  return u.wsAccess && u.wsAccess.includes(wsName);
+}
+
+/* Helper: retorna true se o usuário atual tem acesso a um relatório */
+function canAccessReport(reportName) {
+  const u = STATE.currentUser;
+  if (!u || u.isAdmin) return true;
+  return u.reportAccess && u.reportAccess.includes(reportName);
+}
+
+let USERS = [
+  { id:1, name:'Ana Souza',     email:'ana@bt.com',     ws:'Administrativo', role:'Admin',       status:'active',   last:'17/01 09:14',
+    wsPerms: [{ ws:'Administrativo', level:'workspace', reports:[] }] },
+  { id:2, name:'Carlos Lima',   email:'carlos@bt.com',  ws:'Controladoria',  role:'Gerente',     status:'active',   last:'16/01 18:02',
+    wsPerms: [{ ws:'Controladoria', level:'reports', reports:['DRE Mensal','Fluxo de Caixa'] }] },
+  { id:3, name:'Mariana Rocha', email:'mariana@bt.com', ws:'Marketing',      role:'Operador',    status:'active',   last:'17/01 11:30',
+    wsPerms: [{ ws:'Marketing', level:'workspace', reports:[] }] },
+  { id:4, name:'Pedro Alves',   email:'pedro@bt.com',   ws:'SAC',            role:'Operador',    status:'inactive', last:'10/01 08:50',
+    wsPerms: [{ ws:'SAC', level:'reports', reports:['Atendimentos SAC'] }] },
+  { id:5, name:'Juliana Costa', email:'juliana@bt.com', ws:'Administrativo', role:'Visitante',   status:'blocked',  last:'05/01 14:22',
+    wsPerms: [{ ws:'Administrativo', level:'none', reports:[] }] },
+  { id:6, name:'Roberto Neto',  email:'roberto@bt.com', ws:'TI',             role:'Super Admin', status:'active',   last:'17/01 13:00',
+    wsPerms: [] },
+];
+
+const WS_CONFIG = [
+  { id:1, name:'Administrativo', users:38, reports:32, status:'active', created:'01/01/2024', online:96, blocked:0, color:'#2a9d45', bg:'#e8f5e9', icon:'fa-briefcase' },
+  { id:2, name:'Controladoria',  users:24, reports:45, status:'active', created:'01/01/2024', online:83, blocked:1, color:'#3b82f6', bg:'#eff6ff', icon:'fa-dollar-sign' },
+  { id:3, name:'Marketing',      users:31, reports:28, status:'active', created:'01/01/2024', online:74, blocked:2, color:'#f97316', bg:'#fff7ed', icon:'fa-chart-line' },
+  { id:4, name:'SAC',            users:31, reports:21, status:'active', created:'01/01/2024', online:90, blocked:4, color:'#8b5cf6', bg:'#f5f3ff', icon:'fa-headset' },
+];
+// alias para compatibilidade
+const WORKSPACES = WS_CONFIG;
+
+let REPORTS = [
+  { id:1, name:'DRE Mensal',         ws:'Controladoria',  cat:'Financeiro',  status:'published', updated:'15/01/2025', fav:true  },
+  { id:2, name:'Pipeline de Vendas', ws:'Marketing',      cat:'Operacional', status:'published', updated:'16/01/2025', fav:false },
+  { id:3, name:'Atendimentos SAC',   ws:'SAC',            cat:'Operacional', status:'draft',     updated:'14/01/2025', fav:true  },
+  { id:4, name:'Indicadores RH',     ws:'Administrativo', cat:'Estratégico', status:'published', updated:'12/01/2025', fav:false },
+  { id:5, name:'Fluxo de Caixa',     ws:'Controladoria',  cat:'Financeiro',  status:'published', updated:'17/01/2025', fav:false },
+];
+
+let GROUPS = [
+  { id:1, name:'Plantão',             members:8, offHours:true,  status:'active',   membersArr:['Carlos Lima','Ana Souza'] },
+  { id:2, name:'Diretoria',           members:5, offHours:true,  status:'active',   membersArr:['Roberto Neto'] },
+  { id:3, name:'TI Suporte',          members:4, offHours:true,  status:'active',   membersArr:['Carlos Lima'] },
+  { id:4, name:'Supervisão Especial', members:3, offHours:false, status:'inactive', membersArr:[] },
+];
+
+let EXCEPTIONS = [
+  { entity:'Diretoria',    type:'Grupo',   time:'00:00–23:59', active:true },
+  { entity:'TI Suporte',  type:'Grupo',   time:'18:00–22:00', active:true },
+  { entity:'Roberto Neto',type:'Usuário', time:'00:00–23:59', active:true },
+  { entity:'Plantão',     type:'Grupo',   time:'18:00–08:00', active:true },
+];
+
+let LOGS = [
+  { ts:'17/01 13:45', event:'Edição de usuário',            detail:'Campo perfil alterado: Operador → Gerente',        user:'Ana Souza',    module:'Usuários',    ip:'192.168.1.105', type:'user' },
+  { ts:'17/01 12:30', event:'Alteração de permissão',       detail:'Permissão Exportar concedida em Relatórios',       user:'Roberto Neto', module:'Permissões',  ip:'192.168.1.1',   type:'permission' },
+  { ts:'17/01 11:00', event:'Acesso fora do expediente',    detail:'Tentativa de acesso às 11:00 (fora expediente)',   user:'Pedro Alves',  module:'Acesso',      ip:'189.40.22.80',  type:'access' },
+  { ts:'16/01 18:02', event:'Login bem-sucedido',            detail:'Sessão iniciada com sucesso',                      user:'Carlos Lima',  module:'Auth',        ip:'192.168.1.88',  type:'auth' },
+  { ts:'16/01 17:55', event:'Tentativa de login inválida',  detail:'5 tentativas — conta bloqueada automaticamente',   user:'Desconhecido', module:'Auth',        ip:'177.200.44.12', type:'security' },
+  { ts:'16/01 16:00', event:'Criação de relatório',          detail:'Relatório "DRE Março" publicado no workspace',     user:'Ana Souza',    module:'Relatórios',  ip:'192.168.1.105', type:'report' },
+  { ts:'15/01 09:00', event:'Alteração de expediente',      detail:'Horário padrão: 08:00–17:00 → 08:00–18:00',        user:'Roberto Neto', module:'Expediente',  ip:'192.168.1.1',   type:'system' },
+];
+
+const PBI_WS_PERMS = [
+  { ws:'Administrativo', level:'workspace', reports:[] },
+  { ws:'Controladoria',  level:'reports',   reports:['DRE Mensal','Fluxo de Caixa'] },
+  { ws:'Marketing',      level:'none',      reports:[] },
+  { ws:'SAC',            level:'reports',   reports:['Atendimentos SAC'] },
+];
+
+const PERM_MODULES = ['Home','Usuários','Permissões','Workspaces','Workspace/Relatórios','Grupos de Exceção','Expediente','Logs','Segurança','Configurações'];
+
+const LOG_COLORS = { user:'green',  permission:'blue', access:'amber', auth:'green', security:'red', report:'blue', system:'gray' };
+const LOG_ICONS  = { user:'fa-user-pen', permission:'fa-key', access:'fa-clock', auth:'fa-right-to-bracket', security:'fa-shield-exclamation', report:'fa-chart-bar', system:'fa-gear' };
+const BAR_COLORS = ['#2a9d45','#3b82f6','#f97316','#8b5cf6'];
+
+let STATE = { currentUser: null, loginAttempts: 0, favorites: new Set([1,3]) };
+
+/* ─ HELPERS ─────────────────────────────────────────────────── */
+const $ = id => document.getElementById(id);
+const initials = n => n.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
+
+function fillLogin(email, pass) {
+  $('l-user').value = email;
+  $('l-pass').value = pass;
+  $('l-btn').focus();
+}
+
+function toast(msg, type='success') {
+  const icons = { success:'fa-circle-check', error:'fa-circle-exclamation', warning:'fa-triangle-exclamation' };
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.innerHTML = `<i class="fas ${icons[type]||icons.success}"></i><span>${msg}</span>`;
+  $('toast-wrap').appendChild(t);
+  setTimeout(()=>t.remove(), 3500);
+}
+
+function statusBadge(s) {
+  const m = { active:['badge-green','fa-circle-check','Ativo'], inactive:['badge-gray','fa-circle-minus','Inativo'], blocked:['badge-red','fa-ban','Bloqueado'], published:['badge-green','fa-circle-check','Publicado'], draft:['badge-amber','fa-pen','Rascunho'] };
+  const [cls,ico,lbl] = m[s]||['badge-gray','',''];
+  return `<span class="badge ${cls}"><i class="fas ${ico}"></i>${lbl}</span>`;
+}
+
+function closeModal(id) { $(id).classList.remove('open'); }
+document.querySelectorAll('[data-close]').forEach(btn => {
+  btn.addEventListener('click', () => closeModal(btn.dataset.close));
+});
+
+/* ─ LOGIN ───────────────────────────────────────────────────── */
+$('l-eye').addEventListener('click', () => {
+  const inp = $('l-pass');
+  const eye = $('l-eye');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+  eye.className = `fas fa-eye${inp.type === 'text' ? '-slash' : ''} lf-eye`;
+});
+
+$('l-btn').addEventListener('click', doLogin);
+$('l-pass').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+$('l-forgot').addEventListener('click', e => { e.preventDefault(); toast('Link de recuperação enviado para o e-mail cadastrado.','warning'); });
+
+function doLogin() {
+  const user = $('l-user').value.trim();
+  const pass = $('l-pass').value;
+  const errEl = $('l-error');
+  if (STATE.loginAttempts >= 5) {
+    errEl.querySelector('#l-error-msg').textContent = 'Conta bloqueada por excesso de tentativas.';
+    errEl.style.display = 'flex'; return;
+  }
+  const found = CREDS.find(c => c.email === user && c.pass === pass);
+  if (found) {
+    STATE.currentUser = found;
+    STATE.loginAttempts = 0;
+    errEl.style.display = 'none';
+    showWelcome(found);
+  } else {
+    STATE.loginAttempts++;
+    errEl.querySelector('#l-error-msg').textContent = `Credenciais inválidas. Tentativa ${STATE.loginAttempts} de 5.`;
+    errEl.style.display = 'flex';
+    $('l-pass').value = ''; $('l-pass').focus();
+  }
+}
+
+/* ─ WELCOME ─────────────────────────────────────────────────── */
+function showWelcome(user) {
+  $('screen-login').style.display = 'none';
+  const ws = $('screen-welcome');
+  ws.style.display = 'flex';
+  $('wc-avatar').textContent = initials(user.name);
+  $('wc-name').textContent = `Olá, ${user.name.split(' ')[0]}`;
+  $('wc-role').textContent = `${user.role} · BrasilTerrenos`;
+
+  // Adaptar chips e descrição conforme perfil
+  const chipsEl = $('wc-chips');
+  const descEl = document.querySelector('.welcome-desc');
+  if (user.isAdmin) {
+    if (chipsEl) chipsEl.innerHTML = `
+      <span class="welcome-chip"><i class="fas fa-users"></i> 6 usuários</span>
+      <span class="welcome-chip"><i class="fas fa-building"></i> 4 workspaces</span>
+      <span class="welcome-chip"><i class="fas fa-chart-bar"></i> 5 relatórios</span>`;
+    if (descEl) descEl.textContent = 'Você tem acesso completo ao portal. Gerencie usuários, permissões, workspaces e relatórios Power BI Embedded.';
+  } else {
+    const wsCount = (user.wsAccess || []).length;
+    const repCount = (user.reportAccess || []).length;
+    if (chipsEl) chipsEl.innerHTML = `
+      <span class="welcome-chip"><i class="fas fa-building"></i> ${wsCount} workspace${wsCount !== 1 ? 's' : ''}</span>
+      <span class="welcome-chip"><i class="fas fa-chart-bar"></i> ${repCount} relatório${repCount !== 1 ? 's' : ''}</span>
+      <span class="welcome-chip"><i class="fas fa-user-tag"></i> ${user.role}</span>`;
+    if (descEl) descEl.textContent = `Você tem acesso ao${wsCount > 1 ? 's' : ''} workspace${wsCount > 1 ? 's' : ''} ${(user.wsAccess || []).join(', ')} e aos relatórios liberados para o seu perfil.`;
+  }
+}
+
+$('wc-btn').addEventListener('click', () => {
+  $('screen-welcome').style.display = 'none';
+  const app = $('screen-app');
+  app.classList.add('visible');
+  initApp();
+});
+
+/* ─ APP INIT ─────────────────────────────────────────────────── */
+function initApp() {
+  const u = STATE.currentUser;
+  $('sb-name').textContent = u.name;
+  $('sb-role').textContent = u.role;
+  $('sb-avatar').textContent = initials(u.name);
+  $('topbar-avatar').textContent = initials(u.name);
+
+  // Controle de visibilidade da nav de admin
+  if (u.isAdmin) {
+    $('admin-nav').style.display = '';
+  } else {
+    $('admin-nav').style.display = 'none';
+    // Esconder botões de ação que operadores não podem usar
+    const adminOnlyBtns = ['btn-new-report','btn-new-workspace-tile'];
+    adminOnlyBtns.forEach(id => { const el = $(id); if(el) el.style.display='none'; });
+  }
+
+  renderAll();
+  applyRBAC();
+  bindReportBtns();
+  checkOffHours();
+}
+
+/* ─ RBAC — oculta elementos e adapta dashboard por perfil ───── */
+function applyRBAC() {
+  const u = STATE.currentUser;
+  if (!u || u.isAdmin) return; // admins veem tudo
+
+  // ── Dashboard: trocar blocos admin → operador ──────────────
+  const hide = id => { const el=$(id); if(el) el.style.display='none'; };
+  const show = id => { const el=$(id); if(el) el.style.display='';     };
+
+  hide('dash-kpi-admin');
+  hide('dash-two-col-admin');
+  hide('dash-pbi-table-admin');
+  show('dash-kpi-operator');
+  show('dash-operator-events');
+
+  // Preencher KPIs do operador
+  const myReports = REPORTS.filter(r => canAccessReport(r.name) && canAccessWs(r.ws));
+  const myWsCount = (u.wsAccess || []).length;
+  const kpiRep = $('op-kpi-reports'); if (kpiRep) kpiRep.textContent = myReports.length;
+  const kpiWs  = $('op-kpi-ws');      if (kpiWs)  kpiWs.textContent  = myWsCount;
+
+  // Preencher atividade recente (apenas logs do próprio usuário)
+  const cMap = { green:'brand', blue:'info', amber:'warning', red:'danger', gray:'gray' };
+  const opEvEl = $('dash-events-operator');
+  if (opEvEl) {
+    const myLogs = LOGS.filter(l => l.user === u.name).slice(0, 5);
+    opEvEl.innerHTML = myLogs.length
+      ? myLogs.map(l => {
+          const c = cMap[LOG_COLORS[l.type]] || 'gray';
+          return `<div class="activity-item">
+            <div class="activity-icon" style="background:var(--${c}-50);color:var(--${c}-500)"><i class="fas ${LOG_ICONS[l.type]}"></i></div>
+            <div class="activity-info">
+              <div class="activity-title">${l.event}</div>
+              <div class="activity-sub">${l.module}</div>
+            </div>
+            <div class="activity-time">${l.ts.split(' ')[1] || l.ts}</div>
+          </div>`;
+        }).join('')
+      : '<div style="text-align:center;padding:24px;color:var(--gray-400)"><i class="fas fa-inbox" style="display:block;font-size:22px;opacity:.3;margin-bottom:8px"></i>Sem atividade recente</div>';
+  }
+
+  // ── Cabeçalho da página Workspace ─────────────────────────
+  hide('ws-page-admin-actions');
+
+  // ── Botão Novo Relatório ──────────────────────────────────
+  hide('btn-new-report');
+
+  // ── Configurações na sidebar ──────────────────────────────
+  const cfgLink = document.querySelector('[data-page="settings"]');
+  if (cfgLink) {
+    const li = cfgLink.closest('.sb-item') || cfgLink;
+    li.style.display = 'none';
+  }
+
+  // ── Filtro de workspace da tabela de relatórios ───────────
+  const wsFilter = document.querySelector('#page-reports .filter-select');
+  if (wsFilter && u.wsAccess) {
+    wsFilter.innerHTML = u.wsAccess.map(w => `<option>${w}</option>`).join('');
+  }
+}
+
+function bindReportBtns() {
+  const r = $('btn-new-report');
+  if (r && !r._b) { r._b = true; r.addEventListener('click', openNewReportModal); }
+  const w = $('btn-new-workspace-tile');
+  if (w && !w._b) { w._b = true; w.addEventListener('click', openNewWorkspaceModal); }
+  const we = document.querySelector('[onclick*="Módulo disponível"]');
+  if (we) { we.removeAttribute('onclick'); we.addEventListener('click', openNewWorkspaceModal); }
+  // Schedule add exception
+  const sc = document.querySelector('[onclick*="Adicionar exceção"]');
+  if (sc) { sc.removeAttribute('onclick'); sc.addEventListener('click', openExceptionModal); }
+}
+
+function renderAll() {
+  renderDashboard();
+  renderWsTiles();
+  renderReports();
+  renderFavs();
+  renderUsers();
+  renderPerms();
+  renderWorkspaces();
+  renderGroups();
+  renderSchedule();
+  renderLogs();
+  renderAdminSummary();
+  renderSecurity();
+  renderAccessControl();
+}
+
+/* ─ NAVIGATION ──────────────────────────────────────────────── */
+const PAGE_NAMES = {
+  dashboard:'Home', reports:'Workspace', favorites:'Favoritos',
+  users:'Usuários', permissions:'Permissões', workspaces:'Workspaces',
+  'ws-detail':'Workspace', 'exception-groups':'Grupos de Exceção',
+  schedule:'Regras de Expediente', logs:'Logs e Auditoria',
+  'access-control':'Controle de Acessos', 'admin-summary':'Painel Gerencial',
+  security:'Segurança Administrativa', settings:'Configurações'
+};
+
+function navigateTo(page) {
+  const u = STATE.currentUser;
+  // Guardar páginas restritas a admins
+  const adminPages = ['users','permissions','workspaces','exception-groups','schedule','logs','access-control','admin-summary','security','settings'];
+  if (u && !u.isAdmin && adminPages.includes(page)) {
+    toast('Você não tem permissão para acessar esta área.', 'error');
+    return;
+  }
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.sb-link, .sb-sublink').forEach(l => l.classList.remove('active'));
+  const target = $(`page-${page}`);
+  if (target) target.classList.add('active');
+  const nav = document.querySelector(`[data-page="${page}"]`);
+  if (nav) nav.classList.add('active');
+  // Reset breadcrumb (may have been set to HTML by ws-detail)
+  $('bc-title').innerHTML = PAGE_NAMES[page] || page;
+  // close mobile sidebar
+  $('sidebar').classList.remove('mobile-open');
+  $('mobile-overlay').style.display = 'none';
+}
+
+document.querySelectorAll('[data-page]').forEach(link => {
+  link.addEventListener('click', () => navigateTo(link.dataset.page));
+});
+
+$('admin-toggle').addEventListener('click', () => {
+  $('admin-nav').classList.toggle('open');
+});
+
+$('logout-btn').addEventListener('click', () => {
+  STATE.currentUser = null; STATE.loginAttempts = 0;
+  $('screen-app').classList.remove('visible');
+  $('screen-login').style.display = '';
+  $('l-user').value = ''; $('l-pass').value = '';
+  $('l-error').style.display = 'none';
+  toast('Sessão encerrada com segurança.');
+});
+
+// Mobile sidebar
+$('mobile-menu-btn').addEventListener('click', () => {
+  $('sidebar').classList.toggle('mobile-open');
+  $('mobile-overlay').style.display = $('sidebar').classList.contains('mobile-open') ? 'block' : 'none';
+});
+$('mobile-overlay').addEventListener('click', () => {
+  $('sidebar').classList.remove('mobile-open');
+  $('mobile-overlay').style.display = 'none';
+});
+
+/* ─ PERMISSION TABS ─────────────────────────────────────────── */
+const permTabTitles = { role:'Permissões por Perfil', user:'Permissões por Usuário', workspace:'Permissões por Workspace', report:'Permissões por Relatório' };
+document.querySelectorAll('.perm-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.perm-tab').forEach(t => t.classList.remove('active', 'btn-primary'));
+    tab.classList.add('active');
+    $('perm-tab-title').textContent = permTabTitles[tab.dataset.tab];
+    const sel = $('perm-target');
+    sel.innerHTML = tab.dataset.tab === 'role'
+      ? '<option>Super Admin</option><option>Admin</option><option>Gerente</option><option>Operador</option><option>Visitante</option>'
+      : tab.dataset.tab === 'user'
+      ? USERS.map(u=>`<option>${u.name}</option>`).join('')
+      : tab.dataset.tab === 'workspace'
+      ? WORKSPACES.map(w=>`<option>${w.name}</option>`).join('')
+      : REPORTS.map(r=>`<option>${r.name}</option>`).join('');
+    $('pbi-perms-section').style.display = (tab.dataset.tab === 'report') ? 'none' : '';
+    renderPerms();
+  });
+});
+
+// Style active tab
+document.querySelectorAll('.perm-tab').forEach(tab => {
+  tab.style.cssText = '';
+  tab.classList.remove('btn-primary', 'btn-secondary');
+});
+
+// Initial style for tabs
+function stylePermTabs() {
+  document.querySelectorAll('.perm-tab').forEach(tab => {
+    if (tab.classList.contains('active')) {
+      tab.style.background = 'var(--gray-0)';
+      tab.style.color = 'var(--gray-800)';
+      tab.style.boxShadow = 'var(--shadow-xs)';
+    } else {
+      tab.style.background = 'transparent';
+      tab.style.color = 'var(--gray-500)';
+      tab.style.boxShadow = 'none';
+    }
+  });
+}
+document.querySelectorAll('.perm-tab').forEach(tab => {
+  tab.addEventListener('click', stylePermTabs);
+});
+stylePermTabs();
+
+/* ─ HOME / DASHBOARD ─────────────────────────────────────────── */
+function renderDashboard() {
+  const cMap = { green:'brand', blue:'info', amber:'warning', red:'danger', gray:'gray' };
+  $('dash-events').innerHTML = LOGS.slice(0,4).map(l => {
+    const c = cMap[LOG_COLORS[l.type]]||'gray';
+    return `
+    <div class="activity-item">
+      <div class="activity-icon" style="background:var(--${c}-50);color:var(--${c}-500)">
+        <i class="fas ${LOG_ICONS[l.type]}"></i>
+      </div>
+      <div class="activity-info">
+        <div class="activity-title">${l.event}</div>
+        <div class="activity-sub">${l.user} · ${l.module}</div>
+      </div>
+      <div class="activity-time">${l.ts.split(' ')[1]}<div class="activity-time-date">Hoje</div></div>
+    </div>`;
+  }).join('');
+
+  const maxU = Math.max(...WS_CONFIG.map(w=>w.users));
+  $('dash-bars').innerHTML = WS_CONFIG.map((w,i) => `
+    <div class="bar-row">
+      <div class="bar-meta"><span class="bar-name">${w.name}</span><span class="bar-count">${w.users}</span></div>
+      <div class="bar-track"><div class="bar-fill" style="width:${(w.users/maxU)*100}%;background:${BAR_COLORS[i]}"></div></div>
+    </div>`).join('');
+}
+
+/* ─ WS TILES (tela Workspace) ───────────────────────────────── */
+function renderWsTiles() {
+  const el = $('ws-tiles-home');
+  if (!el) return;
+  const visibleWs = WS_CONFIG.filter(w => canAccessWs(w.name));
+  if (visibleWs.length === 0) {
+    el.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:48px;color:var(--gray-400)"><i class="fas fa-lock" style="font-size:28px;opacity:.3;display:block;margin-bottom:10px"></i>Nenhum workspace disponível para seu perfil.</div>';
+    return;
+  }
+  el.innerHTML = visibleWs.map(w => {
+    const isAdmin = STATE.currentUser && STATE.currentUser.isAdmin;
+    return `
+    <div class="ws-tile" onclick="openWsDetail(${w.id})">
+      <div class="ws-tile-chevron"><i class="fas fa-chevron-right"></i></div>
+      <div class="ws-tile-header">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div class="ws-tile-icon" style="background:${w.bg};color:${w.color}">
+            <i class="fas ${w.icon}"></i>
+          </div>
+          <div>
+            <div style="font-size:16px;font-weight:700;color:var(--gray-900)">${w.name}</div>
+            ${isAdmin ? `<div style="font-size:12.5px;color:var(--gray-400)">${w.users} usuários · ${Math.ceil(w.users/8)} gestores</div>` : `<div style="font-size:12.5px;color:var(--gray-400)">Seu workspace</div>`}
+          </div>
+        </div>
+        <span class="badge badge-green"><i class="fas fa-circle" style="font-size:6px"></i>Ativo</span>
+      </div>
+      ${isAdmin ? `
+      <div class="ws-tile-stats">
+        <div>
+          <div class="ws-stat-val">${w.users}</div>
+          <div class="ws-stat-label">Usuários</div>
+        </div>
+        <div>
+          <div class="ws-stat-val" style="color:var(--brand-600)">${w.online}%</div>
+          <div class="ws-stat-label">Online Agora</div>
+        </div>
+        <div>
+          <div class="ws-stat-val" style="color:${w.blocked>0?'var(--danger-600)':'var(--gray-700)'}">${w.blocked}</div>
+          <div class="ws-stat-label">Bloqueados</div>
+        </div>
+      </div>` : ''}
+    </div>`}).join('');
+}
+
+/* ─ REPORTS ─────────────────────────────────────────────────── */
+function renderReports() {
+  const u = STATE.currentUser;
+  const visibleReports = REPORTS.filter(r => canAccessReport(r.name) && canAccessWs(r.ws));
+  if (visibleReports.length === 0) {
+    $('reports-body').innerHTML = `<tr><td colspan="7" style="text-align:center;padding:48px;color:var(--gray-400)"><i class="fas fa-lock" style="font-size:24px;opacity:.3;display:block;margin-bottom:10px"></i>Nenhum relatório disponível para seu perfil.</td></tr>`;
+    return;
+  }
+  $('reports-body').innerHTML = visibleReports.map(r => `
+    <tr>
+      <td>
+        <button class="btn btn-icon btn-ghost fav-btn ${STATE.favorites.has(r.id)?'fav-active':''}" data-fav="${r.id}" title="Favoritar" style="color:${STATE.favorites.has(r.id)?'#d97706':'var(--gray-300)'}">
+          <i class="fas fa-bookmark"></i>
+        </button>
+      </td>
+      <td class="td-bold">${r.name}</td>
+      <td><span class="badge badge-gray"><i class="fas fa-building"></i>${r.ws}</span></td>
+      <td>${r.cat}</td>
+      <td>${statusBadge(r.status)}</td>
+      <td style="font-size:12.5px;color:var(--gray-400)">${r.updated}</td>
+      <td>
+        <div style="display:flex;gap:4px">
+          <button class="btn btn-icon btn-ghost btn-sm" title="Visualizar" onclick="toast('Abrindo: ${r.name}','success')"><i class="fas fa-eye"></i></button>
+          ${u && u.isAdmin ? `<button class="btn btn-icon btn-ghost btn-sm" title="Exportar" onclick="toast('Exportando: ${r.name}','success')"><i class="fas fa-download"></i></button>` : ''}
+          ${u && u.isAdmin ? `<button class="btn btn-icon btn-ghost btn-sm" title="Editar" onclick="toast('Editar: ${r.name}','success')"><i class="fas fa-pen"></i></button>` : ''}
+        </div>
+      </td>
+    </tr>`).join('');
+
+  document.querySelectorAll('.fav-btn[data-fav]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = +btn.dataset.fav;
+      if (STATE.favorites.has(id)) { STATE.favorites.delete(id); btn.style.color='var(--gray-300)'; btn.classList.remove('fav-active'); toast('Removido dos favoritos','warning'); }
+      else { STATE.favorites.add(id); btn.style.color='#d97706'; btn.classList.add('fav-active'); toast('Adicionado aos favoritos'); }
+      renderFavs();
+    });
+  });
+}
+
+/* Novo Relatório — modal funcional */
+document.addEventListener('DOMContentLoaded', () => {});
+function bindNewReportBtn() {
+  const btn = $('btn-new-report');
+  if (btn && !btn._bound) {
+    btn._bound = true;
+    btn.addEventListener('click', () => openNewReportModal());
+  }
+  const btnTile = $('btn-new-workspace-tile');
+  if (btnTile && !btnTile._bound) {
+    btnTile._bound = true;
+    btnTile.addEventListener('click', () => openNewWorkspaceModal());
+  }
+}
+function openNewReportModal() {
+  // Inject modal if not present
+  if (!$('modal-new-report')) {
+    const m = document.createElement('div');
+    m.className='modal-overlay'; m.id='modal-new-report';
+    m.innerHTML=`<div class="modal"><div class="modal-hd"><div class="modal-title">Novo Relatório Power BI</div><button class="modal-close" data-close="modal-new-report"><i class="fas fa-times"></i></button></div>
+    <div class="modal-bd"><div class="form-grid fg-2" style="gap:14px">
+      <div class="form-group"><label class="form-label">Nome do relatório</label><input type="text" class="form-input" id="nr-name" placeholder="Ex: DRE Mensal"></div>
+      <div class="form-group"><label class="form-label">Workspace</label><select class="form-select" id="nr-ws"><option>Administrativo</option><option>Controladoria</option><option>Marketing</option><option>SAC</option></select></div>
+      <div class="form-group"><label class="form-label">Categoria</label><select class="form-select" id="nr-cat"><option>Financeiro</option><option>Operacional</option><option>Estratégico</option><option>RH</option></select></div>
+      <div class="form-group"><label class="form-label">Report ID (Power BI)</label><input type="text" class="form-input" id="nr-pbi-id" placeholder="xxxxxxxx-xxxx-xxxx-xxxx"></div>
+      <div class="form-group"><label class="form-label">Status</label><select class="form-select" id="nr-status"><option value="published">Publicado</option><option value="draft">Rascunho</option></select></div>
+    </div></div>
+    <div class="modal-ft"><button class="btn btn-secondary" data-close="modal-new-report">Cancelar</button><button class="btn btn-primary" id="btn-create-report"><i class="fas fa-plus"></i> Criar Relatório</button></div></div>`;
+    document.body.appendChild(m);
+    m.querySelector('[data-close]').addEventListener('click',()=>closeModal('modal-new-report'));
+    $('btn-create-report').addEventListener('click',()=>{
+      const name=$('nr-name').value.trim();
+      if(!name){toast('Informe o nome.','error');return;}
+      const today=new Date().toLocaleDateString('pt-BR');
+      REPORTS.push({id:REPORTS.length+1,name,ws:$('nr-ws').value,cat:$('nr-cat').value,status:$('nr-status').value,updated:today,fav:false});
+      closeModal('modal-new-report'); renderReports();
+      toast(`Relatório "${name}" criado!`);
+      $('nr-name').value='';
+    });
+  }
+  $('modal-new-report').classList.add('open');
+}
+function openNewWorkspaceModal() {
+  if (!$('modal-new-workspace')) {
+    const m = document.createElement('div');
+    m.className='modal-overlay'; m.id='modal-new-workspace';
+    m.innerHTML=`<div class="modal" style="max-width:560px"><div class="modal-hd"><div class="modal-title">Novo Workspace</div><button class="modal-close" data-close="modal-new-workspace"><i class="fas fa-times"></i></button></div>
+    <div class="modal-bd"><div class="form-grid" style="gap:14px">
+      <div class="form-group"><label class="form-label">Nome do Workspace</label><input type="text" class="form-input" id="nw-name" placeholder="Ex: Controladoria"></div>
+      <div class="form-group"><label class="form-label">Liberação por departamento</label>
+        <div style="display:flex;flex-direction:column;gap:6px;margin-top:6px">
+          ${['Administrativo','Controladoria','Marketing','SAC'].map(d=>`<label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px"><input type="checkbox" style="accent-color:var(--brand-500)"> ${d}</label>`).join('')}
+        </div>
+      </div>
+      <div class="form-group"><label class="form-label">Liberação por usuário</label>
+        <select class="form-select" id="nw-users" multiple style="height:80px">
+          ${USERS.map(u=>`<option>${u.name}</option>`).join('')}
+        </select>
+        <div style="font-size:11px;color:var(--gray-400);margin-top:4px">Segure Ctrl para múltiplos</div>
+      </div>
+    </div></div>
+    <div class="modal-ft"><button class="btn btn-secondary" data-close="modal-new-workspace">Cancelar</button><button class="btn btn-primary" id="btn-create-ws-tile"><i class="fas fa-plus"></i> Criar Workspace</button></div></div>`;
+    document.body.appendChild(m);
+    m.querySelector('[data-close]').addEventListener('click',()=>closeModal('modal-new-workspace'));
+    $('btn-create-ws-tile').addEventListener('click',()=>{
+      const name=$('nw-name').value.trim();
+      if(!name){toast('Informe o nome.','error');return;}
+      WS_CONFIG.push({id:WS_CONFIG.length+1,name,users:0,reports:0,status:'active',created:new Date().toLocaleDateString('pt-BR'),online:0,blocked:0,color:'#6b7280',bg:'#f5f5f6',icon:'fa-building'});
+      closeModal('modal-new-workspace'); renderWsTiles(); renderWorkspaces();
+      toast(`Workspace "${name}" criado!`);
+      $('nw-name').value='';
+    });
+  }
+  $('modal-new-workspace').classList.add('open');
+}
+
+/* ─ FAVORITES ───────────────────────────────────────────────── */
+function renderFavs() {
+  const allFavs = REPORTS.filter(r => STATE.favorites.has(r.id));
+  const favs = allFavs.filter(r => canAccessReport(r.name) && canAccessWs(r.ws));
+  if (!favs.length) {
+    $('fav-body').innerHTML = `<tr><td colspan="5" style="text-align:center;padding:40px;color:var(--gray-400)"><i class="fas fa-bookmark" style="font-size:24px;opacity:.3;display:block;margin-bottom:10px"></i>Nenhum favorito ainda</td></tr>`;
+    return;
+  }
+  $('fav-body').innerHTML = favs.map(r => `
+    <tr>
+      <td class="td-bold"><i class="fas fa-bookmark" style="color:#d97706;margin-right:8px"></i>${r.name}</td>
+      <td>Relatório Power BI</td>
+      <td><span class="badge badge-gray">${r.ws}</span></td>
+      <td style="font-size:12.5px;color:var(--gray-400)">—</td>
+      <td>
+        <button class="btn btn-ghost btn-sm" onclick="removeFav(${r.id})"><i class="fas fa-bookmark-slash"></i> Remover</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function removeFav(id) {
+  STATE.favorites.delete(id);
+  renderFavs(); renderReports(); toast('Removido dos favoritos.','warning');
+}
+
+/* ─ USERS ───────────────────────────────────────────────────── */
+function renderUsers(search='') {
+  const sf = $('user-status-filter') ? $('user-status-filter').value : '';
+  const wf = $('user-ws-filter') ? $('user-ws-filter').value : '';
+  const list = USERS.filter(u => {
+    const ms = !search || u.name.toLowerCase().includes(search) || u.email.toLowerCase().includes(search);
+    const mst = !sf || u.status === sf;
+    const mw = !wf || u.ws === wf;
+    return ms && mst && mw;
+  });
+  $('users-body').innerHTML = list.map(u => `
+    <tr>
+      <td>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,var(--brand-400),var(--brand-700));display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700;flex-shrink:0">${initials(u.name)}</div>
+          <span class="td-bold">${u.name}</span>
+        </div>
+      </td>
+      <td style="font-size:13px;color:var(--gray-500)">${u.email}</td>
+      <td>
+        <div style="display:flex;flex-wrap:wrap;gap:4px">
+          ${(u.wsPerms && u.wsPerms.length ? u.wsPerms : [{ws:u.ws}]).map(p=>`<span class="badge badge-gray" style="font-size:11px"><i class="fas fa-building"></i>${p.ws}</span>`).join('')}
+        </div>
+      </td>
+      <td style="font-size:13px">${u.role}</td>
+      <td>${statusBadge(u.status)}</td>
+      <td style="font-size:12.5px;color:var(--gray-400)">${u.last}</td>
+      <td>
+        <div style="display:flex;gap:4px">
+          <button class="btn btn-icon btn-ghost btn-sm" title="Editar usuário" onclick="openEditUser(${u.id})"><i class="fas fa-pen"></i></button>
+          <button class="btn btn-icon btn-ghost btn-sm" title="${u.status==='blocked'?'Desbloquear':'Bloquear'}" onclick="toggleUserBlock(${u.id})"><i class="fas fa-${u.status==='blocked'?'lock-open':'lock'}"></i></button>
+          <button class="btn btn-icon btn-ghost btn-sm" title="Redefinir senha" onclick="openResetPass(${u.id})"><i class="fas fa-key"></i></button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+$('user-search').addEventListener('input', e => renderUsers(e.target.value.toLowerCase()));
+$('user-status-filter').addEventListener('change', () => renderUsers($('user-search').value.toLowerCase()));
+$('user-ws-filter').addEventListener('change', () => renderUsers($('user-search').value.toLowerCase()));
+
+$('btn-new-user').addEventListener('click', () => $('modal-user').classList.add('open'));
+$('btn-create-user').addEventListener('click', () => {
+  const name = $('nu-name').value.trim();
+  const email = $('nu-email').value.trim();
+  if (!name || !email) { toast('Preencha nome e e-mail.', 'error'); return; }
+  USERS.push({ id: USERS.length + 1, name, email, ws: $('nu-ws').value, role: $('nu-role').value, status: $('nu-status').value, last: '—' });
+  LOGS.unshift({ ts:'Agora', event:'Criação de usuário', detail:`Usuário ${name} criado com perfil ${$('nu-role').value}`, user: STATE.currentUser.name, module:'Usuários', ip:'192.168.1.1', type:'user' });
+  closeModal('modal-user');
+  renderUsers(); renderLogs();
+  toast(`Usuário ${name} criado com sucesso!`);
+  $('nu-name').value = ''; $('nu-email').value = ''; $('nu-pass').value = '';
+});
+
+/* ─ EDIT USER — multi-workspace + per-ws report permissions ─── */
+let _euCurrentPerms = []; // working copy of wsPerms during edit
+
+function openEditUser(id) {
+  const u = USERS.find(x => x.id === id);
+  if (!u) return;
+
+  // Deep-copy existing wsPerms into working state
+  _euCurrentPerms = (u.wsPerms || []).map(p => ({ ws: p.ws, level: p.level, reports: [...p.reports] }));
+
+  if (!$('modal-edit-user')) {
+    const m = document.createElement('div');
+    m.className = 'modal-overlay'; m.id = 'modal-edit-user';
+    m.innerHTML = `
+    <div class="modal" style="max-width:640px">
+      <div class="modal-hd">
+        <div class="modal-title">Editar Usuário</div>
+        <button class="modal-close" data-close="modal-edit-user"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-bd" style="padding-bottom:8px">
+        <input type="hidden" id="eu-id">
+        <div class="form-grid fg-2" style="gap:14px;margin-bottom:20px">
+          <div class="form-group"><label class="form-label">Nome completo</label><input type="text" class="form-input" id="eu-name"></div>
+          <div class="form-group"><label class="form-label">E-mail</label><input type="email" class="form-input" id="eu-email"></div>
+          <div class="form-group"><label class="form-label">Perfil</label>
+            <select class="form-select" id="eu-role">
+              <option>Visitante</option><option>Operador</option><option>Gerente</option><option>Admin</option><option>Super Admin</option>
+            </select>
+          </div>
+          <div class="form-group"><label class="form-label">Status</label>
+            <select class="form-select" id="eu-status">
+              <option value="active">Ativo</option><option value="inactive">Inativo</option><option value="blocked">Bloqueado</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Workspace permissions section -->
+        <div style="border-top:1px solid var(--gray-100);padding-top:18px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+            <div>
+              <div style="font-size:12px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--gray-500)">Workspaces &amp; Relatórios</div>
+              <div style="font-size:12px;color:var(--gray-400);margin-top:2px">Defina quais workspaces e relatórios este usuário pode acessar</div>
+            </div>
+            <button class="btn btn-secondary btn-sm" id="eu-add-ws-btn" style="white-space:nowrap">
+              <i class="fas fa-plus"></i> Adicionar workspace
+            </button>
+          </div>
+
+          <!-- Picker (hidden by default) -->
+          <div id="eu-ws-picker" style="display:none;margin-bottom:12px;padding:14px;background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--r-md)">
+            <div style="font-size:12px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--gray-500);margin-bottom:10px">Selecionar workspace</div>
+            <div id="eu-ws-picker-options" style="display:flex;flex-wrap:wrap;gap:8px"></div>
+          </div>
+
+          <!-- List of assigned workspaces -->
+          <div id="eu-ws-list" style="display:flex;flex-direction:column;gap:10px"></div>
+        </div>
+      </div>
+      <div class="modal-ft">
+        <button class="btn btn-secondary" data-close="modal-edit-user">Cancelar</button>
+        <button class="btn btn-primary" id="eu-save"><i class="fas fa-floppy-disk"></i> Salvar</button>
+      </div>
+    </div>`;
+    document.body.appendChild(m);
+    m.querySelector('[data-close]').addEventListener('click', () => closeModal('modal-edit-user'));
+
+    $('eu-add-ws-btn').addEventListener('click', () => {
+      const picker = $('eu-ws-picker');
+      picker.style.display = picker.style.display === 'none' ? 'block' : 'none';
+      euRenderPicker();
+    });
+
+    $('eu-save').addEventListener('click', () => {
+      const uid = +$('eu-id').value;
+      const usr = USERS.find(x => x.id === uid);
+      if (!usr) return;
+      const oldRole = usr.role;
+      usr.name   = $('eu-name').value;
+      usr.email  = $('eu-email').value;
+      usr.role   = $('eu-role').value;
+      usr.status = $('eu-status').value;
+      usr.wsPerms = _euCurrentPerms.map(p => ({ ...p, reports: [...p.reports] }));
+      // Keep legacy ws field as first ws or blank
+      usr.ws = _euCurrentPerms.length ? _euCurrentPerms[0].ws : '—';
+      LOGS.unshift({ ts:'Agora', event:'Edição de usuário', detail:`Perfil: ${oldRole} → ${usr.role} | Workspaces: ${_euCurrentPerms.map(p=>p.ws).join(', ')||'nenhum'}`, user: STATE.currentUser.name, module:'Usuários', ip:'192.168.1.1', type:'user' });
+      closeModal('modal-edit-user');
+      renderUsers(); renderLogs();
+      toast('Usuário atualizado com sucesso!');
+    });
+  }
+
+  // Populate basic fields
+  $('eu-id').value    = u.id;
+  $('eu-name').value  = u.name;
+  $('eu-email').value = u.email;
+  $('eu-role').value  = u.role;
+  $('eu-status').value = u.status;
+  $('eu-ws-picker').style.display = 'none';
+
+  euRenderWsList();
+  $('modal-edit-user').classList.add('open');
+}
+
+function euRenderPicker() {
+  const assignedWs = _euCurrentPerms.map(p => p.ws);
+  const available  = WS_CONFIG.filter(w => !assignedWs.includes(w.name));
+  const el = $('eu-ws-picker-options');
+  if (!available.length) {
+    el.innerHTML = '<span style="font-size:13px;color:var(--gray-400)">Todos os workspaces já foram adicionados.</span>';
+    return;
+  }
+  el.innerHTML = available.map(w => `
+    <button class="btn btn-secondary btn-sm" onclick="euAddWorkspace('${w.name}')" style="gap:6px">
+      <span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${w.color}"></span>
+      ${w.name}
+    </button>`).join('');
+}
+
+function euAddWorkspace(wsName) {
+  if (_euCurrentPerms.find(p => p.ws === wsName)) return;
+  _euCurrentPerms.push({ ws: wsName, level: 'workspace', reports: [] });
+  $('eu-ws-picker').style.display = 'none';
+  euRenderWsList();
+}
+
+function euRemoveWorkspace(wsName) {
+  _euCurrentPerms = _euCurrentPerms.filter(p => p.ws !== wsName);
+  euRenderWsList();
+}
+
+function euSetLevel(wsName, level) {
+  const p = _euCurrentPerms.find(x => x.ws === wsName);
+  if (!p) return;
+  p.level = level;
+  if (level !== 'reports') p.reports = [];
+  euRenderWsList();
+}
+
+function euToggleReport(wsName, reportName, checked) {
+  const p = _euCurrentPerms.find(x => x.ws === wsName);
+  if (!p) return;
+  if (checked) { if (!p.reports.includes(reportName)) p.reports.push(reportName); }
+  else { p.reports = p.reports.filter(r => r !== reportName); }
+}
+
+function euRenderWsList() {
+  const el = $('eu-ws-list');
+  if (!_euCurrentPerms.length) {
+    el.innerHTML = `<div style="text-align:center;padding:24px;color:var(--gray-400);border:1px dashed var(--gray-200);border-radius:var(--r-md)">
+      <i class="fas fa-building" style="font-size:22px;opacity:.3;display:block;margin-bottom:8px"></i>
+      <span style="font-size:13px">Nenhum workspace atribuído</span>
+    </div>`;
+    return;
+  }
+  el.innerHTML = _euCurrentPerms.map(p => {
+    const wCfg      = WS_CONFIG.find(w => w.name === p.ws) || { color:'#6b7280', bg:'#f5f5f6', icon:'fa-building' };
+    const wsReports = REPORTS.filter(r => r.ws === p.ws);
+    const reportRows = wsReports.map(r => `
+      <label style="display:flex;align-items:center;gap:10px;padding:9px 12px;border:1px solid var(--gray-100);border-radius:var(--r-sm);cursor:pointer;transition:background var(--t-fast);background:var(--gray-0)"
+             onmouseover="this.style.background='var(--gray-50)'" onmouseout="this.style.background='var(--gray-0)'">
+        <input type="checkbox" style="accent-color:var(--brand-500);width:15px;height:15px;flex-shrink:0"
+               ${p.reports.includes(r.name) ? 'checked' : ''}
+               onchange="euToggleReport('${p.ws}','${r.name}',this.checked)">
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:600;color:var(--gray-800);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.name}</div>
+          <div style="font-size:11.5px;color:var(--gray-400)">${r.cat}</div>
+        </div>
+        ${statusBadge(r.status)}
+      </label>`).join('');
+
+    return `
+    <div style="border:1px solid var(--gray-200);border-radius:var(--r-md);overflow:hidden">
+      <!-- Header -->
+      <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--gray-50);border-bottom:1px solid var(--gray-100)">
+        <div style="width:28px;height:28px;border-radius:8px;background:${wCfg.bg};color:${wCfg.color};display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0">
+          <i class="fas ${wCfg.icon}"></i>
+        </div>
+        <span style="font-size:13.5px;font-weight:700;color:var(--gray-900);flex:1">${p.ws}</span>
+        <button class="btn btn-icon btn-ghost btn-sm" title="Remover workspace" onclick="euRemoveWorkspace('${p.ws}')" style="color:var(--danger-400)">
+          <i class="fas fa-trash-can"></i>
+        </button>
+      </div>
+      <!-- Access level -->
+      <div style="padding:12px 14px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--gray-400);margin-bottom:8px">Nível de acesso</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:${p.level==='reports' ? '14px' : '0'}">
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:6px 12px;border-radius:var(--r-sm);border:1.5px solid ${p.level==='workspace'?'var(--brand-400)':'var(--gray-200)'};background:${p.level==='workspace'?'var(--brand-50)':'var(--gray-0)'};transition:all var(--t-fast)">
+            <input type="radio" name="eu-lvl-${p.ws.replace(/\s/g,'_')}" value="workspace" ${p.level==='workspace'?'checked':''} style="accent-color:var(--brand-500)" onchange="euSetLevel('${p.ws}','workspace')">
+            <span style="font-size:13px;font-weight:500;color:${p.level==='workspace'?'var(--brand-700)':'var(--gray-600)'}"><i class="fas fa-building" style="margin-right:5px;font-size:11px"></i>Workspace inteiro</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:6px 12px;border-radius:var(--r-sm);border:1.5px solid ${p.level==='reports'?'var(--info-500)':'var(--gray-200)'};background:${p.level==='reports'?'var(--info-50)':'var(--gray-0)'};transition:all var(--t-fast)">
+            <input type="radio" name="eu-lvl-${p.ws.replace(/\s/g,'_')}" value="reports" ${p.level==='reports'?'checked':''} style="accent-color:var(--info-500)" onchange="euSetLevel('${p.ws}','reports')">
+            <span style="font-size:13px;font-weight:500;color:${p.level==='reports'?'var(--info-700)':'var(--gray-600)'}"><i class="fas fa-file-chart-column" style="margin-right:5px;font-size:11px"></i>Relatórios específicos</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:6px 12px;border-radius:var(--r-sm);border:1.5px solid ${p.level==='none'?'var(--danger-400)':'var(--gray-200)'};background:${p.level==='none'?'var(--danger-50)':'var(--gray-0)'};transition:all var(--t-fast)">
+            <input type="radio" name="eu-lvl-${p.ws.replace(/\s/g,'_')}" value="none" ${p.level==='none'?'checked':''} style="accent-color:var(--danger-500)" onchange="euSetLevel('${p.ws}','none')">
+            <span style="font-size:13px;font-weight:500;color:${p.level==='none'?'var(--danger-600)':'var(--gray-600)'}"><i class="fas fa-ban" style="margin-right:5px;font-size:11px"></i>Sem acesso</span>
+          </label>
+        </div>
+        ${p.level === 'reports' ? `
+          <div>
+            <div style="font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--gray-400);margin-bottom:8px">Relatórios disponíveis em ${p.ws}</div>
+            ${wsReports.length ? `<div style="display:flex;flex-direction:column;gap:6px">${reportRows}</div>`
+            : `<div style="font-size:13px;color:var(--gray-400);padding:10px 0">Nenhum relatório cadastrado neste workspace.</div>`}
+          </div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleUserBlock(id) {
+  const u = USERS.find(x => x.id === id);
+  if (!u) return;
+  const prev = u.status;
+  u.status = u.status === 'blocked' ? 'active' : 'blocked';
+  LOGS.unshift({ ts:'Agora', event: u.status==='blocked' ? 'Usuário bloqueado' : 'Usuário desbloqueado', detail:`Status: ${prev} → ${u.status}`, user: STATE.currentUser.name, module:'Usuários', ip:'192.168.1.1', type:'user' });
+  renderUsers(); renderLogs(); renderAccessControl();
+  toast(`${u.name} ${u.status==='blocked'?'bloqueado':'desbloqueado'}!`, u.status==='blocked'?'warning':'success');
+}
+
+function openResetPass(id) {
+  const u = USERS.find(x => x.id === id);
+  if (!u) return;
+  if (!$('modal-reset-pass')) {
+    const m = document.createElement('div');
+    m.className = 'modal-overlay'; m.id = 'modal-reset-pass';
+    m.innerHTML = `<div class="modal" style="max-width:420px"><div class="modal-hd"><div class="modal-title">Redefinir Senha</div>
+      <button class="modal-close" data-close="modal-reset-pass"><i class="fas fa-times"></i></button></div>
+      <div class="modal-bd">
+        <div style="margin-bottom:14px;font-size:13px;color:var(--gray-600)">Redefinindo para: <strong id="rp-name"></strong></div>
+        <input type="hidden" id="rp-uid">
+        <div class="form-group" style="margin-bottom:12px"><label class="form-label">Nova senha temporária</label><input type="password" class="form-input" id="rp-pass" placeholder="Mínimo 8 caracteres"></div>
+        <div class="form-group"><label class="form-label">Confirmar senha</label><input type="password" class="form-input" id="rp-confirm" placeholder="Repita a senha"></div>
+      </div>
+      <div class="modal-ft"><button class="btn btn-secondary" data-close="modal-reset-pass">Cancelar</button>
+        <button class="btn btn-primary" id="rp-save"><i class="fas fa-key"></i> Redefinir</button></div></div>`;
+    document.body.appendChild(m);
+    m.querySelector('[data-close]').addEventListener('click', () => closeModal('modal-reset-pass'));
+    $('rp-save').addEventListener('click', () => {
+      const pass = $('rp-pass').value;
+      if (!pass || pass.length < 8) { toast('Mínimo 8 caracteres.', 'error'); return; }
+      if (pass !== $('rp-confirm').value) { toast('Senhas não coincidem.', 'error'); return; }
+      const uid = +$('rp-uid').value;
+      const usr = USERS.find(x => x.id === uid);
+      LOGS.unshift({ ts:'Agora', event:'Senha alterada', detail:'Senha temporária definida pelo administrador', user: STATE.currentUser.name, module:'Usuários', ip:'192.168.1.1', type:'user' });
+      closeModal('modal-reset-pass'); renderLogs();
+      toast(`Senha de ${usr?.name || 'usuário'} redefinida!`);
+    });
+  }
+  $('rp-uid').value = u.id; $('rp-name').textContent = u.name;
+  $('rp-pass').value = ''; $('rp-confirm').value = '';
+  $('modal-reset-pass').classList.add('open');
+}
+
+/* ─ PERMISSIONS ─────────────────────────────────────────────── */
+function renderPerms() {
+  const actions = ['Visualizar','Criar','Editar','Excluir','Exportar','Gerenciar'];
+  $('perm-body').innerHTML = PERM_MODULES.map(mod => `
+    <tr>
+      <td>${mod}</td>
+      ${actions.map(()=>`<td><input type="checkbox" class="perm-cb" ${Math.random()>.4?'checked':''}></td>`).join('')}
+    </tr>
+  `).join('');
+
+  // PBI perms
+  $('pbi-perm-body').innerHTML = PBI_WS_PERMS.map(p => `
+    <tr>
+      <td class="td-bold">${p.ws}</td>
+      <td>
+        ${p.level==='workspace'
+          ? '<span class="access-full"><i class="fas fa-building"></i> Workspace inteiro</span>'
+          : p.level==='reports'
+          ? '<span class="access-partial"><i class="fas fa-file-chart-column"></i> Relatórios específicos</span>'
+          : '<span class="access-none"><i class="fas fa-ban"></i> Sem acesso</span>'}
+      </td>
+      <td style="font-size:13px;color:var(--gray-500)">${p.reports.length ? p.reports.join(', ') : (p.level==='workspace' ? 'Todos' : '—')}</td>
+      <td>
+        <button class="btn btn-ghost btn-sm" onclick="openPBIModal('${p.ws}')"><i class="fas fa-pen"></i> Configurar</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function openPBIModal(ws) {
+  $('pbi-modal-ws').textContent = ws;
+  const wReports = REPORTS.filter(r=>r.ws===ws);
+  $('pbi-reports-checkboxes').innerHTML = wReports.length
+    ? wReports.map(r=>`
+      <label style="display:flex;align-items:center;gap:10px;padding:10px 14px;border:1px solid var(--gray-100);border-radius:var(--r-md);cursor:pointer;transition:background var(--t-fast)"
+             onmouseover="this.style.background='var(--gray-50)'" onmouseout="this.style.background=''">
+        <input type="checkbox" style="accent-color:var(--brand-500);width:16px;height:16px" ${Math.random()>.5?'checked':''}>
+        <div>
+          <div style="font-size:13.5px;font-weight:600;color:var(--gray-800)">${r.name}</div>
+          <div style="font-size:12px;color:var(--gray-400)">${r.cat} · ${statusBadge(r.status)}</div>
+        </div>
+      </label>
+    `).join('')
+    : '<div style="color:var(--gray-400);font-size:13px">Nenhum relatório neste workspace.</div>';
+  $('modal-pbi-perms').classList.add('open');
+}
+
+$('btn-save-perms').addEventListener('click', () => {
+  LOGS.unshift({ ts:'Agora', event:'Alteração de permissão', detail:`Permissões atualizadas para ${$('perm-target').value}`, user: STATE.currentUser.name, module:'Permissões', ip:'192.168.1.1', type:'permission' });
+  renderLogs(); toast('Permissões salvas com sucesso!');
+});
+
+/* ─ WORKSPACES (tabela admin) ───────────────────────────────── */
+function renderWorkspaces() {
+  $('ws-body').innerHTML = WS_CONFIG.map(w => `
+    <tr style="cursor:pointer" onclick="openWsDetail(${w.id})">
+      <td>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:32px;height:32px;border-radius:9px;background:${w.bg};color:${w.color};display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0"><i class="fas ${w.icon}"></i></div>
+          <span class="td-bold" style="color:var(--brand-600);text-decoration:underline;text-underline-offset:3px">${w.name}</span>
+        </div>
+      </td>
+      <td>${w.users} usuários</td>
+      <td><span class="pbi-badge"><i class="fas fa-chart-bar"></i>${w.reports} relatórios</span></td>
+      <td>${statusBadge(w.status)}</td>
+      <td style="font-size:12.5px;color:var(--gray-400)">${w.created}</td>
+      <td onclick="event.stopPropagation()">
+        <div style="display:flex;gap:4px">
+          <button class="btn btn-icon btn-ghost btn-sm" title="Editar" onclick="openEditWs(${w.id})"><i class="fas fa-pen"></i></button>
+          <button class="btn btn-icon btn-ghost btn-sm" title="Usuários" onclick="openWsMembers(${w.id})"><i class="fas fa-users"></i></button>
+          <button class="btn btn-icon btn-ghost btn-sm" title="Permissões PBI" onclick="openPBIModal('${w.name}')"><i class="fas fa-chart-pie"></i></button>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+
+/* ─ WS DETAIL — tela de relatórios do workspace ─────────────── */
+function openWsDetail(id) {
+  const w = WS_CONFIG.find(x => x.id === id);
+  if (!w) return;
+
+  const u        = STATE.currentUser;
+  const isAdmin  = u && u.isAdmin;
+
+  // Filtrar relatórios conforme perfil
+  const allWsReports = REPORTS.filter(r => r.ws === w.name);
+  const wsReports    = isAdmin
+    ? allWsReports
+    : allWsReports.filter(r => canAccessReport(r.name));
+
+  const pubCount   = wsReports.filter(r => r.status === 'published').length;
+  const draftCount = wsReports.filter(r => r.status === 'draft').length;
+  const wsUsers    = USERS.filter(u => u.ws === w.name);
+
+  // Breadcrumb
+  $('bc-title').innerHTML = `<span style="color:var(--gray-400);cursor:pointer" onclick="navigateTo('workspaces')">Workspaces</span>
+    <span style="color:var(--gray-200);margin:0 6px;font-size:10px"><i class="fas fa-chevron-right"></i></span>
+    <span>${w.name}</span>`;
+
+  const detailPage = $('page-ws-detail');
+  detailPage.innerHTML = `
+    <!-- Voltar -->
+    <div class="ws-detail-back" onclick="navigateTo('${isAdmin ? 'workspaces' : 'reports'}')">
+      <i class="fas fa-arrow-left"></i> Voltar para ${isAdmin ? 'Workspaces' : 'Workspace'}
+    </div>
+
+    <!-- Banner do workspace -->
+    <div class="ws-detail-banner" style="background:linear-gradient(135deg,${w.bg} 0%,#fff 100%);border:1px solid ${w.color}22">
+      <div class="ws-detail-banner-icon" style="background:${w.bg};color:${w.color}">
+        <i class="fas ${w.icon}"></i>
+      </div>
+      <div>
+        <div class="ws-detail-banner-name">${w.name}</div>
+        <div class="ws-detail-banner-meta">
+          <span class="badge badge-green" style="margin-right:6px"><i class="fas fa-circle" style="font-size:6px"></i>Ativo</span>
+          Criado em ${w.created}
+        </div>
+      </div>
+      ${isAdmin ? `
+      <div class="ws-detail-kpis">
+        <div class="ws-detail-kpi">
+          <div class="ws-detail-kpi-val">${w.users}</div>
+          <div class="ws-detail-kpi-label">Usuários</div>
+        </div>
+        <div class="ws-detail-kpi">
+          <div class="ws-detail-kpi-val" style="color:var(--brand-600)">${w.online}%</div>
+          <div class="ws-detail-kpi-label">Online</div>
+        </div>
+        <div class="ws-detail-kpi">
+          <div class="ws-detail-kpi-val">${allWsReports.length}</div>
+          <div class="ws-detail-kpi-label">Relatórios</div>
+        </div>
+        <div class="ws-detail-kpi">
+          <div class="ws-detail-kpi-val" style="color:${w.blocked>0?'var(--danger-600)':'var(--gray-700)'}">${w.blocked}</div>
+          <div class="ws-detail-kpi-label">Bloqueados</div>
+        </div>
+      </div>` : ''}
+    </div>
+
+    <!-- Cabeçalho dos relatórios -->
+    <div class="ph" style="margin-bottom:16px">
+      <div class="ph-left">
+        <div class="ph-title" style="font-size:18px">Relatórios — ${w.name}</div>
+        <div class="ph-sub">${wsReports.length} relatório${wsReports.length!==1?'s':''} · ${pubCount} publicado${pubCount!==1?'s':''} · ${draftCount} rascunho${draftCount!==1?'s':''}</div>
+      </div>
+      ${isAdmin ? `
+      <div class="ph-right">
+        <span class="pbi-badge"><i class="fas fa-chart-pie"></i> Power BI Embedded</span>
+        <button class="btn btn-primary btn-sm" onclick="openNewReportModal()"><i class="fas fa-plus"></i> Novo Relatório</button>
+      </div>` : ''}
+    </div>
+
+    <!-- Tabela de relatórios -->
+    <div class="card">
+      ${wsReports.length ? `
+      <div class="tbl-wrap">
+        <table class="tbl">
+          <thead><tr>
+            <th style="width:40px"></th>
+            <th>Relatório</th><th>Categoria</th><th>Status</th><th>Atualizado</th>
+            ${isAdmin ? '<th>Ações</th>' : '<th>Ações</th>'}
+          </tr></thead>
+          <tbody>
+            ${wsReports.map(r => `
+            <tr>
+              <td>
+                <button class="btn btn-icon btn-ghost fav-btn" data-fav="${r.id}" style="color:${STATE.favorites.has(r.id)?'#d97706':'var(--gray-300)'}">
+                  <i class="fas fa-bookmark"></i>
+                </button>
+              </td>
+              <td class="td-bold">${r.name}</td>
+              <td>${r.cat}</td>
+              <td>${statusBadge(r.status)}</td>
+              <td style="font-size:12.5px;color:var(--gray-400)">${r.updated}</td>
+              <td>
+                <div style="display:flex;gap:4px">
+                  <button class="btn btn-icon btn-ghost btn-sm" title="Visualizar" onclick="toast('Abrindo: ${r.name}','success')"><i class="fas fa-eye"></i></button>
+                  ${isAdmin ? `
+                  <button class="btn btn-icon btn-ghost btn-sm" title="Exportar" onclick="toast('Exportando: ${r.name}','success')"><i class="fas fa-download"></i></button>
+                  <button class="btn btn-icon btn-ghost btn-sm" title="Editar" onclick="toast('Editar: ${r.name}','success')"><i class="fas fa-pen"></i></button>` : ''}
+                </div>
+              </td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>` : `
+      <div style="text-align:center;padding:48px 24px;color:var(--gray-400)">
+        <i class="fas fa-chart-bar" style="font-size:36px;opacity:.2;display:block;margin-bottom:12px"></i>
+        <div style="font-size:15px;font-weight:600;margin-bottom:6px">Nenhum relatório disponível</div>
+        <div style="font-size:13px">${isAdmin ? 'Clique em "+ Novo Relatório" para adicionar o primeiro.' : 'Nenhum relatório foi liberado para o seu perfil neste workspace.'}</div>
+      </div>`}
+    </div>
+
+    <!-- Usuários vinculados — somente admins -->
+    ${isAdmin && wsUsers.length ? `
+    <div style="margin-top:20px">
+      <div class="ph" style="margin-bottom:14px">
+        <div class="ph-left">
+          <div style="font-size:15px;font-weight:700;color:var(--gray-900)">Usuários vinculados</div>
+          <div style="font-size:12.5px;color:var(--gray-400);margin-top:2px">${wsUsers.length} usuário${wsUsers.length!==1?'s':''} neste workspace</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="tbl-wrap">
+          <table class="tbl">
+            <thead><tr><th>Usuário</th><th>E-mail</th><th>Perfil</th><th>Status</th><th>Último acesso</th></tr></thead>
+            <tbody>
+              ${wsUsers.map(u => `
+              <tr>
+                <td>
+                  <div style="display:flex;align-items:center;gap:10px">
+                    <div style="width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--brand-400),var(--brand-700));display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700;flex-shrink:0">${initials(u.name)}</div>
+                    <span class="td-bold">${u.name}</span>
+                  </div>
+                </td>
+                <td style="font-size:13px;color:var(--gray-500)">${u.email}</td>
+                <td style="font-size:13px">${u.role}</td>
+                <td>${statusBadge(u.status)}</td>
+                <td style="font-size:12.5px;color:var(--gray-400)">${u.last}</td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>` : ''}
+  `;
+
+  // Rebind fav buttons no detalhe
+  detailPage.querySelectorAll('.fav-btn[data-fav]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const rid = +btn.dataset.fav;
+      if (STATE.favorites.has(rid)) { STATE.favorites.delete(rid); btn.style.color='var(--gray-300)'; toast('Removido dos favoritos','warning'); }
+      else { STATE.favorites.add(rid); btn.style.color='#d97706'; toast('Adicionado aos favoritos'); }
+      renderFavs();
+    });
+  });
+
+  // Navegar para ws-detail
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  detailPage.classList.add('active');
+  // Marcar sidebar
+  document.querySelectorAll('.sb-link, .sb-sublink').forEach(l => l.classList.remove('active'));
+  const wsNav = document.querySelector('[data-page="workspaces"]');
+  if (wsNav) wsNav.classList.add('active');
+}
+
+function openEditWs(id) {
+  const w = WS_CONFIG.find(x => x.id === id);
+  if (!w) return;
+  if (!$('modal-edit-ws')) {
+    const m = document.createElement('div');
+    m.className = 'modal-overlay'; m.id = 'modal-edit-ws';
+    m.innerHTML = `<div class="modal" style="max-width:440px"><div class="modal-hd">
+      <div class="modal-title">Editar Workspace — <span id="ew-ws-name"></span></div>
+      <button class="modal-close" data-close="modal-edit-ws"><i class="fas fa-times"></i></button></div>
+      <div class="modal-bd"><input type="hidden" id="ew-id"><div class="form-grid" style="gap:14px">
+        <div class="form-group"><label class="form-label">Nome</label><input type="text" class="form-input" id="ew-name"></div>
+        <div class="form-group"><label class="form-label">Status</label><select class="form-select" id="ew-status"><option value="active">Ativo</option><option value="inactive">Inativo</option></select></div>
+      </div></div>
+      <div class="modal-ft"><button class="btn btn-secondary" data-close="modal-edit-ws">Cancelar</button>
+        <button class="btn btn-primary" id="ew-save"><i class="fas fa-floppy-disk"></i> Salvar</button></div></div>`;
+    document.body.appendChild(m);
+    m.querySelector('[data-close]').addEventListener('click', () => closeModal('modal-edit-ws'));
+    $('ew-save').addEventListener('click', () => {
+      const wid = +$('ew-id').value;
+      const ws = WS_CONFIG.find(x => x.id === wid);
+      if (ws) { ws.name = $('ew-name').value; ws.status = $('ew-status').value; }
+      closeModal('modal-edit-ws'); renderWorkspaces(); renderWsTiles();
+      toast('Workspace atualizado!');
+    });
+  }
+  $('ew-id').value = w.id; $('ew-ws-name').textContent = w.name;
+  $('ew-name').value = w.name; $('ew-status').value = w.status;
+  $('modal-edit-ws').classList.add('open');
+}
+
+function openWsMembers(id) {
+  const w = WS_CONFIG.find(x => x.id === id);
+  if (!w) return;
+  const existing = $('modal-ws-members');
+  if (existing) existing.remove();
+  const members = USERS.filter(u => u.ws === w.name);
+  const m = document.createElement('div');
+  m.className = 'modal-overlay open'; m.id = 'modal-ws-members';
+  m.innerHTML = `<div class="modal" style="max-width:500px"><div class="modal-hd">
+    <div class="modal-title">Usuários — ${w.name}</div>
+    <button class="modal-close" data-close="modal-ws-members"><i class="fas fa-times"></i></button></div>
+    <div class="modal-bd">
+      <div style="display:flex;flex-direction:column;gap:8px">
+        ${members.length ? members.map(u => `
+          <div style="display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--gray-100);border-radius:var(--r-md)">
+            <div style="width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,var(--brand-400),var(--brand-700));display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700">${initials(u.name)}</div>
+            <div style="flex:1"><div style="font-size:13px;font-weight:600">${u.name}</div><div style="font-size:12px;color:var(--gray-400)">${u.email} · ${u.role}</div></div>
+            ${statusBadge(u.status)}
+          </div>`).join('')
+          : '<div style="text-align:center;padding:24px;color:var(--gray-400)">Nenhum usuário neste workspace</div>'}
+      </div>
+    </div>
+    <div class="modal-ft"><button class="btn btn-secondary" data-close="modal-ws-members">Fechar</button></div></div>`;
+  document.body.appendChild(m);
+  m.querySelector('[data-close]').addEventListener('click', () => m.remove());
+}
+
+/* ─ GROUPS ──────────────────────────────────────────────────── */
+function renderGroups() {
+  $('groups-body').innerHTML = GROUPS.map(g => `
+    <tr>
+      <td>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:30px;height:30px;border-radius:8px;background:var(--brand-50);color:var(--brand-600);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0"><i class="fas fa-layer-group"></i></div>
+          <span class="td-bold">${g.name}</span>
+        </div>
+      </td>
+      <td>${g.members} membros</td>
+      <td>${g.offHours ? '<span class="badge badge-green"><i class="fas fa-check"></i>Sim</span>' : '<span class="badge badge-gray"><i class="fas fa-minus"></i>Não</span>'}</td>
+      <td>${statusBadge(g.status)}</td>
+      <td>
+        <div style="display:flex;gap:4px">
+          <button class="btn btn-icon btn-ghost btn-sm" title="Editar" onclick="openEditGroup(${g.id})"><i class="fas fa-pen"></i></button>
+          <button class="btn btn-icon btn-ghost btn-sm" title="Membros" onclick="openGroupMembers(${g.id})"><i class="fas fa-users"></i></button>
+          <button class="btn btn-icon btn-ghost btn-sm" title="Excluir" style="color:var(--danger-500)" onclick="deleteGroup(${g.id})"><i class="fas fa-trash"></i></button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+$('btn-new-group').addEventListener('click', () => openGroupModal());
+
+function openGroupModal(g) {
+  // Injetar modal se não existir
+  if (!$('modal-group')) {
+    const m = document.createElement('div');
+    m.className = 'modal-overlay'; m.id = 'modal-group';
+    m.innerHTML = `<div class="modal" style="max-width:560px">
+      <div class="modal-hd">
+        <div class="modal-title" id="mg-title">Novo Grupo de Exceção</div>
+        <button class="modal-close" data-close="modal-group"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-bd">
+        <input type="hidden" id="mg-id">
+        <div class="form-grid" style="gap:14px">
+          <div class="form-group"><label class="form-label">Nome do grupo</label><input type="text" class="form-input" id="mg-name" placeholder="Ex: Plantão Noturno"></div>
+          <div class="form-group">
+            <label class="form-label">Acesso fora do expediente</label>
+            <label class="toggle-label" style="margin-top:6px">
+              <input type="checkbox" class="toggle-input" id="mg-offhours" checked>
+              <div class="toggle-track"></div>
+              <span class="toggle-text">Permitir acesso fora do expediente</span>
+            </label>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Membros do grupo</label>
+            <select class="form-select" id="mg-members" multiple style="height:90px"></select>
+            <div style="font-size:11px;color:var(--gray-400);margin-top:4px">Segure Ctrl para selecionar múltiplos</div>
+          </div>
+          <div class="form-group"><label class="form-label">Regras e restrições</label><textarea class="form-textarea" id="mg-rules" placeholder="Regras específicas, restrições de horário..."></textarea></div>
+          <div class="form-group"><label class="form-label">Status</label>
+            <select class="form-select" id="mg-status"><option value="active">Ativo</option><option value="inactive">Inativo</option></select>
+          </div>
+        </div>
+      </div>
+      <div class="modal-ft">
+        <button class="btn btn-secondary" data-close="modal-group">Cancelar</button>
+        <button class="btn btn-primary" id="mg-save"><i class="fas fa-check"></i> Salvar</button>
+      </div>
+    </div>`;
+    document.body.appendChild(m);
+    m.querySelector('[data-close]').addEventListener('click', () => closeModal('modal-group'));
+    $('mg-save').addEventListener('click', () => {
+      const name = $('mg-name').value.trim();
+      if (!name) { toast('Informe o nome do grupo.', 'error'); return; }
+      const id = +$('mg-id').value;
+      if (id) {
+        const g = GROUPS.find(x => x.id === id);
+        if (g) { g.name = name; g.offHours = $('mg-offhours').checked; g.status = $('mg-status').value; }
+        toast(`Grupo "${name}" atualizado!`);
+      } else {
+        GROUPS.push({ id: GROUPS.length + 1, name, members: 0, offHours: $('mg-offhours').checked, status: $('mg-status').value, membersArr: [] });
+        toast(`Grupo "${name}" criado!`);
+      }
+      closeModal('modal-group'); renderGroups();
+    });
+  }
+  // Popular select de usuários
+  $('mg-members').innerHTML = USERS.map(u => `<option>${u.name}</option>`).join('');
+  // Preencher se edição
+  if (g) {
+    $('mg-title').textContent = `Editar — ${g.name}`;
+    $('mg-id').value = g.id;
+    $('mg-name').value = g.name;
+    $('mg-offhours').checked = g.offHours;
+    $('mg-status').value = g.status;
+  } else {
+    $('mg-title').textContent = 'Novo Grupo de Exceção';
+    $('mg-id').value = '';
+    $('mg-name').value = '';
+    $('mg-offhours').checked = true;
+    $('mg-status').value = 'active';
+  }
+  $('modal-group').classList.add('open');
+}
+
+function openEditGroup(id) {
+  const g = GROUPS.find(x => x.id === id);
+  if (g) openGroupModal(g);
+}
+
+function openGroupMembers(id) {
+  const g = GROUPS.find(x => x.id === id);
+  if (!g) return;
+  // Modal simples inline
+  const existing = $('modal-gmembers');
+  if (existing) existing.remove();
+  const m = document.createElement('div');
+  m.className = 'modal-overlay open'; m.id = 'modal-gmembers';
+  const list = (g.membersArr || []);
+  m.innerHTML = `<div class="modal" style="max-width:460px">
+    <div class="modal-hd">
+      <div class="modal-title">Membros — ${g.name}</div>
+      <button class="modal-close" data-close="modal-gmembers"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-bd">
+      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px">
+        ${list.length ? list.map(mb => `
+          <div style="display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--gray-100);border-radius:var(--r-md)">
+            <div style="width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--brand-400),var(--brand-700));display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700">${mb.split(' ').slice(0,2).map(x=>x[0]).join('')}</div>
+            <span style="font-size:13px;font-weight:600;flex:1">${mb}</span>
+            <button class="btn btn-ghost btn-sm" style="color:var(--danger-500)"><i class="fas fa-times"></i></button>
+          </div>`).join('')
+          : '<div style="text-align:center;padding:20px;color:var(--gray-400)">Nenhum membro ainda</div>'}
+      </div>
+      <div style="display:flex;gap:8px">
+        <select class="form-select" id="gm-add" style="flex:1">${USERS.map(u=>`<option>${u.name}</option>`).join('')}</select>
+        <button class="btn btn-primary btn-sm" onclick="toast('Membro adicionado!','success')"><i class="fas fa-plus"></i> Adicionar</button>
+      </div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-secondary" data-close="modal-gmembers">Fechar</button>
+      <button class="btn btn-primary" onclick="toast('Membros salvos!','success');closeModal('modal-gmembers')"><i class="fas fa-floppy-disk"></i> Salvar</button>
+    </div>
+  </div>`;
+  document.body.appendChild(m);
+  m.querySelector('[data-close]').addEventListener('click', () => { m.remove(); });
+}
+
+function deleteGroup(id) {
+  const g = GROUPS.find(x => x.id === id);
+  if (!g) return;
+  if (confirm(`Excluir o grupo "${g.name}"?`)) {
+    GROUPS.splice(GROUPS.indexOf(g), 1);
+    renderGroups();
+    toast(`Grupo "${g.name}" excluído.`, 'warning');
+  }
+}
+
+/* ─ SCHEDULE ─────────────────────────────────────────────────── */
+const DAYS_DATA = [
+  { short:'SEG', active:true },{ short:'TER', active:true },
+  { short:'QUA', active:true },{ short:'QUI', active:true },
+  { short:'SEX', active:true },{ short:'SÁB', active:false },
+  { short:'DOM', active:false },
+];
+let expDays = DAYS_DATA.map(d=>({...d}));
+
+function renderSchedule() {
+  $('exp-grid').innerHTML = expDays.map((d,i) => `
+    <div class="exp-day ${d.active?'active':''}" id="exp-day-${i}" onclick="toggleDay(${i})">
+      <div class="exp-day-label">
+        <input type="checkbox" class="exp-day-cb" ${d.active?'checked':''} onclick="event.stopPropagation();toggleDay(${i})">
+        <span class="exp-day-name">${d.short}</span>
+      </div>
+      <div class="exp-day-time">${d.active?'08:00<br>18:00':'Fechado'}</div>
+    </div>
+  `).join('');
+
+  $('exc-body').innerHTML = EXCEPTIONS.map(ex => `
+    <tr>
+      <td class="td-bold">${ex.entity}</td>
+      <td><span class="badge badge-blue"><i class="fas fa-${ex.type==='Grupo'?'layer-group':'user'}"></i>${ex.type}</span></td>
+      <td style="font-family:monospace;font-size:13px">${ex.time}</td>
+      <td>${ex.active ? '<span class="badge badge-green"><i class="fas fa-circle-check"></i>Ativo</span>' : '<span class="badge badge-gray"><i class="fas fa-circle-minus"></i>Inativo</span>'}</td>
+      <td>
+        <div style="display:flex;gap:4px">
+          <button class="btn btn-icon btn-ghost btn-sm" title="Editar" onclick="toast('Editar exceção.','success')"><i class="fas fa-pen"></i></button>
+          <button class="btn btn-icon btn-ghost btn-sm" title="Remover" onclick="toast('Exceção removida.','warning')"><i class="fas fa-trash"></i></button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function toggleDay(i) {
+  expDays[i].active = !expDays[i].active;
+  renderSchedule();
+}
+
+$('btn-save-schedule').addEventListener('click', () => {
+  LOGS.unshift({ ts:'Agora', event:'Alteração de expediente', detail:'Regras de expediente atualizadas', user: STATE.currentUser.name, module:'Expediente', ip:'192.168.1.1', type:'system' });
+  renderLogs(); toast('Regras de expediente salvas!');
+});
+
+/* ─ SCHEDULE extras ──────────────────────────────────────────── */
+// Adicionar exceção — botão
+document.addEventListener('click', e => {
+  if (e.target && e.target.id === 'btn-add-exception-inline') openExceptionModal();
+});
+function openExceptionModal() {
+  if (!$('modal-exception')) {
+    const m = document.createElement('div');
+    m.className = 'modal-overlay'; m.id = 'modal-exception';
+    m.innerHTML = `<div class="modal" style="max-width:440px">
+      <div class="modal-hd"><div class="modal-title">Nova Exceção de Acesso</div>
+        <button class="modal-close" data-close="modal-exception"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-bd"><div class="form-grid fg-2" style="gap:14px">
+        <div class="form-group"><label class="form-label">Tipo</label>
+          <select class="form-select" id="ex-type"><option value="Usuário">Usuário</option><option value="Grupo">Grupo</option></select>
+        </div>
+        <div class="form-group"><label class="form-label">Entidade</label>
+          <select class="form-select" id="ex-entity">${USERS.map(u=>`<option>${u.name}</option>`).join('')}</select>
+        </div>
+        <div class="form-group"><label class="form-label">Início</label><input type="time" class="form-input" id="ex-start" value="18:00"></div>
+        <div class="form-group"><label class="form-label">Fim</label><input type="time" class="form-input" id="ex-end" value="22:00"></div>
+      </div></div>
+      <div class="modal-ft">
+        <button class="btn btn-secondary" data-close="modal-exception">Cancelar</button>
+        <button class="btn btn-primary" id="ex-save"><i class="fas fa-plus"></i> Adicionar</button>
+      </div>
+    </div>`;
+    document.body.appendChild(m);
+    m.querySelector('[data-close]').addEventListener('click', () => closeModal('modal-exception'));
+    $('ex-save').addEventListener('click', () => {
+      EXCEPTIONS.push({ entity: $('ex-entity').value, type: $('ex-type').value, time: `${$('ex-start').value}–${$('ex-end').value}`, active: true });
+      closeModal('modal-exception'); renderSchedule();
+      toast('Exceção adicionada!');
+    });
+  }
+  $('modal-exception').classList.add('open');
+}
+
+// Botão Adicionar Exceção
+const btnAddExc = document.querySelector('[onclick*="Adicionar exceção"]') || document.querySelector('#btn-add-exc');
+// Bind via event delegation — veja abaixo
+
+/* ─ LOGS ─────────────────────────────────────────────────────── */
+function renderLogs() {
+  const colorMap = { green:'brand', blue:'info', amber:'warning', red:'danger', gray:'gray' };
+  $('logs-body').innerHTML = LOGS.map(l => {
+    const c = colorMap[LOG_COLORS[l.type]] || 'gray';
+    const badgeClass = LOG_COLORS[l.type]==='green'?'green':LOG_COLORS[l.type]==='blue'?'blue':LOG_COLORS[l.type]==='amber'?'amber':LOG_COLORS[l.type]==='red'?'red':'gray';
+    // detail e ip com fallback
+    const detail = l.detail || l.affected || '—';
+    const ip = l.ip || '—';
+    return `
+      <tr>
+        <td style="font-size:12px;color:var(--gray-400);white-space:nowrap;font-variant-numeric:tabular-nums">${l.ts}</td>
+        <td><span class="badge badge-${badgeClass}"><i class="fas ${LOG_ICONS[l.type]}"></i>${l.event}</span></td>
+        <td class="td-bold" style="font-size:13px">${l.user}</td>
+        <td style="font-size:13px;color:var(--gray-500)">${l.module}</td>
+        <td style="font-size:12.5px;color:var(--gray-700);max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${detail}">${detail}</td>
+        <td style="font-size:12px;color:var(--gray-400);font-family:monospace">${ip}</td>
+        <td><button class="btn btn-icon btn-ghost btn-sm" title="Ver detalhes" onclick="toast('${l.event} — ${detail}','success')"><i class="fas fa-eye"></i></button></td>
+      </tr>`;
+  }).join('');
+}
+
+/* ─ ADMIN SUMMARY / PAINEL GERENCIAL ────────────────────────── */
+function renderAdminSummary() {
+  const critical = LOGS.filter(l => l.type === 'security' || l.type === 'access');
+  $('admin-critical').innerHTML = critical.length
+    ? critical.slice(0, 4).map(l => `
+      <div style="display:flex;align-items:flex-start;gap:12px;padding:14px;border-radius:var(--r-md);border:1px solid var(--gray-100);background:var(--gray-0);margin-bottom:8px">
+        <div style="width:36px;height:36px;border-radius:10px;background:var(--danger-50);color:var(--danger-500);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">
+          <i class="fas fa-shield-exclamation"></i>
+        </div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:600;color:var(--gray-800)">${l.event}</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:5px">
+            <span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--gray-500);background:var(--gray-50);border:1px solid var(--gray-100);border-radius:4px;padding:2px 7px"><i class="fas fa-user" style="font-size:10px"></i>${l.user}</span>
+            <span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--gray-500);background:var(--gray-50);border:1px solid var(--gray-100);border-radius:4px;padding:2px 7px"><i class="fas fa-network-wired" style="font-size:10px"></i>${l.ip || '—'}</span>
+            <span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--gray-500);background:var(--gray-50);border:1px solid var(--gray-100);border-radius:4px;padding:2px 7px"><i class="fas fa-layer-group" style="font-size:10px"></i>${l.module}</span>
+          </div>
+          <div style="font-size:12px;color:var(--gray-500);margin-top:5px;line-height:1.4">${l.detail || l.affected || ''}</div>
+          <div style="display:flex;gap:6px;margin-top:8px">
+            <button class="btn btn-secondary btn-sm" onclick="toast('Usuário liberado.','success')"><i class="fas fa-lock-open"></i> Liberar</button>
+            <button class="btn btn-ghost btn-sm" onclick="navigateTo('logs')"><i class="fas fa-eye"></i> Ver logs</button>
+          </div>
+        </div>
+        <div style="font-size:11.5px;color:var(--gray-400);white-space:nowrap;flex-shrink:0">${l.ts}</div>
+      </div>`).join('')
+    : '<div style="text-align:center;padding:32px;color:var(--gray-400)"><i class="fas fa-shield-check" style="font-size:28px;opacity:.3;display:block;margin-bottom:8px"></i>Nenhum evento crítico</div>';
+
+  $('sys-status').innerHTML = [
+    { name: 'JWT ativo',          desc: 'Tokens com expiração configurada',  ok: true  },
+    { name: 'Sessões Redis',      desc: 'Cache de sessão operacional',        ok: true  },
+    { name: 'PBI Embedded',       desc: 'Integração Power BI ativa',          ok: true  },
+    { name: 'Backup de auditoria',desc: 'Último: ontem 02:00',                ok: true  },
+  ].map(s => `
+    <div class="sec-item">
+      <div class="sec-status ${s.ok ? 'sec-ok' : 'sec-warn'}"><i class="fas fa-${s.ok ? 'check' : 'exclamation'}"></i></div>
+      <div class="sec-info"><div class="sec-name">${s.name}</div><div class="sec-desc">${s.desc}</div></div>
+    </div>`).join('');
+}
+
+/* ─ SECURITY ─────────────────────────────────────────────────── */
+function renderSecurity() {
+  const items = [
+    { name: 'Hashing de senhas (bcrypt)',  desc: 'Todas as senhas usam bcrypt com salt 12',           ok: true  },
+    { name: 'Proteção brute force',        desc: 'Bloqueio após 5 tentativas inválidas',               ok: true  },
+    { name: 'Rate limiting',               desc: '100 req/min por IP configurado',                      ok: true  },
+    { name: 'RBAC implementado',           desc: 'Controle granular por perfil e usuário',              ok: true  },
+    { name: 'Headers de segurança',        desc: 'HSTS, CSP, X-Frame-Options configurados',            ok: true  },
+    { name: 'Proteção XSS',               desc: 'Sanitização de inputs ativa',                         ok: true  },
+    { name: 'Proteção CSRF',              desc: 'Tokens CSRF em formulários sensíveis',                ok: true  },
+    { name: 'MFA / 2FA',                  desc: 'Ainda não configurado — recomendado para produção',   ok: false },
+    { name: 'Conformidade LGPD',          desc: 'Políticas de dados em elaboração',                    ok: false },
+    { name: 'SSL/TLS 1.3',               desc: 'Certificado válido e configurado',                    ok: true  },
+  ];
+  $('sec-checklist').innerHTML = items.map(s => `
+    <div class="sec-item" style="margin-bottom:8px">
+      <div class="sec-status ${s.ok ? 'sec-ok' : 'sec-warn'}"><i class="fas fa-${s.ok ? 'check' : 'exclamation'}"></i></div>
+      <div class="sec-info"><div class="sec-name">${s.name}</div><div class="sec-desc">${s.desc}</div></div>
+    </div>`).join('');
+
+  $('sec-events').innerHTML = LOGS.filter(l => l.type === 'security' || l.type === 'auth').slice(0, 4).map(l => `
+    <div class="activity-item">
+      <div class="activity-icon" style="background:${l.type==='security'?'var(--danger-50)':'var(--brand-50)'};color:${l.type==='security'?'var(--danger-500)':'var(--brand-500)'}">
+        <i class="fas fa-${l.type==='security'?'shield-exclamation':'right-to-bracket'}"></i>
+      </div>
+      <div class="activity-info">
+        <div class="activity-title">${l.event}</div>
+        <div class="activity-sub">${l.user} · IP: ${l.ip || '—'}</div>
+      </div>
+      <div class="activity-time">${l.ts}</div>
+    </div>`).join('');
+}
+
+/* ─ ACCESS CONTROL ───────────────────────────────────────────── */
+function renderAccessControl() {
+  const blocked = USERS.filter(u => u.status === 'blocked');
+  const allowed = EXCEPTIONS.filter(e => e.active);
+
+  // Atualizar contadores se existirem
+  const bcEl = $('blocked-count');
+  const acEl = $('allowed-count');
+  if (bcEl) bcEl.textContent = blocked.length;
+  if (acEl) acEl.textContent = allowed.length;
+
+  $('blocked-list').innerHTML = blocked.length
+    ? blocked.map(u => `
+      <div class="access-row">
+        <div class="access-row-icon" style="background:var(--danger-50);color:var(--danger-500)"><i class="fas fa-ban"></i></div>
+        <div class="access-row-info">
+          <div class="access-row-name">${u.name}</div>
+          <div class="access-row-meta">${u.email}</div>
+          <span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:2px 7px;border-radius:4px;background:var(--info-50);color:var(--info-700);margin-top:4px">
+            <i class="fas fa-building"></i> ${u.ws}
+          </span>
+        </div>
+        <button class="btn btn-secondary btn-sm" onclick="unblockUser(${u.id})" style="white-space:nowrap;flex-shrink:0">
+          <i class="fas fa-lock-open"></i> Desbloquear
+        </button>
+      </div>`).join('')
+    : '<div style="text-align:center;padding:32px;color:var(--gray-400)"><i class="fas fa-check-circle" style="font-size:26px;opacity:.3;display:block;margin-bottom:8px"></i>Nenhum bloqueio ativo</div>';
+
+  $('allowed-list').innerHTML = allowed.map((e, i) => `
+    <div class="access-row">
+      <div class="access-row-icon" style="background:var(--brand-50);color:var(--brand-500)"><i class="fas fa-circle-check"></i></div>
+      <div class="access-row-info">
+        <div class="access-row-name">${e.entity}</div>
+        <div class="access-row-meta">${e.time}</div>
+        <span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:2px 7px;border-radius:4px;background:${e.type==='Grupo'?'var(--info-50)':'var(--brand-50)'};color:${e.type==='Grupo'?'var(--info-700)':'var(--brand-700)'};margin-top:4px">
+          <i class="fas fa-${e.type==='Grupo'?'layer-group':'user'}"></i> ${e.type}
+        </span>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="revokeException(${i})" style="color:var(--danger-500);white-space:nowrap;flex-shrink:0">
+        <i class="fas fa-times"></i> Revogar
+      </button>
+    </div>`).join('');
+}
+
+function unblockUser(id) {
+  const u = USERS.find(x => x.id === id);
+  if (!u) return;
+  u.status = 'active';
+  LOGS.unshift({ ts:'Agora', event:'Usuário desbloqueado', detail:`Status alterado para Ativo`, user: STATE.currentUser.name, module:'Acessos', ip:'192.168.1.1', type:'user' });
+  renderAccessControl(); renderUsers(); renderLogs();
+  toast(`${u.name} desbloqueado com sucesso!`);
+}
+
+function revokeException(i) {
+  const ex = EXCEPTIONS[i];
+  if (!ex) return;
+  EXCEPTIONS.splice(i, 1);
+  renderAccessControl(); renderSchedule();
+  toast(`Liberação de "${ex.entity}" revogada.`, 'warning');
+}
+
+// Botão Nova Liberação
+document.addEventListener('click', e => {
+  if (e.target && (e.target.id === 'btn-new-access-lib' || e.target.closest('#btn-new-access-lib'))) {
+    openExceptionModal();
+  }
+});
+
+/* ─ OFF HOURS CHECK ─────────────────────────────────────────── */
+function checkOffHours() {
+  const now = new Date();
+  const h = now.getHours();
+  const day = now.getDay();
+  const isWknd = day===0||day===6;
+  const isOffHours = isWknd || h<8 || h>=18;
+  if (isOffHours && STATE.currentUser && !STATE.currentUser.isAdmin) {
+    const pg = document.createElement('div');
+    pg.className = 'page active'; pg.id = 'page-off-hours';
+    pg.innerHTML = `
+      <div class="blocked-wrap">
+        <div class="blocked-icon-wrap"><i class="fas fa-clock"></i></div>
+        <div class="blocked-title">Acesso fora do expediente</div>
+        <div class="blocked-desc">O portal está disponível de segunda a sexta-feira, das 08:00 às 18:00. Para acesso urgente, entre em contato com o administrador.</div>
+        <div class="blocked-info-row">
+          <div class="blocked-info-card">
+            <div class="blocked-info-label">Horário atual</div>
+            <div class="blocked-info-val">${now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}</div>
+          </div>
+          <div class="blocked-info-card">
+            <div class="blocked-info-label">Expediente</div>
+            <div class="blocked-info-val">08:00 – 18:00</div>
+          </div>
+        </div>
+        <button class="btn btn-secondary" onclick="$('logout-btn').click()"><i class="fas fa-arrow-left"></i> Voltar ao login</button>
+      </div>`;
+    document.querySelector('.content-area').appendChild(pg);
+    document.querySelectorAll('.page:not(#page-off-hours)').forEach(p=>p.classList.remove('active'));
+  }
+}
+</script>
+</body>
+</html>
