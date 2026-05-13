@@ -13,8 +13,8 @@
                       ┌─────────────────────────────────┐
                       │                                 │
     [Colaborador]──▶ │   BrasilTerrenos                │──▶ [Power BI Service]
-    [Gerente]   ──▶  │   Portal Corporativo            │──▶ [Azure Active Directory]
-    [Admin]     ──▶  │                                 │──▶ [Serv. E-mail transacional]
+    [Gerente]    ──▶ │   Portal Corporativo            │──▶ [Azure Active Directory]
+    [Admin]      ──▶ │                                 │──▶ [Serv. E-mail transacional]
                       │   Sistema de Governança         │
                       │   Analítica                     │
                       └─────────────────────────────────┘

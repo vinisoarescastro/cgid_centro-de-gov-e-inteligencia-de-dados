@@ -265,7 +265,7 @@ jobs:
 
 | Camada | Tecnologia Principal | Alternativa |
 |--------|---------------------|-------------|
-| Frontend | React 18 + TypeScript + Vite | Next.js (se SSR for necessário) |
+| Frontend | React 18 + TypeScript |  |
 | Estado servidor | TanStack Query v5 | SWR |
 | Estado global | Zustand | Jotai |
 | Backend | NestJS (Node.js 20) + TypeScript | Fastify + TypeScript (menos opinionado) |

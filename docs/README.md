@@ -10,7 +10,7 @@
 
 ## Sobre este repositório de documentação
 
-Esta documentação foi elaborada com base na análise completa do protótipo inicial (`portal_v4_8.html`) do BrasilTerrenos Portal Corporativo. O objetivo é transformar o protótipo conceitual em uma base sólida de documentação técnica e organizacional, seguindo boas práticas de Engenharia de Software, Arquitetura de Sistemas e Análise de Requisitos.
+Esta documentação foi elaborada com base na análise completa do protótipo inicial (`/prototipo/portal_v4_8.html`) do BrasilTerrenos Portal Corporativo. O objetivo é transformar o protótipo conceitual em uma base sólida de documentação técnica e organizacional, seguindo boas práticas de Engenharia de Software, Arquitetura de Sistemas e Análise de Requisitos.
 
 > **Importante:** Os documentos aqui presentes representam uma **visão inicial** do sistema, sujeita a revisões, complementações e validações com os stakeholders do projeto. Cada arquivo foi estruturado para ser editado e evoluído conforme o projeto avança.
 
