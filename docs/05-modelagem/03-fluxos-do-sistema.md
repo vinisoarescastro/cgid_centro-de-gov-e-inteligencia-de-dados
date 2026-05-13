@@ -19,22 +19,22 @@ Este é o fluxo mais crítico do sistema. Toda tentativa de login passa por este
 [Usuário] → POST /auth/login { email, password }
                 │
                 ▼
-        ┌───────────────┐
+        ┌────────────────┐
         │ Usuário existe │──── NÃO ──→ 401 "Credenciais inválidas"
         │ no banco?      │             (não revelar que e-mail não existe)
-        └───────┬───────┘
+        └───────┬────────┘
                 │ SIM
                 ▼
         ┌──────────────────┐
         │ bcrypt.compare() │──── FALHA ──→ Incrementa login_attempts
-        │ senha válida?     │               │
+        │ senha válida?    │               │
         └────────┬─────────┘               ▼
-                │                    login_attempts >= 5?
-                │                    SIM → status = 'blocked'
-                │                          403 "Conta bloqueada"
-                │                    NÃO → 401 "Credenciais inválidas (X/5)"
-                │ OK
-                ▼
+                 │                    login_attempts >= 5?
+                 │                    SIM → status = 'blocked'
+                 │                          403 "Conta bloqueada"
+                 │                    NÃO → 401 "Credenciais inválidas (X/5)"
+                 │ OK
+                 ▼
         ┌──────────────────────┐
         │ status === 'active'? │──── NÃO ──→ 403 (inativo ou bloqueado)
         └──────────┬───────────┘
@@ -118,7 +118,7 @@ GET /api/v1/reports/{reportId}/embed-token
   Authorization: Bearer <access_token>
         │
         ▼
-[Backend — Guard]
+[Backend - Guard]
 ┌────────────────────────────┐
 │ JWT válido e não expirado? │──── NÃO ──→ 401
 └──────────┬─────────────────┘
@@ -316,4 +316,4 @@ Frontend redireciona para tela de login ✓
 
 | Versão | Data | Autor | Descrição |
 |--------|------|-------|-----------|
-| 1.0 | Maio/2026 | — | Criação inicial do documento |
+| 1.0 | Maio/2026 | Vinicius Soares | Criação inicial do documento |

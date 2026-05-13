@@ -13,14 +13,14 @@ A priorização segue o framework **MoSCoW**:
 
 | Classificação | Descrição |
 |---------------|-----------|
-| 🔴 **Must Have** | Indispensável. O produto não funciona sem isso. Compõe o MVP. |
-| 🟡 **Should Have** | Importante, mas o MVP funciona sem. Entra na v1.1. |
-| 🟢 **Could Have** | Desejável se houver tempo/orçamento. Entra na v2.0+. |
-| ⚪ **Won't Have (now)** | Fora do escopo por ora. Pode ser reavaliado em versões futuras. |
+| 🔴 **Obrigatório** | Indispensável. O produto não funciona sem isso. Compõe o MVP. |
+| 🟡 **Recomendado** | Importante, mas o MVP funciona sem. Entra na v1.1. |
+| 🟢 **Opcional** | Desejável se houver tempo/orçamento. Entra na v2.0+. |
+| ⚪ **Não disponível (novo)** | Fora do escopo por ora. Pode ser reavaliado em versões futuras. |
 
 ---
 
-## 2. Must Have — MVP (v1.0)
+## 2. Obrigatório — MVP (v1.0)
 
 > Tudo o que está aqui é **pré-requisito para o go-live**. Sem qualquer desses itens, o sistema não pode ser entregue.
 
@@ -32,7 +32,6 @@ A priorização segue o framework **MoSCoW**:
 - [x] Bloqueio automático após 5 tentativas de login inválido
 - [x] Validação de status do usuário a cada requisição
 - [x] Logout com invalidação de token
-- [x] HTTPS obrigatório + headers de segurança (HSTS, CSP, X-Frame-Options)
 - [x] Rate limiting por IP
 
 ### Gestão de Usuários
@@ -100,15 +99,12 @@ A priorização segue o framework **MoSCoW**:
 
 ---
 
-## 3. Should Have — v1.1 (Pós-MVP, Curto Prazo)
+## 3. Recomendado — v1.1 (Pós-MVP, Curto Prazo)
 
-> Importante para a experiência completa, mas o MVP funciona sem. Prazo estimado: **6–8 semanas após o MVP**.
+> Importante para a experiência completa, mas o MVP funciona sem. Prazo estimado: **8 semanas após o MVP**.
 
-- [ ] Recuperação de senha por e-mail com link tokenizado
-- [ ] MFA via TOTP para perfis Admin e Super Admin
 - [ ] Exportação de logs de auditoria em CSV
 - [ ] Filtros avançados combinados nos logs
-- [ ] Notificações por e-mail para eventos críticos (bloqueio de conta, acesso suspeito)
 - [ ] Sincronização automática de workspaces/relatórios do PBI Service
 - [ ] Relatório de IPs suspeitos
 - [ ] Toggle de visibilidade da senha no login
@@ -116,7 +112,7 @@ A priorização segue o framework **MoSCoW**:
 
 ---
 
-## 4. Could Have — v2.0 (Médio Prazo)
+## 4. Opcional — v2.0 (Médio Prazo)
 
 > Desejável e agrega valor, mas não é urgente. Prazo estimado: **3–6 meses após v1.1**.
 
@@ -132,7 +128,7 @@ A priorização segue o framework **MoSCoW**:
 
 ---
 
-## 5. Won't Have — Fora do escopo atual
+## 5. Não disponível — Fora do escopo atual
 
 > Não será desenvolvido nesta linha de versões sem reavaliação formal de escopo.
 
@@ -150,29 +146,29 @@ A priorização segue o framework **MoSCoW**:
 
 Para definir a priorização acima, foram considerados:
 
-| Critério | Peso |
-|----------|:----:|
-| Valor para o negócio / urgência | Alto |
-| Impacto em segurança e conformidade (LGPD) | Alto |
-| Dependência técnica de outros itens | Alto |
-| Esforço de implementação | Médio |
-| Frequência de uso pelos usuários | Médio |
-| Risco técnico de implementação | Médio |
+| Critério                                   | Peso  |
+|--------------------------------------------|:-----:|
+| Valor para o negócio / urgência            | Alto  |
+| Impacto em segurança e conformidade (LGPD) | Alto  |
+| Dependência técnica de outros itens        | Alto  |
+| Esforço de implementação                   | Médio |
+| Frequência de uso pelos usuários           | Médio |
+| Risco técnico de implementação             | Médio |
 
 ---
 
 ## 7. Sugestão de Backlog Inicial (Sprints)
 
-| Sprint | Foco | Histórias incluídas |
-|--------|------|---------------------|
-| Sprint 0 | Setup e infraestrutura | Repositório, Docker, banco, CI/CD, Azure App registration |
-| Sprint 1 | Autenticação core | RF-AUTH-01 a 07, RF-SEC-01 a 05 |
-| Sprint 2 | Usuários e permissões | RF-USR-01 a 07, RF-PERM-01 a 05 |
-| Sprint 3 | Power BI Embedded | RF-PBI-01 a 03, workspaces e relatórios |
-| Sprint 4 | Expediente e exceções | RF-SCHED-01 a 05 |
-| Sprint 5 | Auditoria e painel admin | RF-AUD-01 a 07, dashboard |
-| Sprint 6 | Configurações e ajustes | RF-CONF-01 a 03, favoritos, busca |
-| Sprint 7 | Qualidade e go-live | Testes, segurança, documentação, deploy |
+| Sprint   | Foco                      | Histórias incluídas                                       |
+|----------|---------------------------|-----------------------------------------------------------|
+| Sprint 0 | Setup e infraestrutura    | Repositório, Docker, banco, CI/CD, Azure App registration |
+| Sprint 1 | Autenticação core         | RF-AUTH-01 a 07, RF-SEC-01 a 05                           |
+| Sprint 2 | Usuários e permissões     | RF-USR-01 a 07, RF-PERM-01 a 05                           |
+| Sprint 3 | Power BI Embedded         | RF-PBI-01 a 03, workspaces e relatórios                   |
+| Sprint 4 | Expediente e exceções     | RF-SCHED-01 a 05                                          |
+| Sprint 5 | Auditoria e painel admin  | RF-AUD-01 a 07, dashboard                                 |
+| Sprint 6 | Configurações e ajustes   | RF-CONF-01 a 03, favoritos, busca                         |
+| Sprint 7 | Qualidade e go-live       | Testes, segurança, documentação, deploy                   |
 
 ---
 
@@ -180,4 +176,4 @@ Para definir a priorização acima, foram considerados:
 
 | Versão | Data | Autor | Descrição |
 |--------|------|-------|-----------|
-| 1.0 | Maio/2026 | — | Criação inicial do documento |
+| 1.0 | Maio/2026 | Vinicius Soares | Criação inicial do documento |

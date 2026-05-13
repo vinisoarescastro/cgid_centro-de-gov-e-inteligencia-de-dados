@@ -45,24 +45,21 @@
 | RNF-SEG-03 | Tokens JWT assinados com RS256 (chave assimétrica, 2048 bits) | Chave privada nunca exposta ao cliente; chave pública disponível em `/.well-known/jwks.json` | Obrigatório |
 | RNF-SEG-04 | Access token com TTL máximo de 1 hora; refresh token com TTL de 24 horas | Tokens expirados rejeitados; renovação automática funciona | Obrigatório |
 | RNF-SEG-05 | Tokens de refresh armazenados em `httpOnly; Secure; SameSite=Strict` cookies | Não acessível via JavaScript (`document.cookie`) | Obrigatório |
-| RNF-SEG-06 | Proteção contra as 10 principais vulnerabilidades do OWASP Top 10 | Relatório SAST/DAST sem vulnerabilidades críticas ou altas | Obrigatório |
-| RNF-SEG-07 | Rate limiting por IP: máximo 100 requisições por minuto | Após exceder, HTTP 429 com header `Retry-After` | Obrigatório |
-| RNF-SEG-08 | Headers de segurança HTTP: HSTS, CSP, X-Frame-Options, X-Content-Type-Options, Referrer-Policy | Scanner de segurança (SecurityHeaders.com) retorna nota A+ | Obrigatório |
-| RNF-SEG-09 | Credenciais Azure/PBI armazenadas criptografadas em cofre de segredos | Client Secret nunca em variável de ambiente não criptografada em produção | Obrigatório |
-| RNF-SEG-10 | Tokens de embed PBI gerados exclusivamente no backend | Nenhuma rota do frontend gera ou expõe tokens PBI diretamente | Obrigatório |
-| RNF-SEG-11 | Scan de vulnerabilidades automatizado no pipeline CI/CD (SAST) | Pipeline falha se vulnerabilidade crítica ou alta for detectada | Recomendado |
-| RNF-SEG-12 | MFA disponível para perfis Admin e Super Admin | Perfis administrativos podem habilitar TOTP | v1.1 |
-| RNF-SEG-13 | Pen test por empresa especializada antes do go-live | Relatório sem achados críticos ou altos sem mitigação | Recomendado |
+| RNF-SEG-06 | Rate limiting por IP: máximo 100 requisições por minuto | Após exceder, HTTP 429 com header `Retry-After` | Obrigatório |
+| RNF-SEG-07 | Headers de segurança HTTP: HSTS, CSP, X-Frame-Options, X-Content-Type-Options, Referrer-Policy | Scanner de segurança (SecurityHeaders.com) retorna nota A+ | Obrigatório |
+| RNF-SEG-08 | Credenciais Azure/PBI armazenadas criptografadas em cofre de segredos | Client Secret nunca em variável de ambiente não criptografada em produção | Obrigatório |
+| RNF-SEG-09 | Tokens de embed PBI gerados exclusivamente no backend | Nenhuma rota do frontend gera ou expõe tokens PBI diretamente | Obrigatório |
+| RNF-SEG-10 | Scan de vulnerabilidades automatizado no pipeline CI/CD (SAST) | Pipeline falha se vulnerabilidade crítica ou alta for detectada | Recomendado |
 
 ---
 
 ## RNF-DISP — Disponibilidade e Confiabilidade
 
-| ID | Requisito | Meta |
-|----|-----------|------|
+| ID          | Requisito | Meta |
+|-------------|-----------|------|
 | RNF-DISP-01 | Disponibilidade mínima do portal em horário de expediente | 99,5% ao mês (≤ 3,6h de downtime/mês) |
-| RNF-DISP-02 | Recovery Time Objective (RTO) — tempo para restaurar o serviço após falha | < 1 hora |
-| RNF-DISP-03 | Recovery Point Objective (RPO) — perda máxima aceitável de dados | < 15 minutos |
+| RNF-DISP-02 | Recovery Time Objective (RTO) - tempo para restaurar o serviço após falha | < 1 hora |
+| RNF-DISP-03 | Recovery Point Objective (RPO) - perda máxima aceitável de dados | < 10 minutos |
 | RNF-DISP-04 | Janela de manutenção programada | Fora do horário de expediente (ex: sábados, 2h–4h) |
 | RNF-DISP-05 | Backup automático do banco de dados | Diário + PITR (Point-in-Time Recovery) para últimas 7 dias |
 | RNF-DISP-06 | Graceful degradation: falha na integração PBI não deve derrubar o portal | Se PBI indisponível, portal exibe mensagem amigável; módulos não-PBI continuam funcionando |
@@ -72,7 +69,7 @@
 ## RNF-UX — Usabilidade
 
 | ID | Requisito | Critério |
-|----|-----------|---------|
+|----|-----------|----------|
 | RNF-UX-01 | Interface responsiva: funcional em desktop (≥1280px), tablet (≥768px) e mobile (≥375px) | Nenhum elemento sobreposto ou inacessível nas 3 resoluções |
 | RNF-UX-02 | Compatibilidade com navegadores modernos | Chrome ≥ 120, Edge ≥ 120, Firefox ≥ 120, Safari ≥ 17 (últimas 2 versões major) |
 | RNF-UX-03 | Mensagens de erro claras e orientadas à ação | Toda mensagem de erro indica o problema e o que o usuário pode fazer |
@@ -108,18 +105,6 @@
 
 ---
 
-## RNF-CONF — Conformidade Legal
-
-| ID | Requisito | Prazo |
-|----|-----------|-------|
-| RNF-CONF-01 | Conformidade com LGPD: base legal documentada para cada tipo de dado processado | Antes do go-live |
-| RNF-CONF-02 | Minimização de dados: coletar apenas dados necessários para o funcionamento | Revisão de DPO antes do go-live |
-| RNF-CONF-03 | Política de retenção de logs: máximo de 2 anos; dados anonimizados após retenção | Implementado no MVP |
-| RNF-CONF-04 | Direito ao esquecimento: remoção de dados pessoais sob demanda | v1.1 |
-| RNF-CONF-05 | Dados armazenados em território nacional ou equivalente contratual | Antes do go-live |
-
----
-
 ## RNF-INT — Integridade de Dados
 
 | ID | Requisito | Critério |
@@ -132,6 +117,6 @@
 
 ## Histórico de Alterações
 
-| Versão | Data | Autor | Descrição |
-|--------|------|-------|-----------|
-| 1.0 | Maio/2026 | — | Criação inicial do documento |
+| Versão | Data      | Autor                  | Descrição                    |
+|--------|-----------|------------------------|------------------------------|
+| 1.0    | Maio/2026 | Vinicius Soares | Criação inicial do documento |

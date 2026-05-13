@@ -15,7 +15,7 @@
 | **Descrição** | O que o sistema deve fazer |
 | **Critério de Aceite** | Condição verificável para considerar o requisito implementado |
 | **Versão** | v1.0 (MVP), v1.1, v2.0 |
-| **Prioridade** | 🔴 Must Have · 🟡 Should Have · 🟢 Could Have · ⚪ Won't Have |
+| **Prioridade** | 🔴 Obrigatório · 🟡 Recomendado · 🟢 Opcional · ⚪ Não disponível |
 
 ---
 
@@ -23,16 +23,14 @@
 
 | ID | Descrição | Critério de Aceite | Versão | Prioridade |
 |----|-----------|-------------------|--------|-----------|
-| RF-AUTH-01 | O sistema deve autenticar usuários por e-mail e senha | Login com credenciais válidas redireciona para tela de boas-vindas | v1.0 | 🔴 |
-| RF-AUTH-02 | O sistema deve bloquear a conta após 5 tentativas inválidas consecutivas | Na 5ª tentativa, conta fica com status `blocked` e mensagem é exibida | v1.0 | 🔴 |
-| RF-AUTH-03 | O sistema deve emitir token JWT (access token) com expiração de 1 hora | Token gerado após login com campo `exp` correto; requisições após expiração retornam 401 | v1.0 | 🔴 |
+| RF-AUTH-01 | O sistema deve autenticar usuários por e-mail e senha | Login com credenciais válidas redireciona para tela principal | v1.0 | 🔴 |
+| RF-AUTH-02 | O sistema deve bloquear a conta após 5 tentativas inválidas consecutivas | Na 5ª tentativa, conta fica com status `bloqueado` e mensagem é exibida | v1.0 | 🔴 |
+| RF-AUTH-03 | O sistema deve emitir token JWT (access token) com expiração de 1 hora | Token gerado após login com campo `validade_token` correto; requisições após expiração retornam 401 | v1.0 | 🔴 |
 | RF-AUTH-04 | O sistema deve emitir refresh token com expiração de 24 horas armazenado em `httpOnly cookie` | Refresh token não acessível via JavaScript; renovação automática funciona dentro do prazo | v1.0 | 🔴 |
 | RF-AUTH-05 | O sistema deve validar status do usuário a cada requisição autenticada | Usuário inativado ou bloqueado após o login recebe 403 na próxima requisição | v1.0 | 🔴 |
 | RF-AUTH-06 | O sistema deve registrar todos os eventos de login (sucesso e falha) no log de auditoria | Log gerado com timestamp, IP, e-mail tentado e resultado (success/fail) | v1.0 | 🔴 |
 | RF-AUTH-07 | O sistema deve oferecer logout que invalida o token ativo | Após logout, requisições com o token anterior retornam 401 | v1.0 | 🔴 |
-| RF-AUTH-08 | O sistema deve oferecer recuperação de senha por link enviado ao e-mail | Link de recuperação expira em 1 hora; nova senha exige mínimo de 8 caracteres | v1.1 | 🔴 |
-| RF-AUTH-09 | O sistema deve suportar MFA via TOTP para perfis Admin e Super Admin | Após senha, Admin deve inserir código TOTP; código inválido bloqueia acesso | v1.1 | 🟡 |
-| RF-AUTH-10 | O sistema deve suportar autenticação via Azure AD (SSO/OIDC) | Usuário clica em "Entrar com Microsoft" e é autenticado via fluxo PKCE | v2.0 | 🟢 |
+| RF-AUTH-08 | O sistema deve suportar autenticação via Azure AD (SSO/OIDC) | Usuário clica em "Entrar com Microsoft" e é autenticado via fluxo PKCE | v2.0 | 🟡 |
 
 ---
 
@@ -45,7 +43,7 @@
 | RF-USR-03 | Admins devem editar dados de um usuário existente | Alterações são persistidas; log de auditoria registra o que foi alterado e por quem | v1.0 | 🔴 |
 | RF-USR-04 | Admins devem ativar e inativar usuários | Usuário inativo não consegue fazer login; status reflete na listagem | v1.0 | 🔴 |
 | RF-USR-05 | Admins devem bloquear e desbloquear usuários manualmente | Usuário bloqueado não consegue fazer login; desbloqueio zera contador de tentativas | v1.0 | 🔴 |
-| RF-USR-06 | O sistema deve exibir a data/hora do último acesso do usuário | Campo `last_login` atualizado a cada login bem-sucedido e exibido na listagem | v1.0 | 🟡 |
+| RF-USR-06 | O sistema deve exibir a data/hora do último acesso do usuário | Campo `ultimo_login` atualizado a cada login bem-sucedido e exibido na listagem | v1.0 | 🔴 |
 | RF-USR-07 | Admins devem associar usuários a workspaces com nível de acesso (total ou por relatórios) | Associação reflete imediatamente nas permissões do usuário | v1.0 | 🔴 |
 | RF-USR-08 | Admins devem poder importar usuários via arquivo CSV | CSV com campos obrigatórios é validado; erros são reportados linha a linha; usuários válidos são criados | v2.0 | 🟢 |
 
@@ -108,8 +106,6 @@
 | RF-SEC-01 | Senhas devem ser armazenadas com hash bcrypt (salt ≥ 12) | Banco não contém senhas em texto puro; comparação usa `bcrypt.compare()` | v1.0 | 🔴 |
 | RF-SEC-02 | O sistema deve aplicar rate limiting de 100 requisições/minuto por IP | Após limite, resposta 429 com cabeçalho `Retry-After` | v1.0 | 🔴 |
 | RF-SEC-03 | O sistema deve configurar headers de segurança HTTP | HSTS, CSP, X-Frame-Options, X-Content-Type-Options, Referrer-Policy presentes em todas as respostas | v1.0 | 🔴 |
-| RF-SEC-04 | O sistema deve proteger contra CSRF em endpoints que modificam estado | Token CSRF ou validação de `SameSite=Strict` em cookies implementado | v1.0 | 🔴 |
-| RF-SEC-05 | O sistema deve sanitizar todos os inputs do usuário para prevenir XSS e SQL Injection | Nenhum input refletido sem sanitização; ORM com queries parametrizadas | v1.0 | 🔴 |
 
 ---
 
@@ -127,4 +123,4 @@
 
 | Versão | Data | Autor | Descrição |
 |--------|------|-------|-----------|
-| 1.0 | Maio/2026 | — | Criação inicial do documento |
+| 1.0 | Maio/2026 | Vinicius Soares | Criação inicial do documento |

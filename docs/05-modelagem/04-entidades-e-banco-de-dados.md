@@ -16,7 +16,7 @@ users
   ├── user_permission_overrides (1:N)
   ├── exception_group_members (N:M com exception_groups)
   ├── favorites (1:N com reports)
-  └── audit_logs (1:N — autor dos eventos)
+  └── audit_logs (1:N - autor dos eventos)
 
 workspaces
   ├── reports (1:N)
@@ -53,9 +53,9 @@ audit_logs
 | Coluna | Tipo | Restrições | Descrição |
 |--------|------|-----------|-----------|
 | `id` | UUID | PK, DEFAULT gen_random_uuid() | Identificador único |
-| `name` | VARCHAR(255) | NOT NULL | Nome completo |
+| `nome_completo` | VARCHAR(255) | NOT NULL | Nome completo |
 | `email` | VARCHAR(255) | NOT NULL, UNIQUE | E-mail corporativo |
-| `password_hash` | VARCHAR(255) | NOT NULL | Hash bcrypt |
+| `senha_hash` | VARCHAR(255) | NOT NULL | Hash bcrypt |
 | `role` | ENUM | NOT NULL | super_admin, admin, manager, operator, visitor |
 | `status` | ENUM | NOT NULL, DEFAULT 'active' | active, inactive, blocked |
 | `login_attempts` | SMALLINT | DEFAULT 0 | Contador de tentativas falhas |

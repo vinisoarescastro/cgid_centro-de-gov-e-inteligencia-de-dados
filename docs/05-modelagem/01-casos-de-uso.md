@@ -9,8 +9,8 @@
 
 ## Atores do Sistema
 
-| Ator | Descrição |
-|------|-----------|
+| Ator        | Descrição                              |
+|-------------|----------------------------------------|
 | **Usuário** | Qualquer pessoa autenticada no sistema |
 | **Operador** | Colaborador com acesso a relatórios específicos |
 | **Gerente** | Líder departamental com acesso ao workspace do seu departamento |
@@ -26,7 +26,7 @@
 
 **Ator principal:** Usuário  
 **Pré-condição:** Usuário cadastrado no sistema com status `ativo`  
-**Pós-condição:** Sessão iniciada; tela de boas-vindas exibida  
+**Pós-condição:** Sessão iniciada; tela principal exibida
 
 ### Fluxo Principal
 1. Usuário acessa o portal e visualiza a tela de login.
@@ -36,22 +36,22 @@
 5. Sistema verifica se o acesso está dentro do horário de expediente.
 6. Sistema emite access token (JWT) e refresh token (`httpOnly cookie`).
 7. Sistema registra evento de login bem-sucedido no log de auditoria.
-8. Sistema exibe tela de boas-vindas personalizada com chips de contexto.
+8. Sistema exibe tela principal.
 
 ### Fluxos Alternativos
-- **A1 — Credenciais inválidas:** Sistema exibe mensagem de erro com contagem de tentativas. Contador incrementado.
-- **A2 — Quinta tentativa inválida:** Sistema bloqueia a conta, exibe mensagem específica de bloqueio, registra evento de segurança no log.
-- **A3 — Conta inativa:** Sistema exibe mensagem genérica sem revelar motivo.
-- **A4 — Conta bloqueada:** Sistema exibe mensagem de conta bloqueada, orienta contatar suporte.
-- **A5 — Fora do horário de expediente:** Sistema exibe mensagem com horário permitido; não revela detalhes de segurança.
-- **A6 — Usuário em grupo de exceção fora do horário:** Sistema valida a janela do grupo; se dentro da janela, prossegue; se fora, bloqueia.
+- **A1: Credenciais inválidas:** Sistema exibe mensagem de erro com contagem de tentativas. Contador incrementado.
+- **A2: Quinta tentativa inválida:** Sistema bloqueia a conta, exibe mensagem específica de bloqueio, registra evento de segurança no log.
+- **A3: Conta inativa:** Sistema exibe mensagem genérica sem revelar motivo.
+- **A4: Conta bloqueada:** Sistema exibe mensagem de conta bloqueada, orienta contatar suporte.
+- **A5: Fora do horário de expediente:** Sistema exibe mensagem com horário permitido; não revela detalhes de segurança.
+- **A6: Usuário em grupo de exceção fora do horário:** Sistema valida a janela do grupo; se dentro da janela, prossegue; se fora, bloqueia.
 
 ---
 
-## UC-02 — Visualizar Relatório Power BI
+## UC-02 - Visualizar Relatório Power BI
 
 **Ator principal:** Operador, Gerente  
-**Pré-condição:** Usuário autenticado; relatório com status `published`; usuário com permissão no workspace/relatório  
+**Pré-condição:** Usuário autenticado; relatório com status `publicado`; usuário com permissão no workspace/relatório  
 **Pós-condição:** Relatório renderizado inline no portal  
 
 ### Fluxo Principal
@@ -71,14 +71,14 @@
 14. Sistema registra acesso ao relatório no log de auditoria.
 
 ### Fluxos Alternativos
-- **A1 — Usuário sem permissão no relatório:** Backend retorna 403; frontend exibe mensagem de acesso negado; evento registrado no log.
-- **A2 — Token de embed expirado durante visualização:** Sistema renova o token em background; usuário não percebe interrupção.
-- **A3 — PBI Service indisponível:** Sistema exibe mensagem amigável de indisponibilidade; portal continua funcionando para outros módulos.
-- **A4 — Relatório não encontrado no PBI Service:** Sistema exibe mensagem de relatório indisponível; sugere contatar administrador.
+- **A1: Usuário sem permissão no relatório:** Backend retorna 403; frontend exibe mensagem de acesso negado; evento registrado no log.
+- **A2: Token de embed expirado durante visualização:** Sistema renova o token em background; usuário não percebe interrupção.
+- **A3: PBI Service indisponível:** Sistema exibe mensagem amigável de indisponibilidade; portal continua funcionando para outros módulos.
+- **A4: Relatório não encontrado no PBI Service:** Sistema exibe mensagem de relatório indisponível; sugere contatar administrador.
 
 ---
 
-## UC-03 — Gerenciar Permissões de Usuário
+## UC-03 - Gerenciar Permissões de Usuário
 
 **Ator principal:** Admin, Super Admin  
 **Pré-condição:** Ator autenticado com perfil adequado  
@@ -99,13 +99,13 @@
 12. Frontend exibe toast de confirmação.
 
 ### Fluxos Alternativos
-- **A1 — Admin tenta alterar permissão de Super Admin:** Sistema retorna 403; Super Admin não pode ter permissões reduzidas por Admin.
-- **A2 — Erro de validação:** Sistema retorna mensagem de erro específica; alterações não são salvas.
-- **A3 — Admin cancela:** Alterações são descartadas; log não é gerado.
+- **A1: Admin tenta alterar permissão de Super Admin:** Sistema retorna 403; Super Admin não pode ter permissões reduzidas por Admin.
+- **A2: Erro de validação:** Sistema retorna mensagem de erro específica; alterações não são salvas.
+- **A3: Admin cancela:** Alterações são descartadas; log não é gerado.
 
 ---
 
-## UC-04 — Configurar Regras de Expediente
+## UC-04 - Configurar Regras de Expediente
 
 **Ator principal:** Admin, Super Admin  
 **Pré-condição:** Ator autenticado  
@@ -124,16 +124,16 @@
 10. Regras entram em vigor imediatamente para as próximas tentativas de login.
 
 ### Fluxos Alternativos
-- **A1 — Horário de início maior que horário de fim:** Sistema valida e exibe mensagem de erro; não salva.
-- **A2 — Grupo sem membros:** Sistema permite salvar (grupo pode ser populado depois).
+- **A1: Horário de início maior que horário de fim:** Sistema valida e exibe mensagem de erro; não salva.
+- **A2: Grupo sem membros:** Sistema permite salvar (grupo pode ser populado depois).
 
 ---
 
-## UC-05 — Criar Novo Usuário
+## UC-05 - Criar Novo Usuário
 
 **Ator principal:** Admin, Super Admin  
 **Pré-condição:** Ator autenticado  
-**Pós-condição:** Usuário criado, e-mail de senha temporária enviado  
+**Pós-condição:** Usuário criado
 
 ### Fluxo Principal
 1. Admin acessa o módulo de Usuários e clica em "Novo Usuário".
@@ -141,19 +141,17 @@
 3. Admin preenche: nome, e-mail, perfil, workspace(s) e relatório(s) de acesso.
 4. Admin confirma criação.
 5. Sistema valida dados: e-mail único, campos obrigatórios preenchidos.
-6. Sistema gera senha temporária aleatória.
+6. Sistema gera senha temporária padrão.
 7. Sistema persiste o usuário com status `ativo` e senha com hash bcrypt.
-8. Sistema envia e-mail com a senha temporária.
-9. Sistema registra criação no log de auditoria.
+8. Sistema registra criação no log de auditoria.
 10. Sistema exibe o novo usuário na listagem.
 
 ### Fluxos Alternativos
-- **A1 — E-mail já cadastrado:** Sistema exibe mensagem "E-mail já utilizado por outro usuário".
-- **A2 — Falha no envio de e-mail:** Usuário é criado; sistema exibe aviso sobre falha no envio; Admin pode reenviar.
+- **A1: E-mail já cadastrado:** Sistema exibe mensagem "E-mail já utilizado por outro usuário".
 
 ---
 
-## UC-06 — Consultar e Exportar Log de Auditoria
+## UC-06 - Consultar e Exportar Log de Auditoria
 
 **Ator principal:** Admin, Super Admin  
 **Pré-condição:** Ator autenticado  
@@ -170,12 +168,12 @@
 8. Download iniciado no navegador.
 
 ### Fluxos Alternativos
-- **A1 — Nenhum resultado para os filtros:** Sistema exibe estado vazio com sugestão de ampliar os filtros.
-- **A2 — Volume muito grande (>50k registros):** Sistema processa exportação de forma assíncrona e notifica quando o arquivo está pronto.
+- **A1: Nenhum resultado para os filtros:** Sistema exibe estado vazio com sugestão de ampliar os filtros.
+- **A2: Volume muito grande (>50k registros):** Sistema processa exportação de forma assíncrona e notifica quando o arquivo está pronto.
 
 ---
 
-## UC-07 — Bloquear / Desbloquear Usuário
+## UC-07 - Bloquear / Desbloquear Usuário
 
 **Ator principal:** Admin, Super Admin  
 **Pré-condição:** Ator autenticado; usuário-alvo existe  
@@ -186,18 +184,18 @@
 2. Admin clica no botão de bloquear do usuário-alvo.
 3. Sistema exibe modal de confirmação.
 4. Admin confirma.
-5. Sistema atualiza status para `blocked`.
+5. Sistema atualiza status para `bloqueado`.
 6. Sistema invalida quaisquer sessões ativas do usuário bloqueado.
 7. Sistema registra o bloqueio no log de auditoria (quem bloqueou, quando).
 8. Usuário bloqueado recebe 403 em qualquer requisição subsequente.
 
 ### Fluxos Alternativos
-- **A1 — Desbloquear:** Fluxo inverso; zera contador de tentativas; log registra desbloqueio.
-- **A2 — Admin tenta bloquear Super Admin:** Sistema retorna 403; Super Admin não pode ser bloqueado por Admin.
+- **A1: Desbloquear:** Fluxo inverso; zera contador de tentativas; log registra desbloqueio.
+- **A2: Admin tenta bloquear Super Admin:** Sistema retorna 403; Super Admin não pode ser bloqueado por Admin.
 
 ---
 
-## UC-08 — Configurar Integração Power BI
+## UC-08 - Configurar Integração Power BI
 
 **Ator principal:** Super Admin  
 **Pré-condição:** Super Admin autenticado; dados do Service Principal disponíveis  
@@ -221,4 +219,4 @@
 
 | Versão | Data | Autor | Descrição |
 |--------|------|-------|-----------|
-| 1.0 | Maio/2026 | — | Criação inicial do documento |
+| 1.0 | Maio/2026 | Vinicius Soares | Criação inicial do documento |

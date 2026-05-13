@@ -10,9 +10,9 @@
 ## Formato Padrão
 
 ```
-Como [tipo de usuário],
-quero [objetivo / ação],
-para [benefício / resultado esperado].
+COMO [tipo de usuário],
+QUERO [objetivo / ação],
+PARA [benefício / resultado esperado].
 
 Critérios de aceite:
 - [ ] Critério 1
@@ -21,43 +21,43 @@ Critérios de aceite:
 
 ---
 
-## Épico 1 — Autenticação e Acesso
+## Épico 1 - Autenticação e Acesso
 
 ---
 
-**US-01 — Login com credenciais corporativas**
+**US-01: Login com credenciais corporativas**
 
-Como colaborador da BrasilTerrenos,  
-quero fazer login no portal com meu e-mail e senha corporativa,  
-para acessar os relatórios Power BI do meu departamento de forma segura.
+COMO colaborador da BrasilTerrenos,  
+QUERO fazer login no portal com meu e-mail e senha corporativa,  
+PARA acessar os relatórios Power BI do meu departamento de forma segura.
 
 *Critérios de aceite:*
-- [ ] Login com e-mail e senha válidos redireciona para a tela de boas-vindas
+- [ ] Login com e-mail e senha válidos redireciona para a tela de principal
 - [ ] Erro específico ao inserir credenciais inválidas com contagem de tentativas visível
 - [ ] Botão de toggle para mostrar/ocultar a senha está presente
 - [ ] Campo de e-mail com sugestão de autocomplete desativada
 
 ---
 
-**US-02 — Proteção contra tentativas excessivas**
+**US-02: Proteção contra tentativas excessivas**
 
-Como administrador de TI,  
-quero que contas sejam bloqueadas automaticamente após 5 tentativas inválidas consecutivas,  
-para proteger o sistema contra ataques de força bruta e acesso não autorizado.
+COMO administrador SuperAdmin,  
+QUERO que contas sejam bloqueadas automaticamente após 5 tentativas inválidas consecutivas,  
+PARA proteger o sistema contra ataques de força bruta e acesso não autorizado.
 
 *Critérios de aceite:*
 - [ ] Na 5ª tentativa inválida, conta é bloqueada automaticamente
 - [ ] Mensagem de bloqueio diferente da mensagem de credenciais inválidas
 - [ ] Evento de bloqueio registrado no log com IP e timestamp
-- [ ] Desbloqueio disponível apenas para Admin/Super Admin na interface
+- [ ] Desbloqueio disponível apenas para Super Admin na interface
 
 ---
 
-**US-03 — Controle de acesso por horário de expediente**
+**US-03: Controle de acesso por horário de expediente**
 
-Como compliance officer,  
-quero que o acesso ao portal seja bloqueado fora do horário de expediente para usuários sem exceção,  
-para garantir que dados corporativos sensíveis não sejam acessados em horários não monitorados.
+COMO administrador SuperAdmin,  
+QUERO que o acesso ao portal seja bloqueado fora do horário de expediente para usuários sem exceção,  
+PARA garantir que dados corporativos sensíveis não sejam acessados em horários não monitorados.
 
 *Critérios de aceite:*
 - [ ] Tentativa de login fora do expediente retorna mensagem com horário permitido
@@ -67,45 +67,15 @@ para garantir que dados corporativos sensíveis não sejam acessados em horário
 
 ---
 
-**US-04 — Recuperação de senha self-service**
-
-Como colaborador,  
-quero recuperar minha senha pelo e-mail caso eu a esqueça,  
-para não precisar abrir chamado no TI para situações rotineiras.
-
-*Critérios de aceite:*
-- [ ] Link de recuperação enviado para o e-mail cadastrado em até 1 minuto
-- [ ] Link expira em 1 hora
-- [ ] Nova senha exige mínimo de 8 caracteres com letras e números
-- [ ] Após redefinição bem-sucedida, usuário é redirecionado para o login
-- [ ] Evento de redefinição de senha registrado no log
+## Épico 2 - Consumo de Relatórios
 
 ---
 
-**US-05 — MFA para perfis administrativos**
+**US-05: Navegar por workspaces do departamento**
 
-Como Super Admin,  
-quero habilitar autenticação multifator (MFA) para perfis Admin e Super Admin,  
-para aumentar a segurança de contas com acesso privilegiado ao sistema.
-
-*Critérios de aceite:*
-- [ ] Após a senha, Admin é solicitado a inserir código TOTP de 6 dígitos
-- [ ] Código gerado por apps como Google Authenticator ou Authy é aceito
-- [ ] Código inválido impede o acesso e incrementa o contador de tentativas
-- [ ] QR Code para configuração do autenticador exibido no primeiro setup
-- [ ] Backup codes de emergência gerados no setup
-
----
-
-## Épico 2 — Consumo de Relatórios
-
----
-
-**US-06 — Navegar por workspaces do departamento**
-
-Como analista do departamento de Controladoria,  
-quero visualizar os workspaces acessíveis para mim de forma organizada,  
-para encontrar facilmente os relatórios do meu departamento sem navegar por dados de outros departamentos.
+COMO analista do departamento de Controladoria,  
+QUERO visualizar os workspaces acessíveis para mim de forma organizada,  
+PARA encontrar facilmente os relatórios do meu departamento sem navegar por dados de outros departamentos.
 
 *Critérios de aceite:*
 - [ ] Apenas workspaces do usuário são exibidos na listagem
@@ -115,11 +85,11 @@ para encontrar facilmente os relatórios do meu departamento sem navegar por dad
 
 ---
 
-**US-07 — Visualizar relatório Power BI inline no portal**
+**US-06: Visualizar relatório Power BI inline no portal**
 
-Como gerente de Marketing,  
-quero visualizar o relatório de Pipeline de Vendas diretamente no portal,  
-para acessar os dados analíticos sem precisar navegar para o Power BI Service.
+COMO gerente de Marketing,  
+QUERO visualizar o relatório de Pipeline de Vendas diretamente no portal,  
+PARA acessar os dados analíticos sem precisar navegar para o Power BI Service.
 
 *Critérios de aceite:*
 - [ ] Relatório renderizado dentro do portal sem abrir nova aba ou janela
@@ -130,11 +100,11 @@ para acessar os dados analíticos sem precisar navegar para o Power BI Service.
 
 ---
 
-**US-08 — Favoritar relatórios de uso frequente**
+**US-07: Favoritar relatórios de uso frequente**
 
-Como analista,  
-quero marcar relatórios como favoritos,  
-para acessá-los rapidamente na tela de favoritos sem navegar pelo workspace toda vez.
+COMO analista,  
+QUERO marcar relatórios como favoritos,  
+PARA acessá-los rapidamente na tela de favoritos sem navegar pelo workspace toda vez.
 
 *Critérios de aceite:*
 - [ ] Ícone de favoritar visível em cada relatório na listagem
@@ -144,11 +114,11 @@ para acessá-los rapidamente na tela de favoritos sem navegar pelo workspace tod
 
 ---
 
-**US-09 — Mensagem clara ao tentar acessar fora do horário**
+**US-08: Mensagem clara ao tentar acessar fora do horário**
 
-Como operador de plantão,  
-quero receber uma mensagem clara quando tentar acessar o portal fora do horário de expediente,  
-para entender o motivo do bloqueio e saber o que fazer.
+COMO operador de plantão,  
+QUERO receber uma mensagem clara quando tentar acessar o portal fora do horário de expediente,  
+PARA entender o motivo do bloqueio e saber o que fazer.
 
 *Critérios de aceite:*
 - [ ] Mensagem exibe o horário permitido de acesso
@@ -157,30 +127,30 @@ para entender o motivo do bloqueio e saber o que fazer.
 
 ---
 
-## Épico 3 — Administração de Usuários
+## Épico 3 - Administração de Usuários
 
 ---
 
-**US-10 — Cadastrar novo colaborador**
+**US-09: Cadastrar novo colaborador**
 
-Como administrador de TI,  
-quero cadastrar novos colaboradores no portal informando nome, e-mail, perfil e workspaces de acesso,  
-para que eles possam acessar imediatamente os relatórios do seu departamento após admissão.
+COMO SuperAdmin,  
+QUERO cadastrar novos colaboradores no portal informando nome, e-mail, perfil e workspaces de acesso,  
+PARA que eles possam acessar imediatamente os relatórios do seu departamento após admissão.
 
 *Critérios de aceite:*
 - [ ] Formulário com campos: nome, e-mail, perfil, workspace(s), relatório(s)
 - [ ] E-mail único validado: erro se já cadastrado
-- [ ] Senha temporária gerada e enviada por e-mail automaticamente
+- [ ] Senha temporária padrão gerada
 - [ ] Usuário criado aparece na listagem com status `ativo`
 - [ ] Evento de criação registrado no log com o autor da ação
 
 ---
 
-**US-11 — Bloquear acesso de usuário suspeito**
+**US-10: Bloquear acesso de usuário suspeito**
 
-Como administrador de segurança,  
-quero bloquear imediatamente o acesso de um usuário suspeito sem precisar excluí-lo,  
-para interromper um potencial acesso indevido mantendo o histórico e podendo reativar o usuário depois.
+COMO administrador de segurança,  
+QUERO bloquear imediatamente o acesso de um usuário suspeito sem precisar excluí-lo,  
+PARA interromper um potencial acesso indevido mantendo o histórico e podendo reativar o usuário depois.
 
 *Critérios de aceite:*
 - [ ] Botão de bloquear disponível na listagem de usuários
@@ -192,11 +162,11 @@ para interromper um potencial acesso indevido mantendo o histórico e podendo re
 
 ---
 
-**US-12 — Conceder permissão a relatórios específicos**
+**US-11: Conceder permissão a relatórios específicos**
 
-Como administrador,  
-quero conceder a um usuário específico acesso apenas a determinados relatórios dentro de um workspace,  
-para seguir o princípio do menor privilégio sem criar um perfil inteiro para isso.
+COMO administrador,  
+QUERO conceder a um usuário específico acesso apenas a determinados relatórios dentro de um workspace,  
+PARA seguir o princípio do menor privilégio sem criar um perfil inteiro para isso.
 
 *Critérios de aceite:*
 - [ ] Interface de permissão por usuário com seleção de relatórios específicos
@@ -206,28 +176,15 @@ para seguir o princípio do menor privilégio sem criar um perfil inteiro para i
 
 ---
 
-**US-13 — Visualizar tela de boas-vindas personalizada**
-
-Como novo colaborador acessando o portal pela primeira vez,  
-quero ver uma tela de boas-vindas com informações sobre meus acessos,  
-para entender rapidamente o que está disponível para mim.
-
-*Critérios de aceite:*
-- [ ] Tela exibe nome do usuário, perfil e chips com número de workspaces e relatórios
-- [ ] Texto descritivo adapta-se ao perfil (admin vs. operador)
-- [ ] Botão "Acessar o portal" navega para o dashboard
+## Épico 4 - Governança e Auditoria
 
 ---
 
-## Épico 4 — Governança e Auditoria
+**US-13: Exportar log de auditoria para compliance**
 
----
-
-**US-14 — Exportar log de auditoria para compliance**
-
-Como compliance officer,  
-quero exportar os logs de auditoria filtrados por período e tipo de evento,  
-para gerar relatórios de conformidade para auditorias internas e externas.
+COMO compliance officer,  
+QUERO exportar os logs de auditoria filtrados por período e tipo de evento,  
+PARA gerar relatórios de conformidade para auditorias internas e externas.
 
 *Critérios de aceite:*
 - [ ] Filtros combinados: data de início, data de fim, usuário, módulo, tipo
@@ -238,11 +195,11 @@ para gerar relatórios de conformidade para auditorias internas e externas.
 
 ---
 
-**US-15 — Receber alertas de eventos críticos**
+**US-14: Receber alertas de eventos críticos**
 
-Como administrador de segurança,  
-quero receber alertas visuais imediatos sobre eventos críticos (bloqueios, tentativas de invasão),  
-para reagir rapidamente a incidentes de segurança sem precisar monitorar o log continuamente.
+COMO administrador de segurança,  
+QUERO receber alertas visuais imediatos sobre eventos críticos (bloqueios, tentativas de invasão),  
+PARA reagir rapidamente a incidentes de segurança sem precisar monitorar o log continuamente.
 
 *Critérios de aceite:*
 - [ ] Badge de alertas no topbar atualiza sem precisar recarregar a página
@@ -252,11 +209,11 @@ para reagir rapidamente a incidentes de segurança sem precisar monitorar o log 
 
 ---
 
-**US-16 — Configurar regras de expediente com exceções**
+**US-15: Configurar regras de expediente com exceções**
 
-Como administrador,  
-quero definir o horário de expediente e criar grupos de exceção para equipes de plantão,  
-para garantir que a regra padrão se aplique à maioria dos usuários enquanto equipes específicas mantêm acesso necessário.
+COMO administrador,  
+QUERO definir o horário de expediente e criar grupos de exceção para equipes de plantão,  
+PARA garantir que a regra padrão se aplique à maioria dos usuários enquanto equipes específicas mantêm acesso necessário.
 
 *Critérios de aceite:*
 - [ ] Interface de configuração de dias da semana com horário de início e fim
@@ -271,11 +228,11 @@ para garantir que a regra padrão se aplique à maioria dos usuários enquanto e
 
 ---
 
-**US-17 — Monitorar KPIs globais do portal**
+**US-16: Monitorar KPIs globais do portal**
 
-Como diretora de TI,  
-quero ver no painel administrativo os principais indicadores do portal (usuários ativos, bloqueados, workspaces, alertas),  
-para ter visibilidade do estado do sistema sem precisar navegar por cada módulo.
+COMO SuperAdmin/Admin,  
+QUERO ver no painel administrativo os principais indicadores do portal (usuários ativos, bloqueados, workspaces, alertas),  
+PARA ter visibilidade do estado do sistema sem precisar navegar por cada módulo.
 
 *Critérios de aceite:*
 - [ ] Cards de KPI com: usuários ativos, usuários bloqueados, acessos negados hoje, workspaces ativos
@@ -285,11 +242,11 @@ para ter visibilidade do estado do sistema sem precisar navegar por cada módulo
 
 ---
 
-**US-18 — Configurar integração com Power BI Embedded**
+**US-17: Configurar integração com Power BI Embedded**
 
-Como Super Admin,  
-quero configurar as credenciais do Power BI Embedded (Client ID, Tenant ID) diretamente pelo portal,  
-para ativar ou reconfigurar a integração sem precisar acessar o servidor ou o código-fonte.
+COMO Super Admin,  
+QUERO configurar as credenciais do Power BI Embedded (Client ID, Tenant ID) diretamente pelo portal,  
+PARA ativar ou reconfigurar a integração sem precisar acessar o servidor ou o código-fonte.
 
 *Critérios de aceite:*
 - [ ] Formulário com campos: Client ID, Tenant ID, Workspace ID, Client Secret (mascarado)
@@ -304,4 +261,4 @@ para ativar ou reconfigurar a integração sem precisar acessar o servidor ou o 
 
 | Versão | Data | Autor | Descrição |
 |--------|------|-------|-----------|
-| 1.0 | Maio/2026 | — | Criação inicial do documento |
+| 1.0 | Maio/2026 | Vinicius Soares | Criação inicial do documento |
