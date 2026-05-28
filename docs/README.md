@@ -24,7 +24,7 @@ docs/
 │
 ├── 01-visao-geral/
 │   ├── 01-contexto-e-prototipo.md               ← Estado atual e análise do protótipo
-│   ├── 02-objetivo-e-problemas.md               ← Objetivo, problemas e necessidades
+│   ├── 02-objetivo-e-problema.md                ← Objetivo, problemas e necessidades
 │   └── 03-stakeholders-e-publico-alvo.md        ← Stakeholders e público-alvo
 │
 ├── 02-escopo/
@@ -58,8 +58,7 @@ docs/
 │   └── 04-integracoes.md                        ← Integrações necessárias
 │
 ├── 08-tecnologias/
-│   ├── 01-stack-recomendada.md                  ← Stack tecnológica recomendada
-│   └── 02-estrutura-de-pastas.md                ← Estrutura de pastas dos projetos
+│   └── 01-stack-recomendada.md                  ← Stack tecnológica recomendada e estrutura prevista
 │
 ├── 09-roadmap/
 │   └── 01-roadmap.md                            ← MVP, curto, médio e longo prazo
@@ -75,7 +74,7 @@ docs/
 | Tópico | Arquivo |
 |--------|---------|
 | Contexto e análise do protótipo | [01-visao-geral/01-contexto-e-prototipo.md](./01-visao-geral/01-contexto-e-prototipo.md) |
-| Objetivo do sistema | [01-visao-geral/02-objetivo-e-problemas.md](./01-visao-geral/02-objetivo-e-problemas.md) |
+| Objetivo do sistema | [01-visao-geral/02-objetivo-e-problema.md](./01-visao-geral/02-objetivo-e-problema.md) |
 | Stakeholders | [01-visao-geral/03-stakeholders-e-publico-alvo.md](./01-visao-geral/03-stakeholders-e-publico-alvo.md) |
 | Escopo | [02-escopo/01-escopo-do-projeto.md](./02-escopo/01-escopo-do-projeto.md) |
 | Módulos e funcionalidades | [02-escopo/02-modulos-e-funcionalidades.md](./02-escopo/02-modulos-e-funcionalidades.md) |
@@ -96,7 +95,6 @@ docs/
 | Manutenção e Observabilidade | [07-estrategias/03-manutencao-e-observabilidade.md](./07-estrategias/03-manutencao-e-observabilidade.md) |
 | Integrações | [07-estrategias/04-integracoes.md](./07-estrategias/04-integracoes.md) |
 | Stack Recomendada | [08-tecnologias/01-stack-recomendada.md](./08-tecnologias/01-stack-recomendada.md) |
-| Estrutura de Pastas | [08-tecnologias/02-estrutura-de-pastas.md](./08-tecnologias/02-estrutura-de-pastas.md) |
 | Roadmap | [09-roadmap/01-roadmap.md](./09-roadmap/01-roadmap.md) |
 | Melhorias e Recomendações | [10-melhorias/01-melhorias-e-recomendacoes.md](./10-melhorias/01-melhorias-e-recomendacoes.md) |
 

@@ -17,6 +17,7 @@ usuarios
   ├── sobrescritas_permissao (1:N)
   ├── membros_grupo_excecao (N:M com grupos_excecao)
   ├── favoritos (1:N com relatorios)
+  ├── sessoes_autenticacao (1:N)
   └── logs_auditoria (1:N - autor dos eventos)
 
 espacos_trabalho
@@ -100,6 +101,42 @@ CREATE TABLE usuarios (
 
 CREATE UNIQUE INDEX UQ_usuarios_email ON usuarios(email);
 CREATE INDEX IX_usuarios_status ON usuarios(status);
+```
+
+---
+
+### Tabela: `sessoes_autenticacao`
+
+Armazena sessões autenticadas e refresh tokens opacos. O `access token` JWT deve carregar o identificador da sessão (`sid`), permitindo que o backend revogue a sessão no logout ou bloqueio do usuário sem depender de Redis.
+
+| Coluna | Tipo SQL Server | Restrições | Descrição |
+|--------|----------------|-----------|-----------|
+| `id` | UNIQUEIDENTIFIER | PK, DEFAULT NEWID() | Identificador da sessão (`sid`) |
+| `usuario_id` | UNIQUEIDENTIFIER | FK → usuarios(id), NOT NULL | Usuário dono da sessão |
+| `hash_refresh_token` | NVARCHAR(255) | NOT NULL, UNIQUE | Hash SHA-256 do refresh token opaco |
+| `criado_em` | DATETIME2(7) | NOT NULL, DEFAULT GETUTCDATE() | Criação da sessão |
+| `expira_em` | DATETIME2(7) | NOT NULL | Expiração do refresh token |
+| `ultimo_uso_em` | DATETIME2(7) | NULL | Última renovação da sessão |
+| `revogado_em` | DATETIME2(7) | NULL | Preenchido no logout/bloqueio |
+| `endereco_ip` | NVARCHAR(45) | NULL | IP de origem |
+| `user_agent` | NVARCHAR(500) | NULL | Navegador/dispositivo |
+
+```sql
+CREATE TABLE sessoes_autenticacao (
+  id                  UNIQUEIDENTIFIER  NOT NULL CONSTRAINT PK_sessoes_autenticacao PRIMARY KEY DEFAULT NEWID(),
+  usuario_id          UNIQUEIDENTIFIER  NOT NULL
+                        CONSTRAINT FK_sa_usuario REFERENCES usuarios(id) ON DELETE CASCADE,
+  hash_refresh_token  NVARCHAR(255)     NOT NULL,
+  criado_em           DATETIME2(7)      NOT NULL DEFAULT GETUTCDATE(),
+  expira_em           DATETIME2(7)      NOT NULL,
+  ultimo_uso_em       DATETIME2(7)      NULL,
+  revogado_em         DATETIME2(7)      NULL,
+  endereco_ip         NVARCHAR(45)      NULL,
+  user_agent          NVARCHAR(500)     NULL
+);
+
+CREATE UNIQUE INDEX UQ_sa_hash_refresh_token ON sessoes_autenticacao(hash_refresh_token);
+CREATE INDEX IX_sa_usuario_ativo ON sessoes_autenticacao(usuario_id, revogado_em, expira_em);
 ```
 
 ---
@@ -416,6 +453,8 @@ usuarios 1──────N acessos_workspace N──────1 espacos_tra
   N membros_grupo_excecao N──────1 grupos_excecao
   │
   1──────N favoritos N──────1 relatorios
+  │
+  1──────N sessoes_autenticacao
   │
   1──────N logs_auditoria (snapshot, sem FK real para integridade histórica)
 

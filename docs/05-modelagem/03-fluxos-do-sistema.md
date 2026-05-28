@@ -16,7 +16,7 @@ Este é o fluxo mais crítico do sistema. Toda tentativa de login passa por este
 │                    FLUXO DE AUTENTICAÇÃO                              │
 └──────────────────────────────────────────────────────────────────────┘
 
-[Usuário] → POST /auth/login { email, password }
+[Usuário] → POST /api/v1/auth/entrar { email, senha }
                 │
                 ▼
         ┌────────────────┐
@@ -26,23 +26,24 @@ Este é o fluxo mais crítico do sistema. Toda tentativa de login passa por este
                 │ SIM
                 ▼
         ┌──────────────────┐
-        │ bcrypt.compare() │──── FALHA ──→ Incrementa login_attempts
+        │ bcrypt.compare() │──── FALHA ──→ Incrementa tentativas_login
         │ senha válida?    │               │
         └────────┬─────────┘               ▼
-                 │                    login_attempts >= 5?
-                 │                    SIM → status = 'blocked'
+                 │                    tentativas_login >= 5?
+                 │                    SIM → status = 'bloqueado'
                  │                          403 "Conta bloqueada"
                  │                    NÃO → 401 "Credenciais inválidas (X/5)"
                  │ OK
                  ▼
         ┌──────────────────────┐
-        │ status === 'active'? │──── NÃO ──→ 403 (inativo ou bloqueado)
+        │ status === 'ativo'?  │──── NÃO ──→ 403 (inativo ou bloqueado)
         └──────────┬───────────┘
                    │ SIM
                    ▼
         ┌──────────────────────────┐
         │ Verificar expediente     │
-        │ checkSchedule(userId,    │
+        │ validar_expediente(      │
+        │ usuario_id,              │
         │ now)                     │
         └──────────┬───────────────┘
                    │
@@ -52,11 +53,12 @@ Este é o fluxo mais crítico do sistema. Toda tentativa de login passa por este
     EXPEDIENTE           EXPEDIENTE
           │                  │
           ▼                  ▼
-   Tem exceção?        Resetar login_attempts
-   grupo ou           Emitir access_token (JWT RS256, 1h)
-   individual?        Emitir refresh_token (httpOnly cookie, 24h)
-          │           Registrar log: auth/login/success
-     SIM  │ NÃO       Retornar { accessToken, user }
+   Tem exceção?        Resetar tentativas_login
+   grupo ou           Criar sessão em sessoes_autenticacao
+   individual?        Emitir access_token (JWT HS256, 1h)
+          │           Emitir refresh_token opaco (cookie httpOnly, 24h)
+     SIM  │ NÃO       Registrar log: autenticacao/login/sucesso
+          │           Retornar { token_acesso, usuario }
           │    │
           │    ▼
           │  403 "Acesso fora do expediente"
@@ -84,14 +86,14 @@ Este é o fluxo mais crítico do sistema. Toda tentativa de login passa por este
         │  Token vai expirar em < 5 minutos?
         │  OU requisição retornou 401?
         ▼
-POST /auth/refresh
+POST /api/v1/auth/renovar
   Cookie: refresh_token (httpOnly)
         │
         ▼
 ┌─────────────────────────┐
 │ Refresh token válido?   │──── NÃO ──→ 401 → Frontend redireciona
-│ (não expirado, não      │            para o login
-│  revogado no Redis?)    │
+│ (não expirado, sessão   │            para o login
+│  não revogada no SQL?)  │
 └──────────┬──────────────┘
            │ SIM
            ▼
@@ -102,8 +104,8 @@ POST /auth/refresh
            │ SIM
            ▼
 Emitir novo access_token
-Renovar refresh_token (rotação)
-Retornar { accessToken }
+Rotacionar refresh_token na tabela sessoes_autenticacao
+Retornar { token_acesso }
 ```
 
 ---
@@ -114,7 +116,7 @@ Retornar { accessToken }
 [Usuário] → Clica em relatório
         │
         ▼
-GET /api/v1/reports/{reportId}/embed-token
+GET /api/v1/relatorios/{relatorio_id}/embed-token
   Authorization: Bearer <access_token>
         │
         ▼
@@ -131,7 +133,7 @@ GET /api/v1/reports/{reportId}/embed-token
            │ SIM
            ▼
 ┌──────────────────────────────────┐
-│ Token em cache Redis?            │──── SIM ──→ Retorna token do cache
+│ Token em cache seguro do backend?│──── SIM ──→ Retorna token do cache
 │ (TTL > 5 min restantes?)        │            (sem chamar Azure/PBI)
 └──────────┬───────────────────────┘
            │ NÃO
@@ -150,8 +152,8 @@ POST https://api.powerbi.com/v1.0/myorg/groups/{groupId}/reports/{reportId}/Gene
   Body: { accessLevel: "View" }
         │
         ▼
-Armazenar token no Redis (TTL = 55 min)
-Registrar log: report/accessed
+Armazenar token em cache temporário do backend (TTL menor que a expiração)
+Registrar log: relatorio/acessado
         │
         ▼
 Retornar { embedToken, embedUrl, reportId, tokenExpiry }
@@ -178,15 +180,15 @@ Relatório renderizado inline no portal ✓
 [Admin] → Acessa módulo Permissões → Seleciona alvo
         │
         ▼
-GET /api/v1/permissions?target={role|userId}&targetId={id}
+GET /api/v1/permissoes?alvo={perfil|usuario_id}&alvo_id={id}
         │
         ▼
 Sistema carrega permissões atuais
 Admin faz alterações nos checkboxes
         │
         ▼
-PUT /api/v1/permissions
-  { target, targetId, module, action, value }
+PUT /api/v1/permissoes
+  { alvo, alvo_id, modulo, acao, valor }
         │
         ▼
 [Backend Guard]
@@ -203,13 +205,13 @@ Carregar estado anterior da permissão
 Persistir nova permissão no banco (transação)
         │
         ▼
-Registrar AuditLog:
-  { type: 'permission', user: admin, target: userId/role,
-    module: 'Permissões', detail: 'Ação X: true → false',
-    previousVal: {...}, newVal: {...} }
+Registrar LogAuditoria:
+  { tipo_evento: 'permissao', usuario: admin, alvo: usuario_id/perfil,
+    modulo: 'Permissões', detalhe: 'Ação X: true → false',
+    valor_anterior: {...}, valor_novo: {...} }
         │
         ▼
-Invalidar cache de permissões do usuário afetado no Redis
+Invalidar consultas/cache de permissões do usuário afetado
         │
         ▼
 Retornar 200 OK
@@ -223,7 +225,7 @@ Frontend exibe toast "Permissão atualizada com sucesso"
 ```
 A cada tentativa de login:
 
-checkSchedule(userId, now):
+validar_expediente(usuario_id, agora):
         │
         ▼
 ┌──────────────────────────┐
@@ -262,28 +264,28 @@ Todo evento relevante gera um registro de auditoria de forma assíncrona:
 [Qualquer evento relevante no sistema]
         │
         ▼
-auditService.log({
-  userId,           // quem fez
-  userName,         // snapshot do nome (imutável)
-  eventType,        // auth | user | permission | access | report | security | system
-  module,           // módulo onde ocorreu
-  detail,           // descrição legível
-  ipAddress,        // IP da requisição
-  previousVal,      // estado anterior (JSON) — para mudanças
-  newVal,           // novo estado (JSON) — para mudanças
+servico_auditoria.registrar({
+  usuario_id,       // quem fez
+  nome_usuario,     // snapshot do nome (imutável)
+  tipo_evento,      // autenticacao | usuario | permissao | acesso | relatorio | seguranca | sistema
+  modulo,           // módulo onde ocorreu
+  detalhe,          // descrição legível
+  endereco_ip,      // IP da requisição
+  valor_anterior,   // estado anterior (JSON) — para mudanças
+  valor_novo,       // novo estado (JSON) — para mudanças
 })
         │
         ▼
-INSERT INTO audit_logs (...)
+INSERT INTO logs_auditoria (...)
   -- tabela com restrição: sem UPDATE, sem DELETE
         │
         ▼
-Eventos críticos? (type: 'security' ou múltiplas falhas de auth)
+Eventos críticos? (tipo_evento: 'seguranca' ou múltiplas falhas de autenticacao)
         │
      SIM│
         ▼
-Publicar evento em fila de notificações
-  → Atualizar contador de alertas no painel admin
+Registrar alerta para o painel administrativo
+  → Atualizar contador de alertas no dashboard
   → (v1.1) Enviar e-mail de alerta para admins
 ```
 
@@ -295,15 +297,15 @@ Publicar evento em fila de notificações
 [Usuário] → Clica em Sair
         │
         ▼
-POST /auth/logout
+POST /api/v1/auth/sair
   Authorization: Bearer <access_token>
   Cookie: refresh_token
         │
         ▼
-Adicionar access_token à blocklist no Redis (TTL = tempo restante do token)
-Remover refresh_token do Redis
+Marcar sessão como revogada em sessoes_autenticacao
+Revogar refresh_token associado à sessão
 Limpar cookie httpOnly no response (Max-Age: 0)
-Registrar log: auth/logout
+Registrar log: autenticacao/logout
         │
         ▼
 Retornar 200

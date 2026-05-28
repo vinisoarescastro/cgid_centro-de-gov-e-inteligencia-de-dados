@@ -101,107 +101,99 @@ O acesso a relatórios PBI tem uma camada adicional além do RBAC dos módulos:
 
 | Nível | Descrição | Como configurar |
 |-------|-----------|----------------|
-| `full` | Acesso a todos os relatórios do workspace | Na associação user_workspace_access: `access_level = 'full'` |
-| `reports_only` | Acesso apenas a relatórios específicos | `access_level = 'reports_only'` + registros em user_report_access |
-| `none` | Sem acesso ao workspace | Não criar registro em user_workspace_access |
+| `total` | Acesso a todos os relatórios do workspace | Na tabela `acessos_workspace`: `nivel_acesso = 'total'` |
+| `apenas_relatorios` | Acesso apenas a relatórios específicos | `nivel_acesso = 'apenas_relatorios'` + registros em `acessos_relatorio` |
+| `nenhum` | Sem acesso ao workspace | Não criar registro em `acessos_workspace` ou usar `nivel_acesso = 'nenhum'` |
 
 ---
 
-## 5. Implementação dos Guards no NestJS
+## 5. Implementação das Dependências/Guards no FastAPI
 
-### JwtAuthGuard
-```typescript
-// Valida se o token JWT é válido e não expirado
-// Valida se o token não está na blocklist do Redis (logout)
-// Carrega o usuário do banco e injeta no request
+### obter_usuario_atual
+```python
+# Valida se o token JWT é válido e não expirado
+# Valida se a sessão vinculada ao token ainda está ativa no SQL Server
+# Carrega o usuário do banco e injeta na rota
 ```
 
-### RolesGuard
-```typescript
-// Verifica se o perfil do usuário tem permissão para acessar o endpoint
-// Usado com @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+### exigir_perfil
+```python
+# Verifica se o perfil do usuário tem permissão para acessar o endpoint
+# Usado como Depends(exigir_perfil("administrador", "super_administrador"))
 ```
 
-### PermissionsGuard
-```typescript
-// Verifica permissão granular (módulo × ação)
-// Consulta: role_permissions + user_permission_overrides
-// Cache Redis para performance (TTL 5 min; invalidado ao alterar permissões)
-// Usado com @RequirePermission('users', 'edit')
+### exigir_permissao
+```python
+# Verifica permissão granular (módulo × ação)
+# Consulta: permissoes_perfil + sobrescritas_permissao
+# Cache pode ser feito em memória/TanStack Query no frontend; a fonte da verdade é o SQL Server
+# Usado como Depends(exigir_permissao("usuarios", "editar"))
 ```
 
-### ScheduleGuard
-```typescript
-// Verifica se o usuário pode acessar com base no horário de expediente
-// Consultado a cada requisição autenticada
-// Verifica: schedule_rules + exception_groups + access_exceptions
+### validar_expediente
+```python
+# Verifica se o usuário pode acessar com base no horário de expediente
+# Consultado a cada requisição autenticada
+# Verifica: regras_expediente + grupos_excecao + membros_grupo_excecao
 ```
 
 ---
 
 ## 6. Algoritmo de Resolução de Permissão
 
-```typescript
-async function resolvePermission(
-  userId: string,
-  module: string,
-  action: string
-): Promise<boolean> {
+```python
+def resolver_permissao(usuario_id: str, modulo: str, acao: str) -> bool:
 
-  // 1. Carregar usuário e seu perfil
-  const user = await userRepo.findById(userId);
+  # 1. Carregar usuário e seu perfil
+  usuario = repositorio_usuarios.buscar_por_id(usuario_id)
 
-  // 2. Super Admin e Admin: acesso irrestrito
-  if (user.role === 'super_admin' || user.role === 'admin') {
-    return true;
-  }
+  # 2. Super Admin e Admin: acesso irrestrito
+  if usuario.perfil in ("super_administrador", "administrador"):
+      return True
 
-  // 3. Verificar override individual primeiro (precedência)
-  const override = await permOverrideRepo.findByUserAndModule(userId, module);
-  if (override && override[action] !== null) {
-    return override[action]; // true ou false — override definitivo
-  }
+  # 3. Verificar override individual primeiro (precedência)
+  sobrescrita = repositorio_sobrescritas.buscar_por_usuario_modulo(usuario_id, modulo)
+  if sobrescrita and getattr(sobrescrita, acao) is not None:
+      return getattr(sobrescrita, acao)  # True ou False — override definitivo
 
-  // 4. Fallback para permissão do perfil
-  const rolePermission = await rolePermRepo.findByRoleAndModule(user.role, module);
-  return rolePermission?.[action] ?? false;
-}
+  # 4. Fallback para permissão do perfil
+  permissao_perfil = repositorio_permissoes.buscar_por_perfil_modulo(usuario.perfil, modulo)
+  return getattr(permissao_perfil, acao, False) if permissao_perfil else False
 ```
 
 ---
 
 ## 7. Controle de Acesso a Relatórios PBI
 
-```typescript
-async function canAccessReport(
-  userId: string,
-  reportId: string
-): Promise<boolean> {
+```python
+def pode_acessar_relatorio(usuario_id: str, relatorio_id: str) -> bool:
 
-  const user = await userRepo.findById(userId);
+  usuario = repositorio_usuarios.buscar_por_id(usuario_id)
 
-  // Admins têm acesso irrestrito
-  if (user.role === 'super_admin' || user.role === 'admin') return true;
+  # Admins têm acesso irrestrito
+  if usuario.perfil in ("super_administrador", "administrador"):
+      return True
 
-  const report = await reportRepo.findById(reportId);
+  relatorio = repositorio_relatorios.buscar_por_id(relatorio_id)
 
-  // Relatórios draft: apenas manager+
-  if (report.status === 'draft' && user.role === 'operator') return false;
+  # Relatórios rascunho: apenas gerente+
+  if relatorio.status == "rascunho" and usuario.perfil in ("operador", "visitante"):
+      return False
 
-  // Verificar acesso ao workspace
-  const wsAccess = await userWsAccessRepo.find(userId, report.workspaceId);
-  if (!wsAccess) return false;
+  # Verificar acesso ao workspace
+  acesso_workspace = repositorio_acessos_workspace.buscar(usuario_id, relatorio.espaco_trabalho_id)
+  if not acesso_workspace:
+      return False
 
-  // Acesso total ao workspace
-  if (wsAccess.access_level === 'full') return true;
+  # Acesso total ao workspace
+  if acesso_workspace.nivel_acesso == "total":
+      return True
 
-  // Acesso apenas a relatórios específicos
-  if (wsAccess.access_level === 'reports_only') {
-    return userReportAccessRepo.exists(userId, reportId);
-  }
+  # Acesso apenas a relatórios específicos
+  if acesso_workspace.nivel_acesso == "apenas_relatorios":
+      return repositorio_acessos_relatorio.existe(usuario_id, relatorio_id)
 
-  return false;
-}
+  return False
 ```
 
 ---

@@ -49,7 +49,7 @@ O protótipo possui um design system CSS bem estruturado. Para preservá-lo:
 | Dados mockados | Arrays globais em JavaScript | Substituir por chamadas à API real com TanStack Query |
 | Event listeners inline | `onclick="..."` no HTML | Usar event handlers React (`onClick`, `onChange`) |
 | Renderização de tabelas | `innerHTML = ...template literal...` | Componentes React tipados |
-| Estado global | Variável `STATE` global | Zustand stores com tipos |
+| Estado global | Variável `STATE` global | React Context para autenticação e TanStack Query para dados de servidor |
 | Estilos inline | `style="..."` em muitos elementos | Classes CSS do design system |
 
 ---
@@ -85,7 +85,7 @@ O protótipo possui um design system CSS bem estruturado. Para preservá-lo:
 | Item | Descrição | Onde |
 |------|-----------|------|
 | README de onboarding | Setup em < 5 min para novo dev | `/README.md` |
-| API Swagger | 100% dos endpoints documentados | Auto-gerado pelo NestJS |
+| API Swagger | 100% dos endpoints documentados | Auto-gerado pelo FastAPI/OpenAPI |
 | ADRs (Architecture Decision Records) | Decisões arquiteturais importantes registradas | `/docs/adr/` |
 | Changelog | CHANGELOG.md atualizado a cada release | `/CHANGELOG.md` |
 | Runbook de operação | Como fazer deploy, rollback, backup | `/docs/runbook/` |
@@ -99,9 +99,9 @@ O protótipo possui um design system CSS bem estruturado. Para preservá-lo:
 
 | ID | Risco | Probabilidade | Impacto | Mitigação |
 |----|-------|:------------:|:-------:|-----------|
-| RT-01 | Complexidade da integração Power BI Embedded (throttling, expiração de tokens) | Média | 🔴 Alto | PoC de embed antes do Sprint 3; cache de tokens no Redis |
+| RT-01 | Complexidade da integração Power BI Embedded (throttling, expiração de tokens) | Média | 🔴 Alto | PoC de embed antes do Sprint 3; cache temporário de tokens no backend |
 | RT-02 | Performance insuficiente com muitos usuários simultâneos | Baixa | 🟡 Médio | Testes de carga no Sprint 7; escalar horizontalmente se necessário |
-| RT-03 | Banco de dados lento para consultas de audit_log com milhões de registros | Média | 🟡 Médio | Índices adequados; paginação server-side; particionamento por data em v2.0 |
+| RT-03 | Banco de dados lento para consultas de `logs_auditoria` com milhões de registros | Média | 🟡 Médio | Índices adequados; paginação server-side; particionamento por data em v2.0 |
 | RT-04 | Dívida técnica acumulada por pressa no desenvolvimento | Alta | 🟡 Médio | Code review obrigatório; não pular testes; debt sprints mensais |
 | RT-05 | Rotatividade de desenvolvedores sem documentação adequada | Média | 🟡 Médio | Documentação técnica atualizada; pair programming; coding standards |
 | RT-06 | Vulnerabilidade de segurança não detectada | Baixa | 🔴 Crítico | SAST no CI; pen test antes do go-live; atualizações de dependências mensais |
@@ -126,18 +126,18 @@ O protótipo possui um design system CSS bem estruturado. Para preservá-lo:
 ### 4.1 Boas Práticas de Desenvolvimento
 
 **Backend:**
-- Todo endpoint com `class-validator` no DTO — nunca confiar em dados do cliente
+- Todo endpoint com schemas Pydantic — nunca confiar em dados do cliente
 - Toda exceção de negócio com `HttpException` semântica (não `500` para erros de validação)
-- Usar `@Transaction()` do Prisma para operações que afetam múltiplas tabelas
-- `AuditService.log()` chamado explicitamente (não via interceptor automático) — mais controle
-- Nunca retornar `password_hash` em resposta de API (usar `Exclude()` do class-transformer)
+- Usar transações do SQLAlchemy para operações que afetam múltiplas tabelas
+- Serviço de auditoria chamado explicitamente (não via interceptor automático) — mais controle
+- Nunca retornar `hash_senha` em resposta de API (usar schemas Pydantic de saída)
 
 **Frontend:**
 - Nunca armazenar token em localStorage (usar apenas memória React + cookie httpOnly)
 - Toda página admin com guard de rota (`<AdminRoute>`)
 - Estados de loading e erro explícitos em toda chamada de API
 - `React.lazy()` para todos os módulos administrativos
-- Validar formulários com React Hook Form + Zod (schema compartilhado com backend)
+- Validar formulários com React Hook Form + Yup
 
 **Geral:**
 - Nenhum `TODO` ou `FIXME` pode ir para a `main` sem issue associada

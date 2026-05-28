@@ -133,7 +133,7 @@ uvicorn main:app --workers 4 --host 0.0.0.0 --port 3001
 **Backend (Stateless — preparado para horizontal scaling):**
 ```
 → Múltiplas instâncias do uvicorn atrás de NGINX (load balancer)
-→ Autenticação via JWT (sem estado em servidor — cada instância valida independentemente)
+→ Autenticação via JWT com sessão revogável no SQL Server (sem necessidade de afinidade de sessão entre instâncias)
 → Deploy via containers Docker
 ```
 
@@ -154,7 +154,7 @@ uvicorn main:app --workers 4 --host 0.0.0.0 --port 3001
 | Crescimento alto | 200–500 | Múltiplas instâncias + NGINX, DB réplicas |
 | Enterprise | 500+ | Kubernetes, auto-scaling, Redis para cache |
 
-> **Nota:** Redis e BullMQ serão adicionados na v2 conforme necessidade, quando o sistema for para produção no servidor da empresa.
+> **Nota:** Redis e uma solução de filas compatível com Python (ex: RQ/Celery) podem ser adicionados na v2 conforme necessidade, quando o sistema for para produção no servidor da empresa.
 
 ---
 

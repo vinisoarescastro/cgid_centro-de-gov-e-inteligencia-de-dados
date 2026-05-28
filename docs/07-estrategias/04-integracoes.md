@@ -103,32 +103,40 @@ PBI_CLIENT_SECRET=<valor do secret>
 
 ### Geração de Embed Token
 
-```typescript
-// pbi.service.ts
-async generateEmbedToken(workspaceId: string, reportId: string): Promise<EmbedTokenResult> {
-  // 1. Obter access token do Azure AD (com cache Redis)
-  const azureToken = await this.getAzureAccessToken();
+```python
+# services/power_bi.py
+async def gerar_embed_token(workspace_id: str, relatorio_id: str) -> dict:
+    # 1. Obter access token do Azure AD (com cache temporário no backend)
+    azure_token = await obter_token_azure()
 
-  // 2. Chamar API do Power BI
-  const response = await axios.post(
-    `https://api.powerbi.com/v1.0/myorg/groups/${workspaceId}/reports/${reportId}/GenerateToken`,
-    { accessLevel: 'View' },
-    { headers: { Authorization: `Bearer ${azureToken}` } }
-  );
+    # 2. Chamar API do Power BI
+    url = (
+        f"https://api.powerbi.com/v1.0/myorg/groups/"
+        f"{workspace_id}/reports/{relatorio_id}/GenerateToken"
+    )
+    resposta = await cliente_http.post(
+        url,
+        json={"accessLevel": "View"},
+        headers={"Authorization": f"Bearer {azure_token}"},
+    )
+    resposta.raise_for_status()
+    dados = resposta.json()
 
-  return {
-    embedToken: response.data.token,
-    embedUrl: response.data.embedUrl || `https://app.powerbi.com/reportEmbed?reportId=${reportId}&groupId=${workspaceId}`,
-    tokenExpiry: response.data.expiration,
-  };
-}
+    return {
+        "embedToken": dados["token"],
+        "embedUrl": dados.get(
+            "embedUrl",
+            f"https://app.powerbi.com/reportEmbed?reportId={relatorio_id}&groupId={workspace_id}",
+        ),
+        "tokenExpiry": dados["expiration"],
+    }
 ```
 
 ### Limites e Throttling da API PBI
 
 | Limite | Valor | Mitigação |
 |--------|-------|-----------|
-| Requisições por hora (por tenant) | ~200 para GenerateToken | Cache de tokens no Redis (55 min) |
+| Requisições por hora (por tenant) | ~200 para GenerateToken | Cache temporário de tokens no backend, com TTL menor que a expiração |
 | Usuários simultâneos por capacidade PBI | Depende da SKU | Upgrade de capacidade |
 | Tamanho máximo do payload de resposta | — | Paginação nos endpoints de listagem |
 
@@ -202,9 +210,9 @@ Browser                    Portal API              Azure AD
 ```
 
 ### Considerações de Implementação
-- Usar biblioteca `@nestjs/passport` + `passport-azure-ad`
+- Usar biblioteca compatível com FastAPI, como `msal` ou `authlib`, para validar o fluxo OIDC
 - Sincronizar grupos do Azure AD com perfis do portal (via MS Graph API)
-- Primeiro acesso via SSO cria o usuário automaticamente com perfil `operator` (configurável)
+- Primeiro acesso via SSO cria o usuário automaticamente com perfil `operador` (configurável)
 - Usuários criados manualmente ainda podem coexistir com usuários SSO
 
 ---
@@ -226,7 +234,7 @@ Browser                    Portal API              Azure AD
 ### Implementação Básica
 ```
 Fluent Bit (sidecar container)
-  → Coleta logs do stdout do container NestJS
+  → Coleta logs do stdout do backend FastAPI
   → Filtra e enriquece com metadata de ambiente
   → Encaminha para destino configurado (Splunk HEC, Azure Monitor, etc.)
 ```
@@ -238,7 +246,7 @@ Fluent Bit (sidecar container)
 | Integração | Risco | Mitigação |
 |-----------|-------|-----------|
 | Azure AD / PBI | Expiração do Client Secret | Alerta 60 dias antes; rotação sem downtime |
-| Power BI API | Rate limiting (throttling) | Cache de tokens no Redis |
+| Power BI API | Rate limiting (throttling) | Cache temporário de tokens e backoff em caso de 429 |
 | Power BI API | Indisponibilidade do serviço | Graceful degradation; mensagem amigável |
 | E-mail transacional | E-mails na caixa de spam | SPF + DKIM + DMARC configurados |
 | Azure AD SSO (v2.0) | Usuário SSO vs. usuário manual | Política de deduplicação por e-mail |

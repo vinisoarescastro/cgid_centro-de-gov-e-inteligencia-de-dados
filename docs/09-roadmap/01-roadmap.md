@@ -36,16 +36,16 @@ Infra    Permissões     Workspaces  Exceções     Dashboard   Ajustes    MVP v
 |------|-----------|------------|
 | Repositório configurado | Monorepo com frontend/ e backend/ | Dev |
 | CI/CD básico | GitHub Actions: lint, testes, build | Dev |
-| Prisma Schema | Schema inicial do banco com migrations base | Dev Backend |
+| Modelos SQLAlchemy | Schema inicial do banco compatível com SQL Server | Dev Backend |
 | Seed de desenvolvimento | Dados de exemplo (baseados no mock do protótipo) | Dev Backend |
 | App Registration Azure | Service Principal criado com permissões PBI | TI / Azure Admin |
 | Power BI workspace | Workspaces de desenvolvimento configurados no PBI Service | TI / Power BI Admin |
 | Ambientes cloud | Staging e Produção provisionados | Infra |
-| Chaves RSA | Par de chaves RSA 2048 bits para JWT gerado | Dev Backend |
+| Chave JWT | Chave secreta forte para assinatura HS256 do JWT | Dev Backend |
 | README de onboarding | Como subir o ambiente em < 5 min | Dev |
 
 ### Critério de conclusão do Sprint 0
-> `docker-compose up` sobe o ambiente completo; `/health` retorna 200; seed executado; pipeline CI verde.
+> `docker-compose up` sobe o ambiente completo; `/saude` retorna 200; seed executado; pipeline CI verde.
 
 ---
 
@@ -57,9 +57,9 @@ Infra    Permissões     Workspaces  Exceções     Dashboard   Ajustes    MVP v
 
 | # | Feature | Módulo |
 |---|---------|--------|
-| 1 | Login com e-mail/senha (JWT RS256) | Auth |
+| 1 | Login com e-mail/senha (JWT HS256) | Auth |
 | 2 | Refresh token automático (httpOnly cookie) | Auth |
-| 3 | Logout com invalidação de token no Redis | Auth |
+| 3 | Logout com revogação da sessão no SQL Server | Auth |
 | 4 | Bloqueio automático após 5 tentativas | Auth |
 | 5 | Rate limiting por IP | Auth |
 | 6 | Tela de boas-vindas personalizada por perfil | Frontend |
@@ -67,12 +67,12 @@ Infra    Permissões     Workspaces  Exceções     Dashboard   Ajustes    MVP v
 | 8 | Status de usuário: ativar, inativar, bloquear, desbloquear | Users |
 | 9 | Matriz de permissões por perfil | Permissions |
 | 10 | Override de permissão por usuário individual | Permissions |
-| 11 | Guards: JwtAuthGuard, RolesGuard, PermissionsGuard | Backend |
-| 12 | Headers de segurança (Helmet.js) | Backend |
+| 11 | Dependências/guards FastAPI: autenticação, perfil e permissões | Backend |
+| 12 | Headers de segurança via middleware FastAPI | Backend |
 | 13 | Hash bcrypt nas senhas | Auth |
 
 ### Critério de conclusão
-> Usuário consegue fazer login; token expira em 1h; refresh funciona; 5 tentativas bloqueiam a conta; RBAC impede acesso de Operador a módulos Admin.
+> Usuário consegue fazer login; token expira em 1h; refresh funciona via cookie httpOnly e sessão no SQL Server; 5 tentativas bloqueiam a conta; RBAC impede acesso de Operador a módulos Admin.
 
 ---
 
@@ -85,7 +85,7 @@ Infra    Permissões     Workspaces  Exceções     Dashboard   Ajustes    MVP v
 | # | Feature | Módulo |
 |---|---------|--------|
 | 1 | Geração de token de embed server-side (Azure AD + PBI API) | PBI |
-| 2 | Cache de tokens PBI no Redis (55 min TTL) | PBI |
+| 2 | Estratégia de cache/renovação de tokens PBI sem expor credenciais ao frontend | PBI |
 | 3 | Renderização inline via powerbi-client SDK | Frontend / PBI |
 | 4 | Renovação automática de token de embed | PBI |
 | 5 | CRUD de workspaces (Admin) | Workspaces |
@@ -93,7 +93,7 @@ Infra    Permissões     Workspaces  Exceções     Dashboard   Ajustes    MVP v
 | 7 | Listagem de workspaces filtrada por perfil | Workspaces |
 | 8 | Detalhes do workspace com tiles e relatórios | Workspaces |
 | 9 | Filtros de relatórios (workspace, categoria, status) | Reports |
-| 10 | Relatórios draft invisíveis para Operador | Reports |
+| 10 | Relatórios `rascunho` invisíveis para Operador | Reports |
 | 11 | Favoritos (marcar/desmarcar/listar) | Favorites |
 | 12 | Associação usuário → workspace → relatórios (Admin) | Permissions |
 
@@ -140,7 +140,7 @@ Infra    Permissões     Workspaces  Exceções     Dashboard   Ajustes    MVP v
 | 7 | Status dos serviços integrados | Dashboard |
 | 8 | Home adaptada por perfil (admin vs. operador) | Dashboard |
 | 9 | Painel de segurança com checklist | Security |
-| 10 | Health checks (/health/live, /health/ready) | Backend |
+| 10 | Health checks (`/saude`, `/saude/banco`) | Backend |
 
 ### Critério de conclusão
 > Todos os eventos de login, bloqueio, alteração de permissão e acesso PBI registrados no log; filtros funcionando; dashboard exibe KPIs corretos.
@@ -160,9 +160,9 @@ Infra    Permissões     Workspaces  Exceções     Dashboard   Ajustes    MVP v
 | 3 | Indicador de ambiente (produção/homologação) | Global |
 | 4 | Busca global de relatórios | Reports |
 | 5 | Breadcrumbs de navegação | Frontend / Layout |
-| 6 | Respostas de erro padronizadas (HttpExceptionFilter) | Backend |
+| 6 | Respostas de erro padronizadas com handlers de exceção FastAPI | Backend |
 | 7 | Documentação OpenAPI (Swagger) completa | Backend |
-| 8 | Variáveis de ambiente validadas no startup (Joi/Zod) | Backend |
+| 8 | Variáveis de ambiente validadas no startup (Pydantic Settings) | Backend |
 
 ### Critério de conclusão
 > Super Admin configura PBI e testa conexão; todos os endpoints documentados no Swagger; busca de relatório funciona.

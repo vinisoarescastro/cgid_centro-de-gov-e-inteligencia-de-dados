@@ -56,11 +56,11 @@ Implementa um fluxo de três telas:
 Usuários disponíveis no mock:
 | E-mail | Perfil | Acesso |
 |--------|--------|--------|
-| admin@btsa.com | Super Admin | Total |
-| ana@btsa.com | Admin | Total |
-| carlos@btsa.com | Gerente | Workspace Controladoria |
-| mariana@btsa.com | Operador | Workspace Marketing |
-| pedro@btsa.com | Operador | Workspace SAC |
+| admin@bt.com | Super Admin | Total |
+| ana@bt.com | Admin | Total |
+| carlos@bt.com | Gerente | Workspace Controladoria |
+| mariana@bt.com | Operador | Workspace Marketing |
+| pedro@bt.com | Operador | Workspace SAC |
 
 ### 2.4 RBAC Implementado no Frontend
 
@@ -97,7 +97,7 @@ As funções `canAccessWs()` e `canAccessReport()` verificam permissões antes d
 Os dados de mock são detalhados e representativos do domínio real:
 - 6 usuários com perfis distintos
 - 4 workspaces (Administrativo, Controladoria, Marketing, SAC)
-- 5 relatórios com categorias (Financeiro, Operacional, Estratégico) e status (published/draft)
+- 5 relatórios com categorias (Financeiro, Operacional, Estratégico) e status (`publicado`/`rascunho`)
 - 4 grupos de exceção
 - 4 exceções de acesso ativas
 - Histórico de logs de auditoria com IPs, timestamps e detalhes
@@ -162,7 +162,7 @@ Não há pipeline de integração contínua, entrega contínua, linting automati
 | O design system CSS é um ativo valioso | Migrar as variáveis CSS para tokens de design (ex: Tailwind config ou CSS-in-JS) mantendo a identidade visual |
 | A estrutura de navegação SPA está bem definida | Usar como base para o roteamento React Router v6 |
 | Os dados mockados são coerentes com o domínio | Usar como referência para seed do banco de dados de desenvolvimento |
-| A lógica de RBAC front-end pode servir de guia | Reimplementar como middleware server-side usando guards NestJS |
+| A lógica de RBAC front-end pode servir de guia | Reimplementar como dependências/guards server-side no FastAPI |
 | O checklist de segurança é bem pensado | Transformar em testes automatizados de segurança (SAST/DAST) |
 
 ---

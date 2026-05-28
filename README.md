@@ -17,7 +17,9 @@ Portal web para centralizar relatórios **Power BI Embedded** com controle granu
 | Servidor | uvicorn |
 | PBI Embed | powerbi-client SDK (Microsoft) |
 
-## Estrutura do Repositório
+## Estrutura Prevista do Repositório
+
+> Estado atual: este repositório ainda contém apenas documentação e o protótipo visual em `prototipo/portal_v4_8.html`. A estrutura abaixo é a referência planejada para o início do desenvolvimento.
 
 ```
 cgid_centro-de-gov-e-inteligencia-de-dados/
@@ -63,6 +65,8 @@ cgid_centro-de-gov-e-inteligencia-de-dados/
 ```
 
 ## Início Rápido (Desenvolvimento Local)
+
+> Estes comandos passam a valer após a criação das pastas `backend/`, `frontend/` e dos arquivos de ambiente correspondentes.
 
 ### Pré-requisitos
 

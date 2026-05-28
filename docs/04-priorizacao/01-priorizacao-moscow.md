@@ -26,75 +26,75 @@ A priorização segue o framework **MoSCoW**:
 
 ### Autenticação e Segurança
 
-- [x] Login com e-mail e senha + JWT (access + refresh token)
-- [x] Armazenamento de senha com bcrypt (salt ≥ 12)
-- [x] Refresh token em `httpOnly cookie`
-- [x] Bloqueio automático após 5 tentativas de login inválido
-- [x] Validação de status do usuário a cada requisição
-- [x] Logout com invalidação de token
-- [x] Rate limiting por IP
+- [ ] Login com e-mail e senha + JWT (access + refresh token)
+- [ ] Armazenamento de senha com bcrypt (salt ≥ 12)
+- [ ] Refresh token em `httpOnly cookie`
+- [ ] Bloqueio automático após 5 tentativas de login inválido
+- [ ] Validação de status do usuário a cada requisição
+- [ ] Logout com invalidação de token
+- [ ] Rate limiting por IP
 
 ### Gestão de Usuários
 
-- [x] CRUD completo de usuários (criar, editar, ativar, inativar, bloquear, desbloquear)
-- [x] Associação de usuários a workspaces e relatórios
-- [x] Listagem com filtros por status, workspace e perfil
-- [x] Exibição do último acesso
+- [ ] CRUD completo de usuários (criar, editar, ativar, inativar, bloquear, desbloquear)
+- [ ] Associação de usuários a workspaces e relatórios
+- [ ] Listagem com filtros por status, workspace e perfil
+- [ ] Exibição do último acesso
 
 ### Permissões (RBAC)
 
-- [x] Controle por perfil (Super Admin, Admin, Gerente, Operador, Visitante)
-- [x] Matriz de permissões (Visualizar, Criar, Editar, Excluir, Exportar, Gerenciar)
-- [x] Override por usuário individual
-- [x] Controle PBI por workspace (total vs. relatórios específicos)
-- [x] Registro de alterações de permissão no log de auditoria
+- [ ] Controle por perfil (Super Admin, Admin, Gerente, Operador, Visitante)
+- [ ] Matriz de permissões (Visualizar, Criar, Editar, Excluir, Exportar, Gerenciar)
+- [ ] Override por usuário individual
+- [ ] Controle PBI por workspace (total vs. relatórios específicos)
+- [ ] Registro de alterações de permissão no log de auditoria
 
 ### Power BI Embedded
 
-- [x] Geração de tokens de embed exclusivamente no backend
-- [x] Renderização inline de relatórios via powerbi-client SDK
-- [x] Renovação automática de tokens antes do vencimento
-- [x] Validação de permissão RBAC antes de gerar token
+- [ ] Geração de tokens de embed exclusivamente no backend
+- [ ] Renderização inline de relatórios via powerbi-client SDK
+- [ ] Renovação automática de tokens antes do vencimento
+- [ ] Validação de permissão RBAC antes de gerar token
 
 ### Workspaces e Relatórios
 
-- [x] CRUD de workspaces e relatórios
-- [x] Listagem filtrada por workspace, categoria e status
-- [x] Detalhes do workspace com tiles e estatísticas
-- [x] Relatórios `draft` invisíveis para Operadores
+- [ ] CRUD de workspaces e relatórios
+- [ ] Listagem filtrada por workspace, categoria e status
+- [ ] Detalhes do workspace com tiles e estatísticas
+- [ ] Relatórios `rascunho` invisíveis para Operadores
 
 ### Controle de Expediente
 
-- [x] Configuração de horário por dia da semana
-- [x] Bloqueio padrão fora do expediente
-- [x] Grupos de exceção com janela de horário
-- [x] Exceções individuais por usuário
+- [ ] Configuração de horário por dia da semana
+- [ ] Bloqueio padrão fora do expediente
+- [ ] Grupos de exceção com janela de horário
+- [ ] Exceções individuais por usuário
 
 ### Auditoria
 
-- [x] Log imutável (append-only) de todos os eventos relevantes
-- [x] Campos: timestamp, usuário, IP, módulo, tipo, detalhe, estado anterior/novo
-- [x] Filtros por período, usuário, módulo, tipo e IP
-- [x] Alertas de eventos críticos no dashboard
+- [ ] Log imutável (append-only) de todos os eventos relevantes
+- [ ] Campos: timestamp, usuário, IP, módulo, tipo, detalhe, estado anterior/novo
+- [ ] Filtros por período, usuário, módulo, tipo e IP
+- [ ] Alertas de eventos críticos no dashboard
 
 ### Dashboard e UX
 
-- [x] Home adaptada por perfil (admin vs. operador)
-- [x] KPIs globais para admins
-- [x] Tela de boas-vindas personalizada
-- [x] Favoritos por usuário
-- [x] Busca de relatórios
-- [x] Interface responsiva (desktop + mobile)
+- [ ] Home adaptada por perfil (admin vs. operador)
+- [ ] KPIs globais para admins
+- [ ] Tela de boas-vindas personalizada
+- [ ] Favoritos por usuário
+- [ ] Busca de relatórios
+- [ ] Interface responsiva (desktop + mobile)
 
 ### Configurações
 
-- [x] Configuração de credenciais Power BI (exclusivo Super Admin)
-- [x] Indicador de ambiente (produção/homologação)
+- [ ] Configuração de credenciais Power BI (exclusivo Super Admin)
+- [ ] Indicador de ambiente (produção/homologação)
 
 ### Infraestrutura
 
-- [x] API REST documentada (Swagger/OpenAPI)
-- [x] Pipeline CI/CD básico (lint + testes + build)
+- [ ] API REST documentada (Swagger/OpenAPI)
+- [ ] Pipeline CI/CD básico (lint + testes + build)
 
 ---
 

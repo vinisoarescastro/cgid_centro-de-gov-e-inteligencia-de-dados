@@ -99,9 +99,9 @@ Browser              FastAPI API           SQL Server
   │                             │── criar_token_acesso(sub=id)       │
   │                             │── UPDATE usuario SET ultimo_login  ──▶│
   │                             │── INSERT logs_auditoria ─────────────▶│
-  │◀── 200 { token_acesso, tipo_token, perfil, nome }                │
+  │◀── 200 { token_acesso, tipo_token, perfil, nome } + Set-Cookie refresh_token │
   │                             │                │
-  │  [Frontend: localStorage.setItem('token_acesso', ...)]
+  │  [Frontend: AuthContext guarda token_acesso em memória]
 ```
 
 ---
@@ -139,7 +139,7 @@ Browser              FastAPI API           SQL Server
   │                                │── INSERT logs_auditoria ────────▶│
   │◀── 200 { "mensagem": "Sessão encerrada" }       │
   │                                │                │
-  │  [Frontend: localStorage.removeItem('token_acesso')]
+  │  [Frontend: AuthContext limpa token_acesso da memória]
   │  [Frontend: navegar('/login')]
 ```
 
@@ -167,10 +167,10 @@ flowchart LR
 
 ```
 ┌──────────────────────────────────────────────────────────┐
-│                    PORTAL BRASILTERRENOS                  │
+│                    PORTAL BRASILTERRENOS                 │
 │                                                          │
 │  ┌─────────────────────────────────────────────────────┐ │
-│  │ MÓDULOS DE CONSUMO                                   │ │
+│  │ MÓDULOS DE CONSUMO                                  │ │
 │  │  ○ Login / Logout         Todos os usuários ────────┼─┤
 │  │  ○ Visualizar relatórios  Operador+ ────────────────┼─┤
 │  │  ○ Navegar workspaces     Operador+ ────────────────┼─┤
@@ -178,7 +178,7 @@ flowchart LR
 │  └─────────────────────────────────────────────────────┘ │
 │                                                          │
 │  ┌─────────────────────────────────────────────────────┐ │
-│  │ MÓDULOS ADMINISTRATIVOS                              │ │
+│  │ MÓDULOS ADMINISTRATIVOS                             │ │
 │  │  ○ Gerenciar usuários     Administrador+ ───────────┼─┤
 │  │  ○ Gerenciar permissões   Administrador+ ───────────┼─┤
 │  │  ○ Gerenciar workspaces   Administrador+ ───────────┼─┤

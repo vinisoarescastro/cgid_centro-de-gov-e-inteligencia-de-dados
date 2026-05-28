@@ -39,7 +39,7 @@
 │  └────────────────┘                 │   - permissoes.py        │     │
 │                                     │   - auditoria.py         │     │
 │                                     └──────────────┬───────────┘     │
-│                                                   │ pyodbc            │
+│                                                   │ pyodbc           │
 │                                     ┌─────────────▼──────────────┐   │
 │                                     │  SQL Server (on-premise)   │   │
 │                                     │  ODBC Driver 17            │   │
@@ -74,8 +74,8 @@
 **Regras do Frontend:**
 - Sem lógica de negócio crítica no cliente
 - Toda validação de segurança ocorre no backend (RBAC, permissões)
-- Token JWT armazenado no `localStorage` com a chave `token_acesso`
-- Em caso de 401 (token inválido/expirado): remove token e redireciona para `/login`
+- Token JWT mantido em memória pelo `AuthContext`; o refresh token fica em cookie `httpOnly`
+- Em caso de 401 por expiração: tenta renovar em `/api/v1/auth/renovar`; se falhar, redireciona para `/login`
 
 ---
 
@@ -95,7 +95,7 @@ backend/
 ├── auth.py           ← funções de JWT e bcrypt
 ├── dependencies.py   ← funções reutilizáveis: obter_db, obter_usuario_atual, exigir_perfil
 └── routers/
-    ├── auth.py       ← POST /auth/entrar, POST /auth/sair, GET /auth/eu
+    ├── auth.py       ← POST /auth/entrar, POST /auth/renovar, POST /auth/sair, GET /auth/eu
     ├── usuarios.py   ← CRUD de usuários
     ├── workspaces.py ← CRUD de workspaces + concessão de acesso
     ├── relatorios.py ← CRUD de relatórios + favoritos
@@ -126,6 +126,7 @@ Response
 - Conexão via `pyodbc` + `ODBC Driver 17 for SQL Server`
 - ORM: SQLAlchemy 2.0 com dialeto `mssql+pyodbc`
 - Tabela `logs_auditoria` com trigger `INSTEAD OF` que impede UPDATE e DELETE
+- Tabela `sessoes_autenticacao` para refresh tokens, rotação e revogação de sessão
 - Índices nas colunas de busca mais frequentes
 
 **Criação das tabelas:**
@@ -143,18 +144,26 @@ Base.metadata.create_all(bind=engine)
 ```
 Login bem-sucedido:
   token_acesso → JWT HS256, 60 minutos, retornado no body
+  refresh_token → valor opaco, 24 horas, salvo em cookie httpOnly
+  sessoes_autenticacao → sessão ativa associada ao token
 
 A cada requisição:
   Authorization: Bearer <token_acesso>
 
+Renovação:
+  POST /api/v1/auth/renovar
+  → Backend valida cookie httpOnly e sessão ativa no SQL Server
+  → Retorna novo token_acesso e rotaciona refresh_token
+
 Logout:
   POST /api/v1/auth/sair
   → Registro no log de auditoria
-  → Frontend remove 'token_acesso' do localStorage
+  → Backend revoga a sessão no SQL Server e limpa o cookie httpOnly
+  → Frontend limpa o token_acesso mantido em memória
 
 Expiração:
   → Backend retorna 401
-  → Frontend remove token e redireciona para /login
+  → Frontend tenta renovar; se não conseguir, redireciona para /login
 ```
 
 ### Estrutura do JWT (token_acesso)
@@ -162,6 +171,8 @@ Expiração:
 ```json
 {
   "sub": "uuid-do-usuario",
+  "sid": "uuid-da-sessao",
+  "perfil": "operador",
   "exp": 1700003600
 }
 ```
@@ -181,6 +192,12 @@ def obter_db():
 def obter_usuario_atual(credenciais, banco):
     # Valida Bearer token → retorna objeto Usuario
     payload = decodificar_token(credenciais.credentials)
+    sessao = banco.query(SessaoAutenticacao).filter(
+        SessaoAutenticacao.id == payload["sid"],
+        SessaoAutenticacao.revogado_em.is_(None),
+    ).first()
+    if not sessao:
+        raise HTTPException(status_code=401)
     usuario = banco.query(Usuario).filter(Usuario.id == payload["sub"]).first()
     return usuario
 
@@ -200,6 +217,7 @@ def exigir_perfil(*perfis):
 ### Autenticação
 ```
 POST   /api/v1/auth/entrar     → { token_acesso, tipo_token, perfil, nome }
+POST   /api/v1/auth/renovar    → { token_acesso, tipo_token }
 POST   /api/v1/auth/sair       → 200
 GET    /api/v1/auth/eu         → dados do usuário logado
 ```

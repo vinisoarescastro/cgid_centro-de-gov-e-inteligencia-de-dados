@@ -1,6 +1,6 @@
 # Objetivo, Problemas e Necessidades do Negócio
 
-> **Documento:** 01-visao-geral/02-objetivo-e-problemas.md  
+> **Documento:** 01-visao-geral/02-objetivo-e-problema.md
 > **Status:** Rascunho  
 > **Criado em:** Maio/2026  
 > **Atualizado em:** Maio/2026

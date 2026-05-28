@@ -36,38 +36,39 @@
 
 ```
 access_token:
-  - Algoritmo: RS256 (assimétrico — par de chaves RSA 2048 bits)
+  - Algoritmo: HS256 (chave simétrica forte em JWT_SECRET_KEY)
   - TTL: 3600 segundos (1 hora)
-  - Payload: sub, email, role, jti, iat, exp
-  - Armazenamento: memória React (estado Zustand)
+  - Payload: sub, sid, email, perfil, iat, exp
+  - Armazenamento: memória React (AuthContext)
   - Transmissão: Authorization: Bearer <token>
 
 refresh_token:
   - Formato: UUID v4 opaco (não-decodificável)
   - TTL: 86400 segundos (24 horas)
-  - Armazenamento: Redis (mapeado ao userId + tokenId)
+  - Armazenamento: hash SHA-256 na tabela sessoes_autenticacao (SQL Server)
   - Transmissão: httpOnly; Secure; SameSite=Strict cookie
   - Rotação: a cada uso (refresh token rotation)
 
 Revogação:
-  - Logout: access_token adicionado à blocklist Redis (TTL = tempo restante)
-  - Logout: refresh_token removido do Redis
-  - Bloqueio de usuário: todos os refresh_tokens do usuário removidos do Redis
+  - Logout: sessão marcada como revogada em sessoes_autenticacao
+  - Logout: cookie httpOnly limpo no response
+  - Bloqueio de usuário: todas as sessões ativas do usuário são revogadas no SQL Server
+  - Toda requisição autenticada valida o sid do JWT contra uma sessão ativa
 ```
 
 ### 2.3 Proteção Contra Força Bruta
 
 ```
 Por conta de usuário:
-  - Contador de login_attempts na tabela users
+  - Contador de tentativas_login na tabela usuarios
   - Bloqueio automático ao atingir 5 tentativas
   - Reset do contador apenas em login bem-sucedido ou por ação do Admin
 
 Por IP (rate limiting global):
-  - 100 requisições/minuto por IP (ThrottlerGuard)
-  - 10 tentativas de login/minuto por IP (guard específico no endpoint /auth/login)
+  - 100 requisições/minuto por IP (middleware/dependência FastAPI)
+  - 10 tentativas de login/minuto por IP no endpoint /api/v1/auth/entrar
   - Resposta: HTTP 429 com Retry-After
-  - Implementação: Redis + @nestjs/throttler
+  - Implementação inicial: contador em memória por processo ou tabela SQL Server; Redis pode ser adicionado em v2 para múltiplas instâncias
 
 Proteção adicional:
   - Delay artificial de 300–500ms em respostas de login (evitar timing attacks)
@@ -83,14 +84,14 @@ Proteção adicional:
 ```
 Toda requisição autenticada passa por:
 
-1. JwtAuthGuard      → Token válido? Não expirado? Na blocklist?
-2. UserStatusGuard   → Usuário ainda ativo (não bloqueado/inativado)?
-3. ScheduleGuard     → Dentro do horário de expediente (ou tem exceção)?
-4. RolesGuard        → Perfil tem acesso ao endpoint?
-5. PermissionsGuard  → Permissão granular (módulo × ação)?
-6. ResourceGuard     → Recurso específico pertence ao escopo do usuário?
+1. obter_usuario_atual → Token válido? Não expirado? Sessão ativa no SQL Server?
+2. validar_status      → Usuário ainda ativo (não bloqueado/inativado)?
+3. validar_expediente  → Dentro do horário de expediente (ou tem exceção)?
+4. exigir_perfil       → Perfil tem acesso ao endpoint?
+5. exigir_permissao    → Permissão granular (módulo × ação)?
+6. validar_recurso     → Recurso específico pertence ao escopo do usuário?
 
-Se qualquer guard falhar → 403 Forbidden + registro em audit_logs
+Se qualquer etapa falhar → 403 Forbidden + registro em logs_auditoria
 ```
 
 ### 3.2 Prevenção de Escalada de Privilégios
@@ -116,29 +117,25 @@ Se qualquer guard falhar → 403 Forbidden + registro em audit_logs
 
 ## 5. Headers de Segurança HTTP
 
-Configurados via **Helmet.js** no NestJS:
+Configurados via middleware no **FastAPI** ou no proxy reverso (NGINX/IIS):
 
-```typescript
-app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'nonce-{random}'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],  // ajustar conforme design system
-      imgSrc: ["'self'", "data:", "https:"],
-      connectSrc: ["'self'", "https://api.powerbi.com"],
-      frameSrc: ["'self'", "https://app.powerbi.com"],
-      fontSrc: ["'self'", "https://fonts.gstatic.com"],
-      objectSrc: ["'none'"],
-      upgradeInsecureRequests: [],
-    },
-  },
-  hsts: { maxAge: 31536000, includeSubDomains: true, preload: true },
-  xFrameOptions: { action: 'sameorigin' },  // permite iframe do PBI no mesmo domínio
-  noSniff: true,                             // X-Content-Type-Options: nosniff
-  referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
-  crossOriginEmbedderPolicy: false,          // necessário para embed PBI
-}));
+```python
+@app.middleware("http")
+async def adicionar_headers_seguranca(request, call_next):
+    response = await call_next(request)
+    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains; preload"
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "SAMEORIGIN"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Content-Security-Policy"] = (
+        "default-src 'self'; "
+        "connect-src 'self' https://api.powerbi.com; "
+        "frame-src 'self' https://app.powerbi.com; "
+        "img-src 'self' data: https:; "
+        "font-src 'self' https://fonts.gstatic.com; "
+        "object-src 'none'"
+    )
+    return response
 ```
 
 ---
@@ -148,12 +145,12 @@ app.use(helmet({
 | Vulnerabilidade | Mitigação |
 |----------------|-----------|
 | **A01: Broken Access Control** | Guards no backend; RBAC server-side; sem lógica de autorização no frontend |
-| **A02: Cryptographic Failures** | bcrypt, RS256, TLS 1.3, secrets em cofre |
-| **A03: Injection** | Prisma ORM com queries parametrizadas; class-validator em todos os DTOs |
+| **A02: Cryptographic Failures** | bcrypt, HS256 com chave forte, TLS 1.3, secrets em cofre |
+| **A03: Injection** | SQLAlchemy com queries parametrizadas; validação Pydantic em todos os schemas |
 | **A04: Insecure Design** | Fail-secure; least privilege; arquitetura em camadas |
-| **A05: Security Misconfiguration** | Helmet.js; variáveis de ambiente; sem defaults inseguros |
+| **A05: Security Misconfiguration** | Headers via FastAPI/proxy; variáveis de ambiente; sem defaults inseguros |
 | **A06: Vulnerable Components** | `npm audit` no CI; Dependabot alerts; atualizações mensais |
-| **A07: Auth Failures** | JWT RS256; refresh rotation; blocklist; brute force protection |
+| **A07: Auth Failures** | JWT HS256; refresh rotation; sessão revogável no SQL Server; brute force protection |
 | **A08: Software Integrity** | Lockfile (package-lock.json); SAST no CI; verificação de integridade de imagens |
 | **A09: Logging Failures** | Auditoria imutável; logs estruturados; alertas de eventos críticos |
 | **A10: SSRF** | Whitelist de URLs externas; sem fetch de URLs fornecidas pelo usuário |
@@ -168,7 +165,7 @@ app.use(helmet({
 | Client Secret PBI | Criptografado com AES-256 antes de salvar; chave no cofre de segredos |
 | MFA Secret (TOTP) | Criptografado antes de salvar |
 | Logs de auditoria | Dados de PII minimizados (IP, nome, e-mail — base legal documentada) |
-| Refresh tokens | Hash SHA-256 antes de salvar no Redis |
+| Refresh tokens | Hash SHA-256 antes de salvar em `sessoes_autenticacao` |
 | Backups do banco | Criptografados com chave gerenciada pelo provedor cloud |
 
 ---
@@ -206,7 +203,7 @@ Pre-commit hook: detect-secrets
 | Service Principal | Apenas permissões mínimas necessárias no Azure |
 | Client Secret | Nunca no frontend; sempre em variável de ambiente criptografada |
 | Tokens de embed | Gerados server-side; TTL de 1h; sem reutilização entre usuários |
-| Cache de tokens | Por userId + reportId no Redis; não compartilhado |
+| Cache de tokens | Por usuário + relatório em cache temporário seguro no backend; Redis apenas se houver múltiplas instâncias em v2 |
 | Whitelist de embeds | CSP `frameSrc` restringe apenas domínios oficiais do PBI |
 | RLS (v2.0) | Username do usuário passado no token para RLS no dataset |
 

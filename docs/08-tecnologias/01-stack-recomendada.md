@@ -149,10 +149,12 @@ frontend/src/
 **Como funciona a autenticação:**
 1. Usuário envia `email` + `senha` para `POST /api/v1/auth/entrar`
 2. Backend verifica a senha com bcrypt
-3. Gera um token JWT assinado com a chave secreta (`JWT_SECRET_KEY`)
-4. Frontend armazena o token no `localStorage` com a chave `token_acesso`
-5. Cada requisição subsequente envia o token no header `Authorization: Bearer <token>`
-6. O FastAPI valida o token automaticamente via a dependência `obter_usuario_atual`
+3. Backend cria uma sessão em `sessoes_autenticacao`
+4. Gera um token JWT HS256 assinado com a chave secreta (`JWT_SECRET_KEY`)
+5. Envia um refresh token opaco em cookie `httpOnly`
+6. Frontend mantém o `token_acesso` em memória via `AuthContext`
+7. Cada requisição subsequente envia o token no header `Authorization: Bearer <token>`
+8. O FastAPI valida o token e a sessão ativa via a dependência `obter_usuario_atual`
 
 ### 4.3 Estrutura de Arquivos (Backend)
 
@@ -166,7 +168,7 @@ backend/
 ├── auth.py           ← funções de JWT e bcrypt
 ├── dependencies.py   ← funções reutilizáveis: obter_db, obter_usuario_atual, exigir_perfil
 ├── routers/
-│   ├── auth.py       ← POST /auth/entrar, POST /auth/sair, GET /auth/eu
+│   ├── auth.py       ← POST /auth/entrar, POST /auth/renovar, POST /auth/sair, GET /auth/eu
 │   ├── usuarios.py   ← CRUD de usuários
 │   ├── workspaces.py ← CRUD de workspaces + concessão de acesso
 │   ├── relatorios.py ← CRUD de relatórios + favoritos
@@ -182,6 +184,7 @@ backend/
 | Método | Endpoint | Função |
 |---|---|---|
 | POST | `/api/v1/auth/entrar` | Login |
+| POST | `/api/v1/auth/renovar` | Renovar token de acesso via cookie httpOnly |
 | POST | `/api/v1/auth/sair` | Logout |
 | GET | `/api/v1/auth/eu` | Dados do usuário logado |
 | GET | `/api/v1/usuarios` | Listar usuários |
@@ -243,6 +246,7 @@ mssql+pyodbc://USUARIO:SENHA@SERVIDOR\INSTANCIA/btportal?driver=ODBC+Driver+17+f
 | `grupos_excecao` | Grupos com acesso fora do expediente |
 | `membros_grupo_excecao` | Usuários em grupos de exceção |
 | `favoritos` | Relatórios favoritos por usuário |
+| `sessoes_autenticacao` | Sessões, refresh tokens e revogação de logout |
 | `logs_auditoria` | Registro imutável de todas as ações |
 | `configuracoes_sistema` | Parâmetros globais do sistema |
 
