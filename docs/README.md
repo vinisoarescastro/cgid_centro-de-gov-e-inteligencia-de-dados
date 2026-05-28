@@ -1,4 +1,4 @@
-# BrasilTerrenos — Portal Corporativo
+# CGID - Centro de Governança e Inteligência de Dados
 ## Documentação Técnica e de Produto
 
 > **Versão:** 1.0.0  

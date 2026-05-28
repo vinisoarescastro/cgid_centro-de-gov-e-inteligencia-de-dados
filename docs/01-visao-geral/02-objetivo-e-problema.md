@@ -9,7 +9,7 @@
 
 ## 1. Objetivo Principal do Sistema
 
-O **BrasilTerrenos Portal Corporativo** tem como missão ser a **camada de governança e consumo unificado de inteligência analítica** da organização, provendo:
+O **CGID - Centro de Governança e Inteligência de Dados** tem como missão ser a **camada de governança e consumo unificado de inteligência analítica** da organização, provendo:
 
 > *"Uma plataforma web centralizada que controla, de forma granular e auditável, o acesso dos colaboradores aos relatórios Power BI Embedded, aplicando políticas de segurança corporativa, gestão de identidade baseada em perfis (RBAC), restrições temporais de acesso e rastreabilidade completa de todas as operações realizadas no sistema."*
 

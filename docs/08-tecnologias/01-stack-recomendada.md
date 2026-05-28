@@ -320,7 +320,7 @@ URL_FRONTEND=http://localhost:5173
 **`frontend/.env`**
 ```env
 VITE_API_BASE_URL=http://localhost:3001/api/v1
-VITE_NOME_APP=Portal Analítico
+VITE_NOME_APP=CGID - Centro de Governança e Inteligência de Dados
 VITE_AMBIENTE=development
 ```
 

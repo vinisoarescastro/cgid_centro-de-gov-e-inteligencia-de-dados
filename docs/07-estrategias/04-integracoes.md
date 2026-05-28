@@ -63,7 +63,7 @@ Portal Backend usa o token para chamar a API do Power BI
 ### Setup Necessário no Azure Portal
 
 1. Criar App Registration no Azure AD:
-   - Nome: `BrasilTerrenos Portal`
+   - Nome: `CGID - Centro de Governança e Inteligência de Dados`
    - Tipo: `Web application`
    - Redirect URIs: não obrigatório para client_credentials
 2. Gerar Client Secret (anotar com validade de 24 meses)

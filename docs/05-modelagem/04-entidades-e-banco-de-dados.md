@@ -391,7 +391,7 @@ CREATE TABLE configuracoes_sistema (
 
 -- Registros iniciais (seed)
 INSERT INTO configuracoes_sistema (chave, valor, eh_secreto) VALUES
-  ('nome_portal',          '"Portal Analítico"', 0),
+  ('nome_portal',          '"CGID - Centro de Governança e Inteligência de Dados"', 0),
   ('ambiente',             '"producao"',         0),
   ('pbi_client_id',        '""',                 0),
   ('pbi_tenant_id',        '""',                 0),

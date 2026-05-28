@@ -9,7 +9,7 @@
 
 ## 1. Declaração de Escopo
 
-O projeto compreende o desenvolvimento do **BrasilTerrenos Portal Corporativo**, uma aplicação web que centraliza o acesso a relatórios Power BI Embedded com controle granular de permissões, restrições temporais de acesso, auditoria completa e painel administrativo.
+O projeto compreende o desenvolvimento do **CGID - Centro de Governança e Inteligência de Dados**, uma aplicação web que centraliza o acesso a relatórios Power BI Embedded com controle granular de permissões, restrições temporais de acesso, auditoria completa e painel administrativo.
 
 ---
 

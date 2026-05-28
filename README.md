@@ -1,4 +1,4 @@
-# PCIA — Portal Corporativo de Inteligência Analítica
+# CGID - Centro de Governança e Inteligência de Dados
 
 Portal web para centralizar relatórios **Power BI Embedded** com controle granular de permissões, auditoria completa e gestão de acesso corporativo.
 
@@ -20,7 +20,7 @@ Portal web para centralizar relatórios **Power BI Embedded** com controle granu
 ## Estrutura do Repositório
 
 ```
-portal_analytcs_brasil_terrenos/
+cgid_centro-de-gov-e-inteligencia-de-dados/
 ├── backend/                    # API Python + FastAPI
 │   ├── main.py                 # Ponto de entrada — inicializa o FastAPI
 │   ├── config.py               # Variáveis de ambiente (pydantic-settings)
