@@ -12,21 +12,21 @@
 ```
 ┌──────────────────────────────────────────────────────────────────┐
 │                         FRONTEND                                  │
-│   React 18 + JavaScript + Vite + TanStack Query                  │
-│   React Context (auth) + React Router v6 + Axios                 │
-│   React Hook Form + Yup + powerbi-client SDK                     │
+│   React 19 + JavaScript + Vite 8 + React Router v7              │
+│   React Context (auth) + fetch nativo                            │
+│   CSS modular por página (sem framework CSS)                     │
 └──────────────────────────────────────────────────────────────────┘
                               │ HTTP / REST (JSON)
 ┌──────────────────────────────────────────────────────────────────┐
 │                          BACKEND                                  │
 │   Python 3.12 + FastAPI + SQLAlchemy 2.0 + Pydantic v2          │
-│   python-jose (JWT HS256) + passlib/bcrypt + uvicorn             │
+│   passlib/bcrypt + uvicorn                                       │
 └──────────────────────────────────────────────────────────────────┘
-                              │ pyodbc
+                              │ SQLAlchemy ORM
 ┌──────────────────────────────────────────────────────────────────┐
 │                       BANCO DE DADOS                              │
-│   SQL Server (Developer local / on-premise corporativo)          │
-│   ODBC Driver 17 for SQL Server                                  │
+│   SQLite (desenvolvimento local — zero configuração)             │
+│   SQL Server (produção corporativa — on-premise)                 │
 └──────────────────────────────────────────────────────────────────┘
 ```
 
@@ -40,10 +40,11 @@ Este projeto é desenvolvido por uma pessoa em processo de aprendizado, com obje
 |---|---|
 | Linguagem mais acessível para iniciantes | Python no backend |
 | Framework web simples e com documentação excelente | FastAPI |
-| Banco obrigatório pelo ambiente corporativo | SQL Server |
+| Zero configuração em desenvolvimento | SQLite em vez de SQL Server |
+| Migração transparente para produção | SQLAlchemy abstrai o banco — trocar SQLite por SQL Server exige mudar só a connection string |
 | Estado de autenticação sem biblioteca extra | React Context nativo |
-| Validação de formulários mais legível | Yup (sintaxe mais direta que Zod) |
-| Sem complexidade desnecessária | Redis e BullMQ removidos da v1 |
+| HTTP sem dependência extra | fetch nativo do browser (sem Axios) |
+| Sem complexidade desnecessária | Redis, BullMQ, TanStack Query e React Hook Form removidos da v1 |
 
 ---
 
@@ -53,75 +54,61 @@ Este projeto é desenvolvido por uma pessoa em processo de aprendizado, com obje
 
 | Tecnologia | Versão | Função |
 |---|:---:|---|
-| **React** | 18.x | Framework de interface |
+| **React** | 19.x | Framework de interface |
 | **JavaScript** | ES2022+ | Linguagem padrão do ecossistema Node/React |
-| **Vite** | 5.x | Servidor de desenvolvimento e build |
-| **React Router** | 6.x | Navegação entre páginas (sem recarregar o browser) |
+| **Vite** | 8.x | Servidor de desenvolvimento e build |
+| **React Router** | 7.x | Navegação entre páginas (sem recarregar o browser) |
 
 ### 3.2 Gerenciamento de Estado
 
-| Biblioteca | Função |
+| Recurso | Função |
 |---|---|
-| **React Context** (`AuthContext`) | Estado do usuário logado — nativo do React, sem dependência extra |
-| **TanStack Query** v5 | Busca de dados da API: cache automático, loading, erro, refetch |
-| **useState** local | Estado de formulários e UI específicos de cada componente |
+| **sessionStorage** | Guarda os dados do usuário logado entre navegações |
+| **useState** local | Estado de formulários, loading, erro e UI de cada componente |
+| **useEffect + fetch** | Busca dados da API ao montar cada página |
 
-> **Por que não Zustand?** Foi removido para simplificar. O React Context cobre o único caso de estado global necessário na v1 (autenticação). Zustand pode ser adicionado futuramente se o projeto crescer.
+> **Por que não TanStack Query?** Foi removido para simplificar. O `useEffect + fetch` cobre os casos de uso da v1 sem adicionar dependências. TanStack Query pode ser adicionado futuramente quando o volume de chamadas e o cache se tornarem complexos.
 
 ### 3.3 Formulários e Validação
 
-| Biblioteca | Função |
-|---|---|
-| **React Hook Form** | Gerencia campos, erros e envio do formulário |
-| **Yup** | Define as regras de validação de forma declarativa |
-| **@hookform/resolvers** | Conecta o Yup ao React Hook Form |
+A v1 usa validação manual com `useState` diretamente nos componentes de formulário. Sem React Hook Form nem Yup na v1 — a complexidade não é necessária ainda.
 
-**Exemplo de uso:**
-```javascript
-const esquema = yup.object({
-  email: yup.string().email('Email inválido').required('Obrigatório'),
-  senha: yup.string().min(6, 'Mínimo 6 caracteres').required('Obrigatório'),
-});
-```
-
-### 3.4 Outras Bibliotecas
-
-| Biblioteca | Função |
-|---|---|
-| **Axios** | Chamadas HTTP para a API com interceptor de token JWT |
-| **React Hot Toast** | Notificações de sucesso e erro |
-| **TanStack Table** | Tabelas com ordenação e filtros |
-| **Headless UI** | Componentes acessíveis (modais, dropdowns) |
-| **powerbi-client** | Embed de relatórios Power BI (v1.1) |
-
-### 3.5 Estrutura de Arquivos (Frontend)
+### 3.4 Estrutura de Arquivos (Frontend)
 
 ```
 frontend/src/
-├── contexts/
-│   └── AuthContext.jsx       ← estado do usuário logado (useAuth)
-├── services/
-│   └── api.js                ← cliente Axios com token JWT automático
-├── layouts/
-│   └── LayoutDashboard.jsx   ← barra lateral + área de conteúdo
 ├── pages/
-│   ├── auth/
-│   │   └── PaginaLogin.jsx
-│   ├── dashboard/
-│   │   └── PaginaDashboard.jsx
-│   ├── relatorios/
-│   │   └── PaginaVisualizacaoRelatorio.jsx
-│   ├── admin/
-│   │   ├── PaginaUsuarios.jsx
-│   │   ├── PaginaWorkspaces.jsx
-│   │   ├── PaginaPermissoes.jsx
-│   │   ├── PaginaLogsAuditoria.jsx
-│   │   ├── PaginaExpediente.jsx
-│   │   └── PaginaConfiguracoes.jsx
-│   └── PaginaNaoEncontrada.jsx
-├── App.jsx                   ← definição de rotas
-└── main.jsx                  ← ponto de entrada
+│   ├── LoginPage.jsx        ← tela de login com chamada ao POST /login
+│   └── HomePage.jsx         ← home com KPIs, eventos e tabela de workspaces
+├── styles/
+│   ├── global.css           ← design tokens, reset, tipografia (Plus Jakarta Sans)
+│   ├── login.css            ← estilos da tela de login
+│   └── home.css             ← estilos do app shell: sidebar, topbar, cards, tabelas
+├── routes/
+│   └── AppRoutes.jsx        ← definição de rotas + componente PrivateRoute
+├── components/
+│   └── Avatar.jsx           ← exibe foto de perfil ou iniciais do nome/email
+├── assets/
+│   ├── logo-bt-branco.png
+│   ├── logo-bt-colorido.png
+│   ├── logo-sidebar-full.png   ← logo exibida na sidebar expandida
+│   └── logo-sidebar-icon.png   ← ícone exibido na sidebar colapsada
+├── App.jsx                  ← monta BrowserRouter + AppRoutes
+└── main.jsx                 ← ponto de entrada, importa global.css
 ```
+
+### 3.5 Design System
+
+O projeto usa um design system próprio baseado em variáveis CSS, sem dependência de biblioteca de componentes (Headless UI, Radix, etc.):
+
+| Token | Exemplo |
+|---|---|
+| Paleta brand (verde) | `--brand-50` a `--brand-950` |
+| Paleta gray (neutro) | `--gray-0` a `--gray-950` |
+| Semânticas | `--warning-*`, `--danger-*`, `--info-*` |
+| Raios | `--r-sm`, `--r-md`, `--r-lg`, `--r-xl` |
+| Sombras | `--shadow-sm`, `--shadow-md`, `--shadow-lg` |
+| Transições | `--t-fast`, `--t-base`, `--t-slow` |
 
 ---
 
@@ -132,121 +119,80 @@ frontend/src/
 | Tecnologia | Versão | Função |
 |---|:---:|---|
 | **Python** | 3.12 | Linguagem principal do backend |
-| **FastAPI** | 0.115 | Framework web — cria endpoints REST com validação automática |
-| **uvicorn** | 0.31 | Servidor ASGI que roda o FastAPI |
+| **FastAPI** | 0.115+ | Framework web — cria endpoints REST com validação automática |
+| **uvicorn** | 0.31+ | Servidor ASGI que roda o FastAPI |
 | **SQLAlchemy** | 2.0 | ORM — traduz código Python em SQL |
-| **Pydantic v2** | 2.9 | Validação e serialização de dados (integrado ao FastAPI) |
-| **pydantic-settings** | 2.6 | Leitura tipada das variáveis do arquivo `.env` |
+| **Pydantic v2** | 2.x | Validação e serialização de dados (integrado ao FastAPI) |
 
 ### 4.2 Autenticação e Segurança
 
 | Biblioteca | Função |
 |---|---|
-| **python-jose** | Criação e validação de tokens JWT (algoritmo HS256) |
 | **passlib + bcrypt** | Hash seguro de senhas |
-| **pyodbc** | Driver de conexão Python → SQL Server |
 
-**Como funciona a autenticação:**
-1. Usuário envia `email` + `senha` para `POST /api/v1/auth/entrar`
-2. Backend verifica a senha com bcrypt
-3. Backend cria uma sessão em `sessoes_autenticacao`
-4. Gera um token JWT HS256 assinado com a chave secreta (`JWT_SECRET_KEY`)
-5. Envia um refresh token opaco em cookie `httpOnly`
-6. Frontend mantém o `token_acesso` em memória via `AuthContext`
-7. Cada requisição subsequente envia o token no header `Authorization: Bearer <token>`
-8. O FastAPI valida o token e a sessão ativa via a dependência `obter_usuario_atual`
+> JWT (python-jose) será implementado no Sprint 1-2. Na v1 atual, a sessão do usuário é mantida via `sessionStorage` no frontend.
 
 ### 4.3 Estrutura de Arquivos (Backend)
 
 ```
 backend/
-├── main.py           ← inicializa o FastAPI, CORS, registra roteadores
-├── config.py         ← lê variáveis do .env com tipagem (pydantic-settings)
-├── database.py       ← cria a conexão com o SQL Server (engine + sessão)
-├── models.py         ← define as tabelas do banco (classes SQLAlchemy)
-├── schemas.py        ← define o formato dos dados de entrada e saída (Pydantic)
-├── auth.py           ← funções de JWT e bcrypt
-├── dependencies.py   ← funções reutilizáveis: obter_db, obter_usuario_atual, exigir_perfil
-├── routers/
-│   ├── auth.py       ← POST /auth/entrar, POST /auth/renovar, POST /auth/sair, GET /auth/eu
-│   ├── usuarios.py   ← CRUD de usuários
-│   ├── workspaces.py ← CRUD de workspaces + concessão de acesso
-│   ├── relatorios.py ← CRUD de relatórios + favoritos
-│   ├── permissoes.py ← leitura e edição de permissões por perfil
-│   └── auditoria.py  ← consulta read-only de logs de auditoria
-├── requirements.txt  ← lista de dependências Python
-├── .env.example      ← modelo do arquivo de configuração
-└── requirements.txt  ← dependências Python
+├── main.py        ← FastAPI app, CORS, todos os endpoints
+├── database.py    ← conexão SQLite + engine + SessionLocal + get_db
+├── models.py      ← 14 tabelas do banco (classes SQLAlchemy)
+├── schemas.py     ← schemas Pydantic de entrada e saída
+├── seed.py        ← cria tabelas e insere dados iniciais
+└── cgid.db        ← arquivo do banco SQLite (gerado pelo seed.py)
 ```
 
-### 4.4 Endpoints Disponíveis (v1)
+### 4.4 Endpoints Disponíveis
 
 | Método | Endpoint | Função |
 |---|---|---|
-| POST | `/api/v1/auth/entrar` | Login |
-| POST | `/api/v1/auth/renovar` | Renovar token de acesso via cookie httpOnly |
-| POST | `/api/v1/auth/sair` | Logout |
-| GET | `/api/v1/auth/eu` | Dados do usuário logado |
-| GET | `/api/v1/usuarios` | Listar usuários |
-| POST | `/api/v1/usuarios` | Criar usuário |
-| PUT | `/api/v1/usuarios/{id}` | Atualizar usuário |
-| DELETE | `/api/v1/usuarios/{id}` | Desativar usuário |
-| GET | `/api/v1/workspaces` | Listar workspaces |
-| POST | `/api/v1/workspaces` | Criar workspace |
-| PUT | `/api/v1/workspaces/{id}` | Atualizar workspace |
-| DELETE | `/api/v1/workspaces/{id}` | Arquivar workspace |
-| POST | `/api/v1/workspaces/{id}/acesso` | Conceder acesso |
-| GET | `/api/v1/relatorios` | Listar relatórios |
-| POST | `/api/v1/relatorios` | Criar relatório |
-| PUT | `/api/v1/relatorios/{id}` | Atualizar relatório |
-| DELETE | `/api/v1/relatorios/{id}` | Arquivar relatório |
-| POST | `/api/v1/relatorios/{id}/favorito` | Adicionar/remover favorito |
-| GET | `/api/v1/permissoes` | Listar permissões |
-| PUT | `/api/v1/permissoes/{id}` | Atualizar permissão |
-| GET | `/api/v1/auditoria` | Consultar logs |
-| GET | `/saude` | Health check |
-
-> A documentação interativa completa fica disponível em `http://localhost:3001/docs` enquanto o servidor estiver rodando em modo `development`.
+| GET | `/` | Health check |
+| POST | `/login` | Autenticação com e-mail e senha |
+| GET | `/dashboard/kpis` | Contadores: usuários ativos, bloqueados, acessos negados, workspaces |
+| GET | `/dashboard/eventos` | Últimos 5 registros do log de auditoria |
+| GET | `/dashboard/workspaces` | Workspaces com contagem de relatórios e acessos |
 
 ---
 
 ## 5. Banco de Dados
 
-### 5.1 SQL Server
+### 5.1 SQLite (Desenvolvimento)
 
 | Item | Detalhe |
 |---|---|
-| **Versão desenvolvimento** | SQL Server 2022/2025 Developer Edition (local, gratuito) |
-| **Versão produção** | SQL Server on-premise do servidor corporativo |
+| **Arquivo** | `backend/cgid.db` |
+| **Criação** | `python seed.py` — cria tabelas e insere dados |
+| **Driver Python** | `sqlite3` (nativo do Python, sem instalação) |
+| **ORM** | SQLAlchemy 2.0 com dialeto `sqlite` |
+| **Connection string** | `sqlite:///./cgid.db` |
+
+### 5.2 SQL Server (Produção)
+
+| Item | Detalhe |
+|---|---|
+| **Versão** | SQL Server on-premise corporativo |
 | **Driver Python** | pyodbc + ODBC Driver 17 for SQL Server |
 | **ORM** | SQLAlchemy 2.0 com dialeto `mssql+pyodbc` |
+| **Migração** | Alterar apenas `DATABASE_URL` em `database.py` |
 
-### 5.2 String de Conexão
-
-```
-# Desenvolvimento local (Autenticação Windows — sem usuário/senha)
-mssql+pyodbc://@localhost\SQLEXPRESS/btportal?driver=ODBC+Driver+17+for+SQL+Server&TrustServerCertificate=yes&trusted_connection=yes
-
-# Produção (servidor da empresa)
-mssql+pyodbc://USUARIO:SENHA@SERVIDOR\INSTANCIA/btportal?driver=ODBC+Driver+17+for+SQL+Server
-```
-
-### 5.3 Tabelas do banco (em português)
+### 5.3 Tabelas do banco
 
 | Tabela | Conteúdo |
 |---|---|
 | `usuarios` | Contas de acesso ao portal |
-| `espacos_trabalho` | Agrupamentos de relatórios (Workspaces) |
+| `sessoes_autenticacao` | Sessões, refresh tokens e revogação |
+| `espacos_trabalho` | Workspaces (agrupamentos de relatórios) |
 | `relatorios` | Relatórios Power BI cadastrados |
-| `acessos_workspace` | Qual usuário acessa qual workspace |
-| `acessos_relatorio` | Acesso explícito a relatório específico |
-| `permissoes_perfil` | Permissões padrão por perfil (RBAC) |
+| `acessos_workspace` | Permissão de usuário por workspace |
+| `acessos_relatorio` | Permissão de usuário por relatório específico |
+| `permissoes_perfil` | Matriz de permissões por perfil (RBAC) |
 | `sobrescritas_permissao` | Exceções de permissão por usuário |
-| `regras_expediente` | Horários de acesso permitidos |
+| `regras_expediente` | Horários de acesso permitidos por dia da semana |
 | `grupos_excecao` | Grupos com acesso fora do expediente |
-| `membros_grupo_excecao` | Usuários em grupos de exceção |
+| `membros_grupo_excecao` | Membros dos grupos de exceção |
 | `favoritos` | Relatórios favoritos por usuário |
-| `sessoes_autenticacao` | Sessões, refresh tokens e revogação de logout |
 | `logs_auditoria` | Registro imutável de todas as ações |
 | `configuracoes_sistema` | Parâmetros globais do sistema |
 
@@ -254,23 +200,22 @@ mssql+pyodbc://USUARIO:SENHA@SERVIDOR\INSTANCIA/btportal?driver=ODBC+Driver+17+f
 
 | Perfil | Valor no banco | Nível de acesso |
 |---|---|---|
-| Super Administrador | `super_administrador` | Acesso total |
-| Administrador | `administrador` | Gerencia usuários e conteúdo |
-| Gerente | `gerente` | Visualiza usuários, não altera permissões |
-| Operador | `operador` | Acessa relatórios liberados |
-| Visitante | `visitante` | Acesso mínimo |
+| Super Administrador | `super_administrador` | Acesso total, incluindo configurações |
+| Administrador | `administrador` | Gerencia usuários, workspaces e permissões |
+| Gerente | `gerente` | Visualiza relatórios e KPIs do seu workspace |
+| Operador | `operador` | Acessa relatórios explicitamente liberados |
+| Visitante | `visitante` | Acesso mínimo e temporário |
 
+### 5.5 Mapeamento de Tipos Python → SQL
 
-### 5.5 Mapeamento de Tipos Python → SQL Server
-
-| Tipo SQLAlchemy | Tipo SQL Server | Observação |
+| Tipo SQLAlchemy | SQLite | SQL Server |
 |---|---|---|
-| `String(N)` | `NVARCHAR(N)` | Use para campos com tamanho definido |
-| `Text` | `NVARCHAR(MAX)` | Use para textos longos |
-| `Boolean` | `BIT` | Mapeado automaticamente |
-| `Integer` | `INT` | — |
-| `DateTime` | `DATETIME2` | Armazenar sempre em UTC |
-| `UNIQUEIDENTIFIER` | `UNIQUEIDENTIFIER` | Chaves primárias UUID |
+| `String(N)` | `VARCHAR(N)` | `NVARCHAR(N)` |
+| `Text` | `TEXT` | `NVARCHAR(MAX)` |
+| `Boolean` | `BOOLEAN` | `BIT` |
+| `SmallInteger` | `SMALLINT` | `SMALLINT` |
+| `DateTime` | `DATETIME` | `DATETIME2` |
+| `Time` | `TIME` | `TIME` |
 
 ---
 
@@ -280,19 +225,17 @@ mssql+pyodbc://USUARIO:SENHA@SERVIDOR\INSTANCIA/btportal?driver=ODBC+Driver+17+f
 
 | Software | Versão mínima | Download |
 |---|---|---|
-| Python | 3.10+ | python.org/downloads |
+| Python | 3.12+ | python.org/downloads |
 | Node.js | 20 LTS | nodejs.org |
-| SQL Server Developer | 2022+ | microsoft.com/sql-server |
-| ODBC Driver 17 | — | aka.ms/odbc17 |
-| SSMS (opcional) | — | aka.ms/ssmsfullsetup |
 
 ### 6.2 Iniciar o projeto
 
 **Terminal 1 — Backend:**
 ```powershell
 cd backend
-pip install -r requirements.txt
-uvicorn main:app --reload --port 3001
+pip install fastapi uvicorn sqlalchemy passlib bcrypt pydantic
+python seed.py
+uvicorn main:app --reload
 ```
 
 **Terminal 2 — Frontend:**
@@ -305,42 +248,28 @@ npm run dev
 | URL | O que abre |
 |---|---|
 | `http://localhost:5173` | Aplicação (frontend) |
-| `http://localhost:3001/docs` | Documentação interativa da API (Swagger) |
-| `http://localhost:3001/saude` | Health check da API |
+| `http://localhost:8000/docs` | Documentação interativa da API (Swagger) |
 
-### 6.3 Variáveis de ambiente
+### 6.3 Credenciais de desenvolvimento
 
-**`backend/.env`**
-```env
-DATABASE_URL=mssql+pyodbc://@localhost\SQLEXPRESS/btportal?driver=ODBC+Driver+17+for+SQL+Server&TrustServerCertificate=yes&trusted_connection=yes
-JWT_SECRET_KEY=troque-por-uma-chave-longa-e-aleatoria
-JWT_ALGORITMO=HS256
-JWT_EXPIRA_MINUTOS=60
-PORTA=3001
-AMBIENTE=development
-URL_FRONTEND=http://localhost:5173
-```
-
-**`frontend/.env`**
-```env
-VITE_API_BASE_URL=http://localhost:3001/api/v1
-VITE_NOME_APP=CGID - Centro de Governança e Inteligência de Dados
-VITE_AMBIENTE=development
-```
+| E-mail | Senha | Perfil |
+|---|---|---|
+| admin@cgid.com | Admin@2025 | Super Administrador |
+| carlos@cgid.com | Carlos@123 | Gerente |
+| mariana@cgid.com | Mariana@123 | Operador |
+| visitante@cgid.com | Visitante@123 | Visitante |
 
 ---
 
 ## 7. Caminho de Evolução
 
-A stack foi pensada para crescer gradualmente conforme o desenvolvedor ganha confiança:
-
 | Fase | O que adicionar | Quando |
 |---|---|---|
-| **v1 (atual)** | Backend Python + FastAPI, frontend React funcional | Agora |
-| **v1.1** | Notificações por email (SMTP), exportação CSV | Após dominar a v1 |
+| **v1 (atual)** | Backend Python + FastAPI, frontend React funcional, SQLite | Agora |
+| **Sprint 1-2** | JWT + refresh token, guards FastAPI, AuthContext | Próxima sprint |
+| **v1.1** | Migrar para SQL Server, notificações por e-mail, exportação CSV | Após dominar a v1 |
 | **v1.2** | Power BI Embedded com token real | Após v1.1 |
-| **v2** | Migrar para servidor da empresa, Redis para cache | Quando for para produção |
-| **Futuro** | Avaliar migração do backend para NestJS | Se o time crescer |
+| **v2** | SSO via Azure AD, Redis para cache | Quando for para produção |
 
 ---
 
@@ -348,15 +277,15 @@ A stack foi pensada para crescer gradualmente conforme o desenvolvedor ganha con
 
 | Camada | Tecnologia |
 |---|---|
-| **Frontend** | React 18 + JavaScript + Vite |
-| **Estado de autenticação** | React Context (AuthContext) |
-| **Estado de dados da API** | TanStack Query v5 |
-| **Formulários** | React Hook Form + Yup |
-| **HTTP** | Axios |
+| **Frontend** | React 19 + JavaScript + Vite 8 |
+| **Roteamento** | React Router v7 |
+| **Estado de autenticação** | sessionStorage → AuthContext (Sprint 1-2) |
+| **HTTP** | fetch nativo |
 | **Backend** | Python 3.12 + FastAPI |
 | **ORM** | SQLAlchemy 2.0 |
-| **Banco de dados** | SQL Server (Developer local → on-premise em produção) |
-| **Autenticação** | JWT HS256 (python-jose + bcrypt) |
+| **Banco (dev)** | SQLite |
+| **Banco (prod)** | SQL Server on-premise |
+| **Senhas** | passlib + bcrypt |
 | **Servidor** | uvicorn |
 
 ---
@@ -366,4 +295,5 @@ A stack foi pensada para crescer gradualmente conforme o desenvolvedor ganha con
 | Versão | Data | Descrição |
 |---|---|---|
 | 1.0 | Maio/2026 | Criação inicial com stack NestJS + Prisma + Redis |
-| 2.0 | Maio/2026 | Migração para Python + FastAPI + SQLAlchemy; remoção de Redis e BullMQ; simplificação do frontend (React Context substituindo Zustand, Yup substituindo Zod); todos os nomes em Português do Brasil |
+| 2.0 | Maio/2026 | Migração para Python + FastAPI + SQLAlchemy; remoção de Redis e BullMQ; simplificação do frontend |
+| 3.0 | Maio/2026 | Atualização para estado real do projeto: React 19, Vite 8, React Router v7, SQLite como banco de desenvolvimento, remoção de TanStack Query/Axios/React Hook Form/Yup, estrutura de pastas atualizada (pages/, styles/, routes/, components/), endpoints de dashboard implementados |

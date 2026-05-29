@@ -1,243 +1,214 @@
 # CGID - Centro de Governança e Inteligência de Dados
 
-Portal web para centralizar relatórios **Power BI Embedded** com controle granular de permissões, auditoria completa e gestão de acesso corporativo.
+Portal web para centralizar relatórios **Power BI Embedded** com controle de permissões, auditoria e gestão de acesso corporativo.
 
-## Stack Tecnológica
+---
+
+## O que é este projeto?
+
+O CGID é um portal interno onde usuários da empresa podem visualizar relatórios do Power BI de acordo com suas permissões. Administradores controlam quem vê o quê, e todas as ações ficam registradas em log de auditoria.
+
+---
+
+## Stack atual
 
 | Camada | Tecnologia |
 |--------|-----------|
-| Frontend | React 18 + JavaScript + Vite |
-| Estado auth | React Context (AuthContext) |
-| Estado servidor | TanStack Query v5 |
-| Formulários | React Hook Form + Yup |
+| Frontend | React 19 + JavaScript + Vite 8 |
+| Roteamento | React Router v7 |
 | Backend | Python 3.12 + FastAPI |
-| ORM | SQLAlchemy 2.0 (`mssql+pyodbc`) |
-| **Banco de dados** | **Microsoft SQL Server 2019+ (on-premise)** |
-| Autenticação | JWT HS256 (python-jose + bcrypt) |
-| Servidor | uvicorn |
-| PBI Embed | powerbi-client SDK (Microsoft) |
+| Banco de dados | SQLite (desenvolvimento) → SQL Server (produção) |
+| ORM | SQLAlchemy 2.0 |
+| Senhas | passlib + bcrypt |
+| Power BI | powerbi-client SDK (Microsoft) — v1.1 |
 
-## Estrutura do Repositório
+---
+
+## Estrutura do repositório
 
 ```
-cgid_centro-de-gov-e-inteligencia-de-dados/
-├── .github/
-│   ├── workflows/
-│   │   ├── ci-backend.yml      # lint e testes do backend
-│   │   └── ci-frontend.yml     # lint, testes e build do frontend
-│   ├── PULL_REQUEST_TEMPLATE.md
-│   └── ISSUE_TEMPLATE/
+cgid/
 │
 ├── backend/
-│   ├── app/
-│   │   ├── api/v1/endpoints/   # auth, usuarios, workspaces, relatorios, permissoes, auditoria
-│   │   ├── core/               # security.py (JWT/bcrypt), exceptions.py
-│   │   ├── models/             # um arquivo por entidade SQLAlchemy
-│   │   ├── schemas/            # um arquivo por recurso Pydantic
-│   │   ├── services/           # lógica de negócio desacoplada dos endpoints
-│   │   ├── config.py           # variáveis de ambiente (pydantic-settings)
-│   │   ├── database.py         # engine + SessionLocal + Base
-│   │   ├── dependencies.py     # obter_db, obter_usuario_atual, exigir_perfil
-│   │   └── main.py             # instância FastAPI, CORS, routers
-│   ├── migrations/             # Alembic
-│   ├── tests/
-│   │   ├── unit/               # testes sem I/O
-│   │   └── integration/        # testes com banco (SQLite em memória)
-│   ├── alembic.ini
-│   ├── pyproject.toml          # dependências + ruff + mypy + pytest
-│   ├── .env.example
+│   ├── main.py          ← servidor FastAPI (começa aqui)
+│   ├── database.py      ← conexão SQLite + sessão SQLAlchemy
+│   ├── models.py        ← 14 tabelas do banco (SQLAlchemy ORM)
+│   ├── schemas.py       ← validação de entrada/saída (Pydantic)
+│   ├── seed.py          ← popular banco com dados iniciais
+│   └── cgid.db          ← banco SQLite (gerado automaticamente)
 │
 ├── frontend/
 │   ├── src/
+│   │   ├── pages/
+│   │   │   ├── LoginPage.jsx    ← tela de login
+│   │   │   ├── HomePage.jsx     ← home (dashboard)
+│   │   │   └── UsersPage.jsx    ← gestão de usuários
+│   │   ├── styles/
+│   │   │   ├── global.css       ← tokens, reset, tipografia
+│   │   │   ├── login.css        ← estilos da tela de login
+│   │   │   ├── home.css         ← estilos do app shell e home
+│   │   │   └── users.css        ← estilos da gestão de usuários
+│   │   ├── routes/
+│   │   │   └── AppRoutes.jsx    ← definição de rotas + rota protegida
 │   │   ├── components/
-│   │   │   ├── layout/         # LayoutDashboard (sidebar + Outlet)
-│   │   │   ├── ui/             # primitivos reutilizáveis
-│   │   │   └── shared/         # componentes de domínio
-│   │   ├── contexts/           # AuthContext (useAuth)
-│   │   ├── hooks/              # hooks customizados
-│   │   ├── pages/              # uma pasta por rota principal
-│   │   ├── services/api.js     # Axios com interceptor JWT
-│   │   ├── utils/index.js      # funções puras auxiliares
-│   │   ├── styles/global.css   # design system (tokens CSS)
-│   │   ├── App.jsx             # rotas lazy-loaded
-│   │   └── main.jsx            # entry point + QueryClient + AuthProvider
-│   ├── tests/
-│   │   ├── unit/               # Vitest
-│   │   └── e2e/                # Playwright
-│   ├── .env.example
+│   │   │   └── Avatar.jsx       ← avatar com foto ou iniciais
+│   │   ├── assets/              ← logos e imagens
+│   │   ├── App.jsx              ← monta BrowserRouter + AppRoutes
+│   │   └── main.jsx             ← inicializa o React
 │   ├── package.json
 │   └── vite.config.js
 │
-├── docs/                       # Documentação técnica e de produto (30 arquivos)
-├── prototipo/                  # Protótipo visual (portal_v4_8.html)
-├── scripts/                    # seed_db.py, create_admin.py, check_env.py
-├── CLAUDE.md                   # Guia para o Claude Code
-└── .gitignore
+└── docs/                ← documentação técnica e de produto
+    └── prototipo/       ← protótipo visual (portal_v4_8.html)
 ```
 
-## Início Rápido (Desenvolvimento Local)
+---
 
-> Estes comandos passam a valer após a criação das pastas `backend/`, `frontend/` e dos arquivos de ambiente correspondentes.
+## Pré-requisitos
 
-### Pré-requisitos
-
-| Software | Versão | Download |
+| Software | Versão | Link |
 |---|---|---|
-| Python | 3.10+ | python.org/downloads |
-| Node.js | 20 LTS | nodejs.org |
-| SQL Server Developer | 2022+ | microsoft.com/sql-server |
-| ODBC Driver 17 | — | aka.ms/odbc17 |
-| SSMS (opcional) | — | aka.ms/ssmsfullsetup |
+| Python | 3.12+ | [python.org](https://python.org/downloads) |
+| Node.js | 20 LTS | [nodejs.org](https://nodejs.org) |
 
-### 1. Configurar o banco de dados
+> Não é necessário SQL Server nem ODBC Driver para rodar em desenvolvimento. O banco SQLite é criado automaticamente.
 
-**Opção A — SQL Server local instalado (recomendado para desenvolvimento):**
+---
 
-Abra o SSMS, conecte em `localhost\SQLEXPRESS` ou `localhost\SQLSERVER` e execute:
-```sql
-CREATE DATABASE btportal;
-```
+## Como rodar localmente
 
-**Opção B — SQL Server on-premise da empresa:**
-
-Peça ao time de TI o endereço do servidor e credenciais de acesso.
-
-### 2. Configurar variáveis de ambiente
-
-```powershell
-# Backend
-copy backend\.env.example backend\.env
-# Abra backend\.env e ajuste a DATABASE_URL para o seu SQL Server
-
-# Frontend
-copy frontend\.env.example frontend\.env
-```
-
-**`backend/.env` (exemplo para instalação local):**
-```env
-DATABASE_URL=mssql+pyodbc://@localhost\SQLEXPRESS/btportal?driver=ODBC+Driver+17+for+SQL+Server&TrustServerCertificate=yes&trusted_connection=yes
-JWT_SECRET_KEY=troque-por-uma-chave-longa-e-aleatoria
-JWT_ALGORITMO=HS256
-JWT_EXPIRA_MINUTOS=60
-PORTA=3001
-AMBIENTE=development
-URL_FRONTEND=http://localhost:5173
-```
-
-### 3. Iniciar o backend
+### 1. Instale as dependências do backend
 
 ```powershell
 cd backend
-pip install -e ".[dev]"
-uvicorn app.main:app --reload --port 3001
+pip install fastapi uvicorn sqlalchemy passlib bcrypt pydantic
 ```
 
-### 4. Iniciar o frontend
+### 2. Crie e popule o banco de dados
+
+```powershell
+python seed.py
+```
+
+Isso cria o arquivo `cgid.db` com as 14 tabelas e os dados iniciais.
+
+### 3. Inicie o backend
+
+```powershell
+uvicorn main:app --reload
+```
+
+### 4. Inicie o frontend
 
 Abra um segundo terminal:
+
 ```powershell
 cd frontend
 npm install
 npm run dev
 ```
 
-### 5. Acessar a aplicação
+### 5. Acesse a aplicação
 
 | URL | O que abre |
 |---|---|
-| http://localhost:5173 | Aplicação |
-| http://localhost:3001/docs | Documentação interativa da API (Swagger) |
-| http://localhost:3001/saude | Health check |
-
-> **Primeiro acesso:** crie um usuário administrador diretamente pelo Swagger em `POST /api/v1/usuarios` após autenticar com um usuário seed (ver script de seed na documentação).
+| http://localhost:5173 | Aplicação React |
+| http://localhost:8000/docs | Documentação interativa da API (Swagger) |
 
 ---
 
-## Comandos Úteis
+## Credenciais de acesso (desenvolvimento)
 
-### Backend
-
-```powershell
-# Iniciar em modo desenvolvimento (hot-reload)
-uvicorn app.main:app --reload --port 3001
-
-# Instalar/atualizar dependências
-pip install -e ".[dev]"
-
-# Testes
-pytest tests/ -v
-
-# Popular banco com dados de exemplo
-python ../scripts/seed_db.py
-
-# Criar primeiro usuário administrador
-python ../scripts/create_admin.py
-
-# Verificar se a API está respondendo
-curl http://localhost:3001/saude
-```
-
-### Frontend
-
-```powershell
-npm run dev          # Vite dev server com hot-reload
-npm run build        # Build de produção
-npm run lint         # ESLint
-npm run test         # Vitest (unitários)
-npm run test:e2e     # Playwright (E2E)
-```
+| E-mail | Senha | Perfil |
+|---|---|---|
+| admin@cgid.com | Admin@2025 | Super Administrador |
+| carlos@cgid.com | Carlos@123 | Gerente |
+| mariana@cgid.com | Mariana@123 | Operador |
+| visitante@cgid.com | Visitante@123 | Visitante |
 
 ---
 
-## Variáveis de Ambiente
+## Regras de negócio importantes
 
-### Backend (`backend/.env`)
+| Regra | Detalhe |
+|---|---|
+| Senha padrão | Novos usuários recebem `Mudar@123` se nenhuma senha for informada |
+| Reset de senha | Admin pode redefinir a senha de qualquer usuário para `Mudar@123` |
+| Bloqueio automático | Conta bloqueada após 5 tentativas de login incorretas |
+| Acesso admin | Super Admin e Admin têm acesso automático a todos os workspaces com nível total |
+| Acesso por perfil | Gerente, Operador e Visitante precisam ter workspaces vinculados manualmente |
+| Último acesso | Registrado automaticamente a cada login bem-sucedido |
 
-| Variável | Descrição | Obrigatório |
-|----------|-----------|:-----------:|
-| `DATABASE_URL` | Connection string SQL Server (formato pyodbc) | Sim |
-| `JWT_SECRET_KEY` | Chave secreta para assinar tokens JWT | Sim |
-| `JWT_ALGORITMO` | Algoritmo JWT (padrão: HS256) | Não |
-| `JWT_EXPIRA_MINUTOS` | Tempo de expiração do token em minutos (padrão: 60) | Não |
-| `PORTA` | Porta do servidor (padrão: 3001) | Não |
-| `AMBIENTE` | development ou producao | Não |
-| `URL_FRONTEND` | URL do frontend para CORS (padrão: http://localhost:5173) | Não |
+---
 
-**Formatos de DATABASE_URL:**
-```env
-# Autenticação Windows (sem usuário/senha) — recomendado para dev local
-mssql+pyodbc://@localhost\SQLEXPRESS/btportal?driver=ODBC+Driver+17+for+SQL+Server&TrustServerCertificate=yes&trusted_connection=yes
+## Páginas disponíveis
 
-# Autenticação SQL (usuário/senha)
-mssql+pyodbc://sa:Senha@localhost\SQLEXPRESS/btportal?driver=ODBC+Driver+17+for+SQL+Server&TrustServerCertificate=yes
+| Rota | Página | Descrição |
+|---|---|---|
+| `/login` | LoginPage | Tela de autenticação |
+| `/` | HomePage | Dashboard com KPIs, eventos e workspaces |
+| `/usuarios` | UsersPage | Gestão completa de usuários (CRUD + acessos) |
 
-# Servidor on-premise da empresa
-mssql+pyodbc://USUARIO:SENHA@SERVIDOR\INSTANCIA/btportal?driver=ODBC+Driver+17+for+SQL+Server
-```
+---
 
-### Frontend (`frontend/.env`)
+## Endpoints disponíveis
 
-| Variável | Descrição |
-|----------|-----------|
-| `VITE_API_BASE_URL` | URL base da API (ex: `http://localhost:3001/api/v1`) |
-| `VITE_NOME_APP` | Nome exibido na aba do browser |
-| `VITE_AMBIENTE` | development ou production |
+### Autenticação
+| Método | Endpoint | Descrição |
+|---|---|---|
+| GET | `/` | Health check |
+| POST | `/login` | Autenticação — retorna dados do usuário e registra último acesso |
+
+### Dashboard
+| Método | Endpoint | Descrição |
+|---|---|---|
+| GET | `/dashboard/kpis` | KPIs: usuários ativos, bloqueados, acessos negados, workspaces |
+| GET | `/dashboard/eventos` | Últimos 5 eventos do log de auditoria |
+| GET | `/dashboard/workspaces` | Workspaces com contagem de relatórios e acessos |
+
+### Gestão de Usuários
+| Método | Endpoint | Descrição |
+|---|---|---|
+| GET | `/usuarios` | Lista usuários com filtros por status, perfil e busca |
+| POST | `/usuarios` | Cria usuário (senha padrão `Mudar@123` se não informada) |
+| PUT | `/usuarios/{id}` | Atualiza dados do usuário |
+| DELETE | `/usuarios/{id}` | Exclui usuário |
+| POST | `/usuarios/{id}/resetar-senha` | Redefine senha para `Mudar@123` |
+
+### Workspaces e Acessos
+| Método | Endpoint | Descrição |
+|---|---|---|
+| GET | `/workspaces` | Lista workspaces ativos |
+| GET | `/usuarios/{id}/acessos` | Acessos de um usuário por workspace |
+| PUT | `/usuarios/{id}/acessos` | Salva acessos (auto-total para admin/super_admin) |
+
+---
+
+## Banco de dados
+
+O banco possui **14 tabelas** conforme a documentação de modelagem:
+
+| Tabela | Conteúdo |
+|---|---|
+| `usuarios` | Contas de acesso ao portal |
+| `sessoes_autenticacao` | Sessões e refresh tokens |
+| `espacos_trabalho` | Workspaces (agrupamentos de relatórios) |
+| `relatorios` | Relatórios Power BI cadastrados |
+| `acessos_workspace` | Permissão de usuário por workspace |
+| `acessos_relatorio` | Permissão de usuário por relatório |
+| `permissoes_perfil` | Matriz de permissões por perfil (RBAC) |
+| `sobrescritas_permissao` | Exceções de permissão por usuário |
+| `regras_expediente` | Horários de acesso permitidos por dia |
+| `grupos_excecao` | Grupos com acesso fora do expediente |
+| `membros_grupo_excecao` | Membros dos grupos de exceção |
+| `favoritos` | Relatórios favoritos por usuário |
+| `logs_auditoria` | Registro imutável de todas as ações |
+| `configuracoes_sistema` | Parâmetros globais do sistema |
 
 ---
 
 ## Documentação
 
-Acesse [`docs/README.md`](docs/README.md) para o índice completo.
+Consulte a pasta [`docs/`](docs/README.md) para requisitos, arquitetura, modelagem e roadmap.
 
-| Pasta | Conteúdo |
-|-------|---------|
-| `docs/01-visao-geral/` | Contexto, objetivos, stakeholders |
-| `docs/02-escopo/` | Escopo e módulos |
-| `docs/03-requisitos/` | Requisitos funcionais, não-funcionais, restrições |
-| `docs/04-priorizacao/` | MoSCoW e MVP |
-| `docs/05-modelagem/` | Use cases, user stories, schema SQL Server |
-| `docs/06-arquitetura/` | Arquitetura C4, RBAC, diagramas |
-| `docs/07-estrategias/` | Segurança, escalabilidade, observabilidade |
-| `docs/08-tecnologias/` | **Stack completa — Python + FastAPI + SQL Server** |
-| `docs/09-roadmap/` | Fases de entrega |
-| `prototipo/` | `portal_v4_8.html` — referência visual |
+O protótipo visual está em [`docs/prototipo/portal_v4_8.html`](docs/prototipo/portal_v4_8.html).

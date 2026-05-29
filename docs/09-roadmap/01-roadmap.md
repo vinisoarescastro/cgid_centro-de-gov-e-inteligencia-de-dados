@@ -1,7 +1,7 @@
 # Roadmap do Projeto
 
 > **Documento:** 09-roadmap/01-roadmap.md  
-> **Status:** Rascunho  
+> **Status:** Em andamento  
 > **Criado em:** Maio/2026  
 > **Atualizado em:** Maio/2026
 
@@ -30,22 +30,28 @@ Infra    Permissões     Workspaces  Exceções     Dashboard   Ajustes    MVP v
 
 **Objetivo:** Preparar toda a base técnica e organizacional antes de iniciar o desenvolvimento de funcionalidades.
 
+**Status:** ✅ Parcialmente concluído — itens de desenvolvimento prontos; itens de infra/Azure pendentes de TI.
+
 ### Entregáveis
 
-| Item | Descrição | Responsável |
-|------|-----------|------------|
-| Repositório configurado | Monorepo com frontend/ e backend/ | Dev |
-| CI/CD básico | GitHub Actions: lint, testes, build | Dev |
-| Modelos SQLAlchemy | Schema inicial do banco compatível com SQL Server | Dev Backend |
-| Seed de desenvolvimento | Dados de exemplo (baseados no mock do protótipo) | Dev Backend |
-| App Registration Azure | Service Principal criado com permissões PBI | TI / Azure Admin |
-| Power BI workspace | Workspaces de desenvolvimento configurados no PBI Service | TI / Power BI Admin |
-| Ambientes cloud | Staging e Produção provisionados | Infra |
-| Chave JWT | Chave secreta forte para assinatura HS256 do JWT | Dev Backend |
-| README de onboarding | Como subir o ambiente em < 5 min | Dev |
+| Item | Descrição | Status |
+|------|-----------|--------|
+| ✅ Repositório configurado | Monorepo com frontend/ e backend/ | Concluído |
+| ✅ Estrutura do frontend | pages/, styles/, routes/, components/ | Concluído |
+| ✅ Modelos SQLAlchemy | 14 tabelas conforme documentação de modelagem | Concluído |
+| ✅ Seed de desenvolvimento | Usuários, workspaces, relatórios, permissões, expediente, configs | Concluído |
+| ✅ Banco de dados (dev) | SQLite — zero configuração, arquivo `cgid.db` | Concluído |
+| ✅ Tela de login | Autenticação real contra o banco, bloqueio após 5 tentativas | Concluído |
+| ✅ Tela Home (dashboard) | KPIs, eventos recentes e tabela de workspaces com dados reais da API | Concluído |
+| ✅ README de onboarding | Setup em < 5 min documentado | Concluído |
+| ⏳ CI/CD básico | GitHub Actions: lint, testes, build | Pendente |
+| ⏳ App Registration Azure | Service Principal com permissões PBI | Pendente (TI) |
+| ⏳ Power BI workspace | Workspaces de desenvolvimento no PBI Service | Pendente (TI) |
+| ⏳ Ambientes cloud | Staging e Produção provisionados | Pendente (Infra) |
+| ⏳ Chave JWT | Chave secreta para assinatura HS256 | Pendente (Sprint 1-2) |
 
 ### Critério de conclusão do Sprint 0
-> Backend e frontend iniciam com `uvicorn` e `npm run dev`; `/saude` retorna 200; seed executado; pipeline CI verde.
+> Backend e frontend iniciam com `uvicorn` e `npm run dev`; `GET /` retorna 200; seed executado com sucesso; login funcional com dados reais do banco. ✅
 
 ---
 
