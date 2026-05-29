@@ -12,7 +12,7 @@
 ```
 ┌──────────────────────────────────────────────────────────────────┐
 │                         FRONTEND                                  │
-│   React 18 + TypeScript + Vite + TanStack Query                  │
+│   React 18 + JavaScript + Vite + TanStack Query                  │
 │   React Context (auth) + React Router v6 + Axios                 │
 │   React Hook Form + Yup + powerbi-client SDK                     │
 └──────────────────────────────────────────────────────────────────┘
@@ -54,7 +54,7 @@ Este projeto é desenvolvido por uma pessoa em processo de aprendizado, com obje
 | Tecnologia | Versão | Função |
 |---|:---:|---|
 | **React** | 18.x | Framework de interface |
-| **TypeScript** | 5.x | Tipagem estática — detecta erros antes de rodar |
+| **JavaScript** | ES2022+ | Linguagem padrão do ecossistema Node/React |
 | **Vite** | 5.x | Servidor de desenvolvimento e build |
 | **React Router** | 6.x | Navegação entre páginas (sem recarregar o browser) |
 
@@ -77,7 +77,7 @@ Este projeto é desenvolvido por uma pessoa em processo de aprendizado, com obje
 | **@hookform/resolvers** | Conecta o Yup ao React Hook Form |
 
 **Exemplo de uso:**
-```typescript
+```javascript
 const esquema = yup.object({
   email: yup.string().email('Email inválido').required('Obrigatório'),
   senha: yup.string().min(6, 'Mínimo 6 caracteres').required('Obrigatório'),
@@ -99,28 +99,28 @@ const esquema = yup.object({
 ```
 frontend/src/
 ├── contexts/
-│   └── AuthContext.tsx       ← estado do usuário logado (useAuth)
+│   └── AuthContext.jsx       ← estado do usuário logado (useAuth)
 ├── services/
-│   └── api.ts                ← cliente Axios com token JWT automático
+│   └── api.js                ← cliente Axios com token JWT automático
 ├── layouts/
-│   └── LayoutDashboard.tsx   ← barra lateral + área de conteúdo
+│   └── LayoutDashboard.jsx   ← barra lateral + área de conteúdo
 ├── pages/
 │   ├── auth/
-│   │   └── PaginaLogin.tsx
+│   │   └── PaginaLogin.jsx
 │   ├── dashboard/
-│   │   └── PaginaDashboard.tsx
+│   │   └── PaginaDashboard.jsx
 │   ├── relatorios/
-│   │   └── PaginaVisualizacaoRelatorio.tsx
+│   │   └── PaginaVisualizacaoRelatorio.jsx
 │   ├── admin/
-│   │   ├── PaginaUsuarios.tsx
-│   │   ├── PaginaWorkspaces.tsx
-│   │   ├── PaginaPermissoes.tsx
-│   │   ├── PaginaLogsAuditoria.tsx
-│   │   ├── PaginaExpediente.tsx
-│   │   └── PaginaConfiguracoes.tsx
-│   └── PaginaNaoEncontrada.tsx
-├── App.tsx                   ← definição de rotas
-└── main.tsx                  ← ponto de entrada
+│   │   ├── PaginaUsuarios.jsx
+│   │   ├── PaginaWorkspaces.jsx
+│   │   ├── PaginaPermissoes.jsx
+│   │   ├── PaginaLogsAuditoria.jsx
+│   │   ├── PaginaExpediente.jsx
+│   │   └── PaginaConfiguracoes.jsx
+│   └── PaginaNaoEncontrada.jsx
+├── App.jsx                   ← definição de rotas
+└── main.jsx                  ← ponto de entrada
 ```
 
 ---
@@ -176,7 +176,7 @@ backend/
 │   └── auditoria.py  ← consulta read-only de logs de auditoria
 ├── requirements.txt  ← lista de dependências Python
 ├── .env.example      ← modelo do arquivo de configuração
-└── Dockerfile        ← imagem Docker do backend
+└── requirements.txt  ← dependências Python
 ```
 
 ### 4.4 Endpoints Disponíveis (v1)
@@ -340,7 +340,7 @@ A stack foi pensada para crescer gradualmente conforme o desenvolvedor ganha con
 | **v1.1** | Notificações por email (SMTP), exportação CSV | Após dominar a v1 |
 | **v1.2** | Power BI Embedded com token real | Após v1.1 |
 | **v2** | Migrar para servidor da empresa, Redis para cache | Quando for para produção |
-| **Futuro** | Avaliar migração do backend para NestJS/TypeScript | Se o time crescer |
+| **Futuro** | Avaliar migração do backend para NestJS | Se o time crescer |
 
 ---
 
@@ -348,7 +348,7 @@ A stack foi pensada para crescer gradualmente conforme o desenvolvedor ganha con
 
 | Camada | Tecnologia |
 |---|---|
-| **Frontend** | React 18 + TypeScript + Vite |
+| **Frontend** | React 18 + JavaScript + Vite |
 | **Estado de autenticação** | React Context (AuthContext) |
 | **Estado de dados da API** | TanStack Query v5 |
 | **Formulários** | React Hook Form + Yup |

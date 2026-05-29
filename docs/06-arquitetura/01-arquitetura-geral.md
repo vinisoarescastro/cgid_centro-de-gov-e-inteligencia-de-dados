@@ -31,7 +31,7 @@
 │  ┌────────────────┐   HTTPS/REST    ┌──────────────────────────┐     │
 │  │   React SPA    │ ◀────────────▶ │    FastAPI (Backend)     │     │
 │  │  (Frontend)    │  + JWT Bearer   │                          │     │
-│  │  TypeScript    │                 │   Módulos (roteadores):  │     │
+│  │  JavaScript    │                 │   Módulos (roteadores):  │     │
 │  │  Vite          │                 │   - auth.py              │     │
 │  │  TanStack Query│                 │   - usuarios.py          │     │
 │  │  React Context │                 │   - workspaces.py        │     │
@@ -62,7 +62,7 @@
 
 | Camada | Tecnologia | Responsabilidade |
 |--------|-----------|-----------------|
-| Framework | React 18 + TypeScript | Componentização, tipagem |
+| Framework | React 18 + JavaScript | Componentização |
 | Build | Vite | Bundling, HMR, otimização |
 | Roteamento | React Router v6 | Navegação client-side |
 | Estado servidor | TanStack Query v5 | Cache de dados, fetch, loading states |

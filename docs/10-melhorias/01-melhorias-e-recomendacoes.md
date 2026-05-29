@@ -181,7 +181,7 @@ Um item do backlog está "Pronto" apenas quando:
 1. ✅ Código implementado seguindo os padrões do projeto
 2. ✅ Testes unitários escritos e passando
 3. ✅ Code review aprovado por ao menos 1 colega
-4. ✅ CI/CD verde (lint, type-check, testes, build)
+4. ✅ CI/CD verde (lint, testes, build)
 5. ✅ Deployado em staging
 6. ✅ Demonstrado e aprovado pelo Product Owner
 7. ✅ Documentação atualizada (se necessário)

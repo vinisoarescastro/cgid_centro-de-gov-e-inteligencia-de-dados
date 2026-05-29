@@ -32,13 +32,13 @@ Vite (bundler):
   - Tree shaking de dependências não utilizadas
   - Lazy loading de módulos administrativos (importados apenas quando necessário)
 
-Exemplo de lazy loading no App.tsx:
+Exemplo de lazy loading no App.jsx:
   const PaginaUsuarios    = lazy(() => import('./pages/admin/PaginaUsuarios'));
   const PaginaLogsAuditoria = lazy(() => import('./pages/admin/PaginaLogsAuditoria'));
 ```
 
 #### Cache de Dados (TanStack Query)
-```typescript
+```javascript
 // Relatórios de um workspace: cache de 5 minutos
 useQuery({ queryKey: ['relatorios', espacoTrabalhoId], staleTime: 5 * 60 * 1000 });
 

@@ -6,7 +6,7 @@ Portal web para centralizar relatórios **Power BI Embedded** com controle granu
 
 | Camada | Tecnologia |
 |--------|-----------|
-| Frontend | React 18 + TypeScript + Vite |
+| Frontend | React 18 + JavaScript + Vite |
 | Estado auth | React Context (AuthContext) |
 | Estado servidor | TanStack Query v5 |
 | Formulários | React Hook Form + Yup |
@@ -17,50 +17,61 @@ Portal web para centralizar relatórios **Power BI Embedded** com controle granu
 | Servidor | uvicorn |
 | PBI Embed | powerbi-client SDK (Microsoft) |
 
-## Estrutura Prevista do Repositório
-
-> Estado atual: este repositório ainda contém apenas documentação e o protótipo visual em `prototipo/portal_v4_8.html`. A estrutura abaixo é a referência planejada para o início do desenvolvimento.
+## Estrutura do Repositório
 
 ```
 cgid_centro-de-gov-e-inteligencia-de-dados/
-├── backend/                    # API Python + FastAPI
-│   ├── main.py                 # Ponto de entrada — inicializa o FastAPI
-│   ├── config.py               # Variáveis de ambiente (pydantic-settings)
-│   ├── database.py             # Conexão SQLAlchemy com SQL Server
-│   ├── models.py               # Modelos (tabelas) SQLAlchemy
-│   ├── schemas.py              # Schemas de validação Pydantic
-│   ├── auth.py                 # JWT e bcrypt
-│   ├── dependencies.py         # Dependências reutilizáveis do FastAPI
-│   ├── routers/                # Endpoints organizados por módulo
-│   │   ├── auth.py             # POST /auth/entrar, /sair  GET /auth/eu
-│   │   ├── usuarios.py         # CRUD usuários
-│   │   ├── workspaces.py       # CRUD workspaces
-│   │   ├── relatorios.py       # CRUD relatórios + favoritos
-│   │   ├── permissoes.py       # Permissões por perfil
-│   │   └── auditoria.py        # Logs de auditoria (somente leitura)
-│   ├── requirements.txt        # Dependências Python
-│   ├── .env.example            # Variáveis de ambiente (copiar para .env)
-│   └── Dockerfile
+├── .github/
+│   ├── workflows/
+│   │   ├── ci-backend.yml      # lint e testes do backend
+│   │   └── ci-frontend.yml     # lint, testes e build do frontend
+│   ├── PULL_REQUEST_TEMPLATE.md
+│   └── ISSUE_TEMPLATE/
 │
-├── frontend/                   # SPA React
-│   ├── src/
-│   │   ├── contexts/
-│   │   │   └── AuthContext.tsx # Estado de autenticação (useAuth)
-│   │   ├── services/api.ts     # Axios com interceptor JWT
-│   │   ├── styles/global.css   # Design system (tokens do protótipo)
-│   │   ├── layouts/            # LayoutDashboard (sidebar + conteúdo)
-│   │   ├── pages/              # Páginas da aplicação
-│   │   ├── App.tsx             # Rotas lazy-loaded
-│   │   └── main.tsx            # Entry point + QueryClient + AuthProvider
+├── backend/
+│   ├── app/
+│   │   ├── api/v1/endpoints/   # auth, usuarios, workspaces, relatorios, permissoes, auditoria
+│   │   ├── core/               # security.py (JWT/bcrypt), exceptions.py
+│   │   ├── models/             # um arquivo por entidade SQLAlchemy
+│   │   ├── schemas/            # um arquivo por recurso Pydantic
+│   │   ├── services/           # lógica de negócio desacoplada dos endpoints
+│   │   ├── config.py           # variáveis de ambiente (pydantic-settings)
+│   │   ├── database.py         # engine + SessionLocal + Base
+│   │   ├── dependencies.py     # obter_db, obter_usuario_atual, exigir_perfil
+│   │   └── main.py             # instância FastAPI, CORS, routers
+│   ├── migrations/             # Alembic
+│   ├── tests/
+│   │   ├── unit/               # testes sem I/O
+│   │   └── integration/        # testes com banco (SQLite em memória)
+│   ├── alembic.ini
+│   ├── pyproject.toml          # dependências + ruff + mypy + pytest
 │   ├── .env.example
-│   ├── Dockerfile
-│   ├── nginx.conf              # Config NGINX para servir SPA
-│   ├── package.json
-│   └── vite.config.ts
 │
-├── docs/                       # Documentação técnica e de produto
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── layout/         # LayoutDashboard (sidebar + Outlet)
+│   │   │   ├── ui/             # primitivos reutilizáveis
+│   │   │   └── shared/         # componentes de domínio
+│   │   ├── contexts/           # AuthContext (useAuth)
+│   │   ├── hooks/              # hooks customizados
+│   │   ├── pages/              # uma pasta por rota principal
+│   │   ├── services/api.js     # Axios com interceptor JWT
+│   │   ├── utils/index.js      # funções puras auxiliares
+│   │   ├── styles/global.css   # design system (tokens CSS)
+│   │   ├── App.jsx             # rotas lazy-loaded
+│   │   └── main.jsx            # entry point + QueryClient + AuthProvider
+│   ├── tests/
+│   │   ├── unit/               # Vitest
+│   │   └── e2e/                # Playwright
+│   ├── .env.example
+│   ├── package.json
+│   └── vite.config.js
+│
+├── docs/                       # Documentação técnica e de produto (30 arquivos)
 ├── prototipo/                  # Protótipo visual (portal_v4_8.html)
-├── docker-compose.yml          # SQL Server local para desenvolvimento
+├── scripts/                    # seed_db.py, create_admin.py, check_env.py
+├── CLAUDE.md                   # Guia para o Claude Code
 └── .gitignore
 ```
 
@@ -87,12 +98,7 @@ Abra o SSMS, conecte em `localhost\SQLEXPRESS` ou `localhost\SQLSERVER` e execut
 CREATE DATABASE btportal;
 ```
 
-**Opção B — SQL Server via Docker:**
-```powershell
-docker compose up -d
-```
-
-**Opção C — SQL Server on-premise da empresa:**
+**Opção B — SQL Server on-premise da empresa:**
 
 Peça ao time de TI o endereço do servidor e credenciais de acesso.
 
@@ -122,8 +128,8 @@ URL_FRONTEND=http://localhost:5173
 
 ```powershell
 cd backend
-pip install -r requirements.txt
-uvicorn main:app --reload --port 3001
+pip install -e ".[dev]"
+uvicorn app.main:app --reload --port 3001
 ```
 
 ### 4. Iniciar o frontend
@@ -153,10 +159,19 @@ npm run dev
 
 ```powershell
 # Iniciar em modo desenvolvimento (hot-reload)
-uvicorn main:app --reload --port 3001
+uvicorn app.main:app --reload --port 3001
 
 # Instalar/atualizar dependências
-pip install -r requirements.txt
+pip install -e ".[dev]"
+
+# Testes
+pytest tests/ -v
+
+# Popular banco com dados de exemplo
+python ../scripts/seed_db.py
+
+# Criar primeiro usuário administrador
+python ../scripts/create_admin.py
 
 # Verificar se a API está respondendo
 curl http://localhost:3001/saude
@@ -168,7 +183,6 @@ curl http://localhost:3001/saude
 npm run dev          # Vite dev server com hot-reload
 npm run build        # Build de produção
 npm run lint         # ESLint
-npm run type-check   # TypeScript sem emitir
 npm run test         # Vitest (unitários)
 npm run test:e2e     # Playwright (E2E)
 ```

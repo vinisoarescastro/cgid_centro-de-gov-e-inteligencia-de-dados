@@ -34,7 +34,7 @@ Premissas são afirmações assumidas como verdadeiras para fins de planejamento
 | P-01 | A BrasilTerrenos já possui **licença Power BI Premium ou Power BI Embedded (A SKU)** ativa | Necessário adquirir licença antes do desenvolvimento da integração PBI - prazo impactado |
 | P-02 | Existe um **Azure Active Directory (AAD) corporativo** com tenant configurado | Necessário criar/configurar AAD - adiciona semanas ao Sprint 0 |
 | P-03 | A equipe tem **acesso ao Azure Portal** para registrar o Service Principal do portal | Sem acesso, integração PBI é inviável — bloqueia MVP |
-| P-04 | Haverá ao menos **1 desenvolvedor backend** (Python/FastAPI) e **1 desenvolvedor frontend** (React/TypeScript) dedicados ao projeto | Com menos recursos, o prazo do MVP deve ser revisado |
+| P-04 | Haverá ao menos **1 desenvolvedor backend** (Python/FastAPI) e **1 desenvolvedor frontend** (React/JavaScript) dedicados ao projeto | Com menos recursos, o prazo do MVP deve ser revisado |
 | P-05 | O design system do protótipo atual (`portal_v4_8.html`) será **mantido como base visual** - sem redesign completo | Redesign adicionaria sprint de UX ao roadmap |
 | P-06 | Os **relatórios Power BI já existem** no PBI Service da organização | Se ainda precisam ser criados, há dependência do time de BI |
 | P-07 | O projeto seguirá **metodologia ágil** com sprints de 2 semanas e backlog priorizado | Metodologia diferente pode exigir ajuste no roadmap |

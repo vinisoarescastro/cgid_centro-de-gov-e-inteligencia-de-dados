@@ -49,8 +49,6 @@ coverage/
 Thumbs.db
 desktop.ini
 
-# TypeScript
-*.tsbuildinfo
 
 # Testes e cobertura
 coverage/
@@ -61,3 +59,33 @@ test-results/
 .cache/
 tmp/
 temp/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg
+*.egg-info/
+dist/
+develop-eggs/
+.eggs/
+.venv/
+venv/
+env/
+ENV/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+*.cover
+
+# SQLite (banco de testes)
+*.db
+*.sqlite3
+
+# Alembic
+# (manter migrations/versions/ no repositório)
+

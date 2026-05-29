@@ -45,7 +45,7 @@ Infra    Permissões     Workspaces  Exceções     Dashboard   Ajustes    MVP v
 | README de onboarding | Como subir o ambiente em < 5 min | Dev |
 
 ### Critério de conclusão do Sprint 0
-> `docker-compose up` sobe o ambiente completo; `/saude` retorna 200; seed executado; pipeline CI verde.
+> Backend e frontend iniciam com `uvicorn` e `npm run dev`; `/saude` retorna 200; seed executado; pipeline CI verde.
 
 ---
 

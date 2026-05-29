@@ -160,7 +160,7 @@ Para definir a priorização acima, foram considerados:
 
 | Sprint   | Foco                      | Histórias incluídas                                       |
 |----------|---------------------------|-----------------------------------------------------------|
-| Sprint 0 | Setup e infraestrutura    | Repositório, Docker, banco, CI/CD, Azure App registration |
+| Sprint 0 | Setup e infraestrutura    | Repositório, banco, CI/CD, Azure App registration |
 | Sprint 1 | Autenticação core         | RF-AUTH-01 a 07, RF-SEC-01 a 05                           |
 | Sprint 2 | Usuários e permissões     | RF-USR-01 a 07, RF-PERM-01 a 05                           |
 | Sprint 3 | Power BI Embedded         | RF-PBI-01 a 03, workspaces e relatórios                   |

@@ -98,7 +98,7 @@
 
 | ID | Requisito | Critério |
 |----|-----------|---------|
-| RNF-PORT-01 | Aplicação containerizada via Docker | `docker-compose up` sobe o ambiente completo de desenvolvimento em < 5 minutos |
+| RNF-PORT-01 | Ambiente de desenvolvimento padronizado | Backend e frontend sobem com `uvicorn` e `npm run dev` seguindo apenas o README, em < 5 minutos |
 | RNF-PORT-02 | Ambiente de desenvolvimento reproduzível | Qualquer desenvolvedor sobe o ambiente local seguindo apenas o README |
 | RNF-PORT-03 | Independência de vendor em infraestrutura (exceto Power BI) | Banco, cache e app podem ser executados em qualquer cloud provider |
 

@@ -104,7 +104,7 @@ logger.error(f"Erro ao conectar ao banco: {str(excecao)}")
 AMBIENTE=development
 ```
 
-**Em produção, logs vão para stdout** — coletados pelo sistema operacional / Docker / serviço de cloud conforme a infraestrutura da empresa.
+**Em produção, logs vão para stdout** — coletados pelo sistema operacional ou serviço de cloud conforme a infraestrutura da empresa.
 
 ### 2.2 Métricas
 
