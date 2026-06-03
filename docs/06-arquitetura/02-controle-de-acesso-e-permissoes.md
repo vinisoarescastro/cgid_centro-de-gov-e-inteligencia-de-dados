@@ -74,8 +74,9 @@ Visitante     (nível 1) → Acesso read-only temporário, apenas relatórios au
 | | Exportar | ✅ | ✅ | ❌ | ❌ | ❌ |
 | **Segurança** | Visualizar checklist | ✅ | ✅ | ❌ | ❌ | ❌ |
 | | Ver eventos suspeitos | ✅ | ✅ | ❌ | ❌ | ❌ |
-| **Configurações** | Visualizar | ✅ | ❌ | ❌ | ❌ | ❌ |
-| | Editar | ✅ | ❌ | ❌ | ❌ | ❌ |
+| **Configurações** | Visualizar | ✅ | ✅ | ❌ | ❌ | ❌ |
+| | Editar expediente e grupos de exceção | ✅ | ✅ | ❌ | ❌ | ❌ |
+| | Editar credenciais Power BI | ✅ | ❌ | ❌ | ❌ | ❌ |
 
 ### 3.3 Consumo (Relatórios e Workspaces)
 
@@ -104,6 +105,10 @@ O acesso a relatórios PBI tem uma camada adicional além do RBAC dos módulos:
 | `total` | Acesso a todos os relatórios do workspace | Na tabela `acessos_workspace`: `nivel_acesso = 'total'` |
 | `apenas_relatorios` | Acesso apenas a relatórios específicos | `nivel_acesso = 'apenas_relatorios'` + registros em `acessos_relatorio` |
 | `nenhum` | Sem acesso ao workspace | Não criar registro em `acessos_workspace` ou usar `nivel_acesso = 'nenhum'` |
+
+Para usuários com `apenas_relatorios`, a listagem de relatórios é filtrada no backend. O endpoint `GET /workspaces/{workspace_id}/relatorios?usuario_id={usuario_id}` retorna somente relatórios publicados que tenham vínculo em `acessos_relatorio`.
+
+Admins podem alterar a lista de relatórios específicos por `PUT /workspaces/{workspace_id}/usuarios/{usuario_id}/relatorios`, enviando `relatorio_ids`. Alterar o nível para `apenas_relatorios` não concede relatórios automaticamente.
 
 ---
 
@@ -203,3 +208,4 @@ def pode_acessar_relatorio(usuario_id: str, relatorio_id: str) -> bool:
 | Versão | Data | Autor | Descrição |
 |--------|------|-------|-----------|
 | 1.0 | Maio/2026 | — | Criação inicial do documento |
+| 1.1 | Junho/2026 | Vinicius Soares | Atualizada matriz: Configurações para Admin/Super Admin, credenciais PBI exclusivas do Super Admin e filtro server-side para relatórios específicos |

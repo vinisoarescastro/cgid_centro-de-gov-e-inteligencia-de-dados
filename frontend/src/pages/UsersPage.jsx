@@ -5,6 +5,7 @@ import '../styles/users.css'
 import logoSidebarFull from '../assets/logo-sidebar-full.png'
 import logoSidebarIcon from '../assets/logo-sidebar-icon.png'
 import Avatar from '../components/Avatar'
+import { apiFetch } from '../utils/api'
 
 const API = 'http://localhost:8000'
 
@@ -95,7 +96,6 @@ function ModalUsuario({ usuario, acessosIniciais = [], onClose, onSave }) {
     const e = {}
     if (!form.nome.trim())  e.nome  = 'Nome obrigatório.'
     if (!form.email.trim()) e.email = 'E-mail obrigatório.'
-    if (!editando && !form.senha.trim()) e.senha = 'Senha obrigatória.'
     if (form.senha && form.senha.length < 6) e.senha = 'Mínimo 6 caracteres.'
     return e
   }
@@ -114,20 +114,16 @@ function ModalUsuario({ usuario, acessosIniciais = [], onClose, onSave }) {
       }
 
       // 1. salva o usuário
-      const res = await fetch(
-        editando ? `${API}/usuarios/${usuario.id}` : `${API}/usuarios`,
-        { method: editando ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }
+      const res = await apiFetch(
+        editando ? `/usuarios/${usuario.id}` : `/usuarios`,
+        { method: editando ? 'PUT' : 'POST', body }
       )
       if (res.status === 409) { setErros({ email: 'E-mail já cadastrado.' }); return }
       if (!res.ok) throw new Error()
       const data = await res.json()
 
       // 2. salva os acessos
-      await fetch(`${API}/usuarios/${data.id}/acessos`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(acessos),
-      })
+      await apiFetch(`/usuarios/${data.id}/acessos`, { method: 'PUT', body: acessos })
 
       onSave(data)
     } catch {
@@ -299,6 +295,7 @@ export default function UsersPage() {
   const navigate = useNavigate()
   const [expanded, setExpanded] = useState(false)
   const currentUser = JSON.parse(sessionStorage.getItem('cgid_user') || '{}')
+  const isAdmin = ['super_administrador', 'administrador'].includes(currentUser.perfil)
 
   const [usuarios, setUsuarios]   = useState([])
   const [acessosMap, setAcessosMap] = useState({}) // { userId: [{nome, nivel_acesso}] }
@@ -344,32 +341,27 @@ export default function UsersPage() {
     return () => clearTimeout(t)
   }, [fetchUsuarios])
 
-  function handleSave(usuario) {
-    setUsuarios(prev => {
-      const idx = prev.findIndex(u => u.id === usuario.id)
-      if (idx >= 0) { const next = [...prev]; next[idx] = usuario; return next }
-      return [usuario, ...prev]
-    })
+  function handleSave() {
     setModalNovo(false)
     setModalEditar(null)
+    fetchUsuarios()
   }
 
   async function handleExcluir() {
-    await fetch(`${API}/usuarios/${modalExcluir.id}`, { method: 'DELETE' })
+    await apiFetch(`/usuarios/${modalExcluir.id}`, { method: 'DELETE' })
     setUsuarios(prev => prev.filter(u => u.id !== modalExcluir.id))
     setModalExcluir(null)
   }
 
   async function handleResetSenha() {
-    const res = await fetch(`${API}/usuarios/${modalResetSenha.id}/resetar-senha`, { method: 'POST' })
+    const res = await apiFetch(`/usuarios/${modalResetSenha.id}/resetar-senha`, { method: 'POST' })
     if (res.ok) setModalResetSenha(null)
   }
 
   async function alterarStatus(usuario, novoStatus) {
-    const res = await fetch(`${API}/usuarios/${usuario.id}`, {
+    const res = await apiFetch(`/usuarios/${usuario.id}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: novoStatus }),
+      body: { status: novoStatus },
     })
     if (res.ok) {
       const atualizado = await res.json()
@@ -409,14 +401,22 @@ export default function UsersPage() {
             <div className="sb-icon"><i className="fa-solid fa-building-columns" /></div>
             <span className="sb-label">Workspace</span>
           </div>
-          <div className="sb-link">
+          <div className="sb-link" onClick={() => navigate('/favoritos')}>
             <div className="sb-icon"><i className="fa-solid fa-bookmark" /></div>
             <span className="sb-label">Favoritos</span>
           </div>
-          <div className="sb-link">
-            <div className="sb-icon"><i className="fa-solid fa-gear" /></div>
-            <span className="sb-label">Configurações</span>
-          </div>
+          {currentUser.perfil === 'super_administrador' && (
+            <div className="sb-link" onClick={() => navigate('/auditoria')}>
+              <div className="sb-icon"><i className="fa-solid fa-file-lines" /></div>
+              <span className="sb-label">Auditoria</span>
+            </div>
+          )}
+          {isAdmin && (
+            <div className="sb-link" onClick={() => navigate('/configuracoes')}>
+              <div className="sb-icon"><i className="fa-solid fa-gear" /></div>
+              <span className="sb-label">Configurações</span>
+            </div>
+          )}
         </nav>
         <div className="sb-footer">
           <div className="sb-user">

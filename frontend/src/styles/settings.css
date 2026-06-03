@@ -1,0 +1,219 @@
+/* ─── Página de Configurações ──────────────────────────────────────────────── */
+
+.cfg-tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--gray-200);
+  margin-bottom: 24px;
+}
+.cfg-tab {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 16px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--gray-500);
+  cursor: pointer;
+  transition: all var(--t-base);
+  border-radius: var(--r-md) var(--r-md) 0 0;
+}
+.cfg-tab:hover { color: var(--gray-700); background: var(--gray-50); }
+.cfg-tab.active { color: var(--brand-600); border-bottom-color: var(--brand-500); font-weight: 600; }
+
+/* ─── Grade de expediente ── */
+.sched-grid {
+  border: 1px solid var(--gray-200);
+  border-radius: var(--r-md);
+  overflow: hidden;
+}
+.sched-header {
+  display: grid;
+  grid-template-columns: 100px 120px 120px 80px 110px 64px;
+  gap: 8px;
+  padding: 8px 14px;
+  background: var(--gray-50);
+  border-bottom: 1px solid var(--gray-200);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--gray-400);
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+.sched-row {
+  display: grid;
+  grid-template-columns: 100px 120px 120px 80px 110px 64px;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px;
+  background: var(--gray-0);
+  border-bottom: 1px solid var(--gray-100);
+  transition: background var(--t-base);
+}
+.sched-row:last-child { border-bottom: none; }
+.sched-row:hover { background: var(--gray-50); }
+.sched-row.inativo { opacity: 0.45; }
+.sched-dia {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gray-800);
+}
+.sched-time-input {
+  height: 30px;
+  padding: 0 8px;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--r-md);
+  font-size: 12px;
+  font-family: var(--font);
+  color: var(--gray-800);
+  background: var(--gray-0);
+  outline: none;
+  transition: all var(--t-base);
+  width: 100%;
+}
+.sched-time-input:focus { border-color: var(--brand-400); box-shadow: 0 0 0 3px var(--brand-100); }
+.sched-time-input:disabled { background: var(--gray-50); color: var(--gray-300); cursor: not-allowed; }
+
+.sched-toggle-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+.sched-toggle-label {
+  font-size: 10px;
+  color: var(--gray-400);
+  white-space: nowrap;
+}
+
+/* ─── Toggle switch ── */
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 36px;
+  height: 20px;
+  flex-shrink: 0;
+}
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
+.toggle-slider {
+  position: absolute;
+  inset: 0;
+  background: var(--gray-200);
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background var(--t-base);
+}
+.toggle-slider::before {
+  content: "";
+  position: absolute;
+  width: 14px; height: 14px;
+  left: 3px; top: 3px;
+  background: white;
+  border-radius: 50%;
+  transition: transform var(--t-base);
+  box-shadow: 0 1px 3px rgba(0,0,0,.2);
+}
+.toggle-switch input:checked + .toggle-slider { background: var(--brand-500); }
+.toggle-switch input:checked + .toggle-slider::before { transform: translateX(16px); }
+
+/* ─── Grupos de exceção ── */
+.grupo-card {
+  border: 1px solid var(--gray-200);
+  border-radius: var(--r-md);
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+.grupo-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: var(--gray-50);
+  border-bottom: 1px solid var(--gray-200);
+}
+.grupo-card-nome {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gray-800);
+  flex: 1;
+}
+.grupo-card-meta {
+  font-size: 12px;
+  color: var(--gray-400);
+}
+.grupo-membros {
+  padding: 10px 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-height: 42px;
+}
+.grupo-membro-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background: var(--brand-50);
+  border: 1px solid var(--brand-100);
+  border-radius: 20px;
+  font-size: 12px;
+  color: var(--brand-700);
+}
+.grupo-membro-chip button {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--brand-400);
+  font-size: 10px;
+  line-height: 1;
+  transition: color var(--t-base);
+}
+.grupo-membro-chip button:hover { color: var(--red-500); }
+
+/* ─── Credenciais PBI ── */
+.pbi-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 520px;
+}
+.pbi-secret-wrap {
+  position: relative;
+}
+.pbi-secret-wrap .modal-input { padding-right: 40px; }
+.pbi-secret-toggle {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--gray-400);
+  font-size: 13px;
+  transition: color var(--t-base);
+}
+.pbi-secret-toggle:hover { color: var(--gray-700); }
+
+.cfg-save-bar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 16px;
+  border-top: 1px solid var(--gray-100);
+  margin-top: 8px;
+}
+.cfg-save-feedback {
+  font-size: 12px;
+  color: var(--brand-600);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}

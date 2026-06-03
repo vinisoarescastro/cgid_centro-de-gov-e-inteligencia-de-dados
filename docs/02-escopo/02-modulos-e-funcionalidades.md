@@ -67,6 +67,7 @@ O sistema é composto por **10 módulos funcionais** organizados em duas camadas
 | F-DASH-06 | Tabela de relatórios PBI com filtros | v1.0 | 🔴 Obrigatório |
 | F-DASH-07 | Tiles de workspaces com estatísticas | v1.0 | 🔴 Obrigatório |
 | F-DASH-08 | Gráficos de acesso por período | v1.1 | 🟡 Recomendado |
+| F-DASH-09 | Card de expediente atual calculado pelo servidor | v1.0 | 🔴 Obrigatório |
 
 ---
 
@@ -93,6 +94,9 @@ O sistema é composto por **10 módulos funcionais** organizados em duas camadas
 | F-WS-13 | Admins podem adicionar usuários ao workspace via modal com busca, seleção e escolha de nível de acesso | v1.0 | 🔴 Obrigatório |
 | F-WS-14 | Admins podem alterar o nível de acesso de um usuário vinculado diretamente na tabela (select inline) | v1.0 | 🔴 Obrigatório |
 | F-WS-15 | Admins podem remover usuários do workspace com confirmação | v1.0 | 🔴 Obrigatório |
+| F-WS-16 | CRUD de relatórios dentro do workspace, incluindo categoria, status, descrição e ID Power BI | v1.0 | 🔴 Obrigatório |
+| F-WS-17 | Visualizador inline de relatório via Power BI Embedded em tela modal | v1.0 | 🔴 Obrigatório |
+| F-WS-18 | Gestão de permissões de relatórios específicos para usuários com `apenas_relatorios` | v1.0 | 🔴 Obrigatório |
 
 ---
 
@@ -108,6 +112,8 @@ O sistema é composto por **10 módulos funcionais** organizados em duas camadas
 | F-FAV-02 | Listagem de favoritos do usuário | v1.0 | 🔴 Obrigatório |
 | F-FAV-03 | Acesso rápido ao relatório favorito | v1.0 | 🔴 Obrigatório |
 | F-FAV-04 | Favoritos persistidos por usuário (não compartilhados) | v1.0 | 🔴 Obrigatório |
+| F-FAV-05 | Página dedicada com favoritos agrupados por workspace e busca por relatório ou workspace | v1.0 | 🔴 Obrigatório |
+| F-FAV-06 | Remoção de favoritos pela página dedicada sem alterar o cadastro do relatório | v1.0 | 🔴 Obrigatório |
 
 ---
 
@@ -144,6 +150,7 @@ O sistema é composto por **10 módulos funcionais** organizados em duas camadas
 | F-PERM-04 | Controle de acesso Power BI por relatório individual | v1.0 | 🔴 Obrigatório |
 | F-PERM-05 | Registro automático de alterações de permissão no log de auditoria | v1.0 | 🔴 Obrigatório |
 | F-PERM-06 | Visualização do estado anterior vs. novo ao alterar permissões | v1.1 | 🟡 Recomendado |
+| F-PERM-07 | Filtro server-side da listagem de relatórios por nível de acesso do usuário | v1.0 | 🔴 Obrigatório |
 
 ---
 
@@ -160,6 +167,7 @@ O sistema é composto por **10 módulos funcionais** organizados em duas camadas
 | F-SCHED-03 | Cadastro de grupos de exceção | v1.0 | 🔴 Obrigatório |
 | F-SCHED-04 | Ativação/desativação de exceções | v1.0 | 🔴 Obrigatório |
 | F-SCHED-05 | Mensagem personalizada exibida ao usuário bloqueado por expediente | v1.0 | 🔴 Obrigatório |
+| F-SCHED-06 | Grade compacta de expediente com uma linha por dia, toggles e salvamento independente | v1.0 | 🔴 Obrigatório |
 
 ---
 
@@ -175,10 +183,11 @@ O sistema é composto por **10 módulos funcionais** organizados em duas camadas
 | F-AUD-02 | Filtros: usuário, módulo, tipo de evento, período, IP | v1.0 | 🔴 Obrigatório |
 | F-AUD-03 | Detalhe expandido de cada evento | v1.0 | 🔴 Obrigatório |
 | F-AUD-04 | Categorização visual por tipo (auth, usuário, permissão, acesso, segurança) | v1.0 | 🔴 Obrigatório |
-| F-AUD-05 | Exportação filtrada em CSV | v1.1 | 🟢 Opcional  |
+| F-AUD-05 | Exportação filtrada em CSV | v1.0 | 🔴 Obrigatório |
 | F-AUD-06 | Exportação em XLSX | v1.1 | 🟢 Opcional  |
 | F-AUD-07 | Alerta visual de eventos críticos no dashboard | v1.0 | 🟡 Recomendado |
 | F-AUD-08 | Notificação por e-mail de eventos críticos | v1.1 | 🟡 Recomendado |
+| F-AUD-09 | Expansão de registros com `valor_anterior` e `valor_novo` lado a lado | v1.0 | 🔴 Obrigatório |
 
 ---
 
@@ -197,20 +206,22 @@ O sistema é composto por **10 módulos funcionais** organizados em duas camadas
 
 ---
 
-### MOD-10 — Configurações do Sistema (Super Admin)
+### MOD-10 — Configurações do Sistema (Admin / Super Admin)
 
-**Descrição:** Configurações globais do portal incluindo integração com Power BI Embedded e políticas de segurança.
+**Descrição:** Configurações globais do portal incluindo expediente, grupos de exceção e integração com Power BI Embedded. Admin e Super Admin acessam a página; credenciais Power BI são exclusivas do Super Admin.
 
 **Funcionalidades:**
 
 | ID | Funcionalidade | Versão | Prioridade |
 |----|---------------|--------|-----------|
 | F-CONF-01 | Configuração de nome do portal e ambiente (produção/homologação) | v1.0 | 🔴 Obrigatório |
-| F-CONF-02 | Configuração de credenciais Power BI (Client ID, Tenant ID, Workspace ID) | v1.0 | 🔴 Obrigatório |
+| F-CONF-02 | Configuração de credenciais Power BI (Tenant ID, Client ID, Client Secret) | v1.0 | 🔴 Obrigatório |
 | F-CONF-03 | Toggle de integração PBI ativa/inativa | v1.0 | 🔴 Obrigatório |
 | F-CONF-04 | URL de embed permitida (whitelist) | v1.0 | 🟡 Recomendado |
 | F-CONF-05 | Política de senha (complexidade, expiração) | v1.1 | 🟡 Recomendado |
 | F-CONF-06 | Configurações de notificação (quais alertas, quem recebe) | v1.1 | 🟡 Recomendado |
+| F-CONF-07 | Abas de Configurações: Expediente, Grupos de Exceção e Credenciais Power BI | v1.0 | 🔴 Obrigatório |
+| F-CONF-08 | CRUD de grupos de exceção com inclusão e remoção de membros | v1.0 | 🔴 Obrigatório |
 
 ---
 
@@ -233,3 +244,4 @@ O sistema é composto por **10 módulos funcionais** organizados em duas camadas
 | 1.2    | Jun/2026  | Vinicius Soares | Adicionado F-WS-12 (aba de usuários vinculados no detalhe do workspace) |
 | 1.3    | Jun/2026  | Vinicius Soares | Adicionados F-WS-13 a F-WS-15 (gerenciamento de usuários do workspace: adicionar, alterar nível, remover) |
 | 1.4    | Jun/2026  | Vinicius Soares | Correção: ícones de workspace no modal de usuário passam a usar prefixo fa-solid; acessos carregados atomicamente via Promise.all e pré-populados do cache da página mãe |
+| 1.5    | Jun/2026  | Vinicius Soares | Adicionados módulos implementados de favoritos, CRUD de relatórios, permissões específicas, auditoria CSV e configurações por abas |

@@ -26,6 +26,7 @@ export default function HomePage() {
   const [kpis, setKpis] = useState(null)
   const [events, setEvents] = useState([])
   const [workspaces, setWorkspaces] = useState([])
+  const [expediente, setExpediente] = useState(null)
 
   useEffect(() => {
     fetch(`${API}/dashboard/kpis`)
@@ -34,6 +35,8 @@ export default function HomePage() {
       .then(r => r.json()).then(setEvents).catch(console.error)
     fetch(`${API}/dashboard/workspaces`)
       .then(r => r.json()).then(setWorkspaces).catch(console.error)
+    fetch(`${API}/dashboard/expediente`)
+      .then(r => r.json()).then(setExpediente).catch(console.error)
   }, [])
 
   // calcula pct relativo ao maior valor para as barras
@@ -78,14 +81,22 @@ export default function HomePage() {
             <div className="sb-icon"><i className="fa-solid fa-building-columns" /></div>
             <span className="sb-label">Workspace</span>
           </div>
-          <div className="sb-link">
+          <div className="sb-link" onClick={() => navigate('/favoritos')}>
             <div className="sb-icon"><i className="fa-solid fa-bookmark" /></div>
             <span className="sb-label">Favoritos</span>
           </div>
-          <div className="sb-link">
-            <div className="sb-icon"><i className="fa-solid fa-gear" /></div>
-            <span className="sb-label">Configurações</span>
-          </div>
+          {user.perfil === 'super_administrador' && (
+            <div className="sb-link" onClick={() => navigate('/auditoria')}>
+              <div className="sb-icon"><i className="fa-solid fa-file-lines" /></div>
+              <span className="sb-label">Auditoria</span>
+            </div>
+          )}
+          {isAdmin && (
+            <div className="sb-link" onClick={() => navigate('/configuracoes')}>
+              <div className="sb-icon"><i className="fa-solid fa-gear" /></div>
+              <span className="sb-label">Configurações</span>
+            </div>
+          )}
         </nav>
 
         <div className="sb-footer">
@@ -197,9 +208,11 @@ export default function HomePage() {
                     <div className="card-title">Eventos Recentes</div>
                     <div className="card-sub">Últimas atividades no portal</div>
                   </div>
-                  <button className="btn btn-ghost btn-sm">
-                    Ver todos <i className="fa-solid fa-arrow-right" />
-                  </button>
+                  {user.perfil === 'super_administrador' && (
+                    <button className="btn btn-ghost btn-sm" onClick={() => navigate('/auditoria')}>
+                      Ver todos <i className="fa-solid fa-arrow-right" />
+                    </button>
+                  )}
                 </div>
                 <div className="card-bd" style={{ padding: '8px 12px' }}>
                   <div className="activity-list">
@@ -223,7 +236,7 @@ export default function HomePage() {
                 <div className="card-hd">
                   <div>
                     <div className="card-title">Distribuição por Workspace</div>
-                    <div className="card-sub">Usuários por departamento</div>
+                    <div className="card-sub">Relatórios publicados por workspace</div>
                   </div>
                 </div>
                 <div className="card-bd">
@@ -238,18 +251,38 @@ export default function HomePage() {
                       </div>
                     </div>
                   ))}
-                  <div style={{ marginTop: 16, padding: '12px 16px', background: 'var(--brand-50)', border: '1px solid var(--brand-100)', borderRadius: 'var(--r-md)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <i className="fa-solid fa-clock" style={{ color: 'var(--brand-500)', fontSize: 14 }} />
-                      <div>
-                        <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--brand-800)' }}>Expediente ativo</div>
-                        <div style={{ fontSize: 12, color: 'var(--brand-600)' }}>08:00 — 18:00 · Acesso normal</div>
+                  {expediente && (
+                    <div style={{
+                      marginTop: 16, padding: '12px 16px', borderRadius: 'var(--r-md)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                      background: expediente.dentro_expediente ? 'var(--brand-50)' : '#fef2f2',
+                      border: `1px solid ${expediente.dentro_expediente ? 'var(--brand-100)' : '#fecaca'}`,
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <i className="fa-solid fa-clock" style={{ fontSize: 14, color: expediente.dentro_expediente ? 'var(--brand-500)' : '#ef4444' }} />
+                        <div>
+                          <div style={{ fontSize: 13, fontWeight: 600, color: expediente.dentro_expediente ? 'var(--brand-800)' : '#991b1b' }}>
+                            {!expediente.configurado
+                              ? 'Expediente não configurado'
+                              : expediente.dentro_expediente
+                                ? 'Dentro do expediente'
+                                : 'Fora do expediente'}
+                          </div>
+                          <div style={{ fontSize: 12, color: expediente.dentro_expediente ? 'var(--brand-600)' : '#b91c1c' }}>
+                            {expediente.configurado
+                              ? `${expediente.hora_inicio} — ${expediente.hora_fim} · Agora: ${expediente.hora_atual}`
+                              : `Hora atual: ${expediente.hora_atual}`}
+                          </div>
+                        </div>
                       </div>
+                      {expediente.configurado && (
+                        <span className={`status-pill ${expediente.dentro_expediente ? 'status-online' : 'status-offline'}`}>
+                          <span className={`status-dot ${expediente.dentro_expediente ? 'green' : 'red'}`} />
+                          {expediente.dentro_expediente ? 'Online' : expediente.bloquear_fora ? 'Bloqueado' : 'Fora do horário'}
+                        </span>
+                      )}
                     </div>
-                    <span className="status-pill status-online">
-                      <span className="status-dot green" />Online
-                    </span>
-                  </div>
+                  )}
                 </div>
               </div>
             </div>

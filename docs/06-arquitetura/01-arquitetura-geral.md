@@ -30,14 +30,14 @@
 │                                                                      │
 │  ┌────────────────┐   HTTPS/REST    ┌──────────────────────────┐     │
 │  │   React SPA    │ ◀────────────▶ │    FastAPI (Backend)     │     │
-│  │  (Frontend)    │  + JWT Bearer   │                          │     │
-│  │  JavaScript    │                 │   Módulos (roteadores):  │     │
-│  │  Vite          │                 │   - auth.py              │     │
-│  │  TanStack Query│                 │   - usuarios.py          │     │
-│  │  React Context │                 │   - workspaces.py        │     │
-│  │  powerbi-client│                 │   - relatorios.py        │     │
-│  └────────────────┘                 │   - permissoes.py        │     │
-│                                     │   - auditoria.py         │     │
+│  │  (Frontend)    │  JSON/fetch     │                          │     │
+│  │  JavaScript    │                 │   main.py:               │     │
+│  │  Vite          │                 │   - auth/login           │     │
+│  │  sessionStorage│                 │   - usuarios             │     │
+│  │  apiFetch      │                 │   - workspaces           │     │
+│  │  powerbi-client│                 │   - relatorios           │     │
+│  └────────────────┘                 │   - configuracoes        │     │
+│                                     │   - auditoria            │     │
 │                                     └──────────────┬───────────┘     │
 │                                                   │ pyodbc           │
 │                                     ┌─────────────▼──────────────┐   │
@@ -62,20 +62,20 @@
 
 | Camada | Tecnologia | Responsabilidade |
 |--------|-----------|-----------------|
-| Framework | React 18 + JavaScript | Componentização |
+| Framework | React 19 + JavaScript | Componentização |
 | Build | Vite | Bundling, HMR, otimização |
-| Roteamento | React Router v6 | Navegação client-side |
-| Estado servidor | TanStack Query v5 | Cache de dados, fetch, loading states |
-| Estado de autenticação | React Context (AuthContext) | Usuário logado, token, funções entrar/sair |
-| Formulários | React Hook Form + Yup | Validação declarativa de formulários |
+| Roteamento | React Router v7 | Navegação client-side |
+| Estado servidor | `useEffect` + `fetch` nativo | Busca de dados e loading states por página |
+| Estado de autenticação | `sessionStorage` | Dados do usuário logado entre navegações |
+| Formulários | `useState` + validação local | Validação manual nos componentes |
 | PBI Embed | powerbi-client (SDK oficial) | Renderização inline de relatórios |
-| HTTP | Axios + interceptors | Chamadas à API; envio automático do token JWT |
+| HTTP | `fetch` nativo + `apiFetch` | Chamadas à API; envio do header `X-Usuario-Id` em ações auditáveis |
 
 **Regras do Frontend:**
 - Sem lógica de negócio crítica no cliente
 - Toda validação de segurança ocorre no backend (RBAC, permissões)
-- Token JWT mantido em memória pelo `AuthContext`; o refresh token fica em cookie `httpOnly`
-- Em caso de 401 por expiração: tenta renovar em `/api/v1/auth/renovar`; se falhar, redireciona para `/login`
+- No protótipo atual, a sessão fica em `sessionStorage`; JWT/refresh token ficam como evolução planejada
+- O helper `apiFetch` envia `X-Usuario-Id` para identificar o autor de ações registradas na auditoria
 
 ---
 
@@ -87,20 +87,12 @@
 
 ```
 backend/
-├── main.py           ← inicializa o FastAPI, CORS, registra roteadores
-├── config.py         ← lê variáveis do .env com tipagem (pydantic-settings)
-├── database.py       ← cria a conexão com o SQL Server (engine + sessão)
+├── main.py           ← inicializa o FastAPI, CORS e endpoints do protótipo
+├── .env.example      ← exemplo de variáveis Power BI Embedded
+├── database.py       ← cria a conexão SQLite/SQL Server (engine + sessão)
 ├── models.py         ← define as tabelas do banco (classes SQLAlchemy)
 ├── schemas.py        ← define o formato dos dados de entrada e saída (Pydantic)
-├── auth.py           ← funções de JWT e bcrypt
-├── dependencies.py   ← funções reutilizáveis: obter_db, obter_usuario_atual, exigir_perfil
-└── routers/
-    ├── auth.py       ← POST /auth/entrar, POST /auth/renovar, POST /auth/sair, GET /auth/eu
-    ├── usuarios.py   ← CRUD de usuários
-    ├── workspaces.py ← CRUD de workspaces + concessão de acesso
-    ├── relatorios.py ← CRUD de relatórios + favoritos
-    ├── permissoes.py ← leitura e edição de permissões por perfil
-    └── auditoria.py  ← consulta read-only de logs de auditoria
+└── seed.py           ← cria tabelas e insere dados iniciais
 ```
 
 **Pipeline de uma requisição autenticada:**
@@ -108,14 +100,15 @@ backend/
 ```
 Request
   → CORS (verificação de origem)
-  → Roteador FastAPI
-  → Depends(obter_usuario_atual) — valida Bearer token, carrega usuário
-  → Depends(exigir_perfil(...)) — verifica se o perfil tem acesso
+  → Rota FastAPI em main.py
   → Validação Pydantic (schemas de entrada)
   → Função de rota → banco via SQLAlchemy
+  → registrar_log(...) quando a ação é auditável
   → Resposta Pydantic (serialização automática)
 Response
 ```
+
+> Observação: autenticação forte via JWT, guards FastAPI e roteadores separados são a direção arquitetural futura. O estado atual do protótipo usa rotas diretas e sessão de usuário no frontend.
 
 ---
 
@@ -139,7 +132,13 @@ Base.metadata.create_all(bind=engine)
 
 ## 4. Autenticação
 
-### Fluxo de Tokens
+### Estado Atual
+
+O protótipo autentica com `POST /login`, valida e-mail/senha com hash bcrypt, atualiza `ultimo_login`, zera tentativas em caso de sucesso e incrementa/bloqueia o usuário após falhas consecutivas. O frontend guarda os dados retornados em `sessionStorage` e protege rotas com `PrivateRoute`.
+
+Para auditoria de ações administrativas, o frontend envia `X-Usuario-Id` pelo helper `apiFetch`; o backend usa esse header apenas para identificar o autor do log (`registrar_log`). Esse header não deve ser tratado como mecanismo definitivo de autorização em produção.
+
+### Alvo Futuro: Fluxo de Tokens
 
 ```
 Login bem-sucedido:
@@ -151,12 +150,12 @@ A cada requisição:
   Authorization: Bearer <token_acesso>
 
 Renovação:
-  POST /api/v1/auth/renovar
+  POST /auth/renovar
   → Backend valida cookie httpOnly e sessão ativa no SQL Server
   → Retorna novo token_acesso e rotaciona refresh_token
 
 Logout:
-  POST /api/v1/auth/sair
+  POST /auth/sair
   → Registro no log de auditoria
   → Backend revoga a sessão no SQL Server e limpa o cookie httpOnly
   → Frontend limpa o token_acesso mantido em memória
@@ -212,56 +211,79 @@ def exigir_perfil(*perfis):
 
 ---
 
-## 5. API REST — Endpoints Disponíveis (v1)
+## 5. API REST — Endpoints Disponíveis
 
 ### Autenticação
 ```
-POST   /api/v1/auth/entrar     → { token_acesso, tipo_token, perfil, nome }
-POST   /api/v1/auth/renovar    → { token_acesso, tipo_token }
-POST   /api/v1/auth/sair       → 200
-GET    /api/v1/auth/eu         → dados do usuário logado
+GET    /                         → health check
+POST   /login                    → autenticação com e-mail e senha
+```
+
+### Dashboard
+```
+GET    /dashboard/kpis           → KPIs globais
+GET    /dashboard/eventos        → últimos eventos de auditoria
+GET    /dashboard/workspaces     → workspaces com contagens
+GET    /dashboard/expediente     → status atual do expediente no servidor
 ```
 
 ### Usuários
 ```
-GET    /api/v1/usuarios        → listagem de usuários
-POST   /api/v1/usuarios        → criar usuário
-PUT    /api/v1/usuarios/{id}   → atualizar usuário
-DELETE /api/v1/usuarios/{id}   → desativar usuário (soft delete)
+GET    /usuarios                  → listagem com filtros
+POST   /usuarios                  → criar usuário
+PUT    /usuarios/{id}             → atualizar usuário
+DELETE /usuarios/{id}             → excluir usuário
+POST   /usuarios/{id}/resetar-senha
+GET    /usuarios/{id}/acessos
+PUT    /usuarios/{id}/acessos
+GET    /usuarios/{id}/favoritos
+POST   /usuarios/{id}/favoritos
+DELETE /usuarios/{id}/favoritos/{relatorio_id}
 ```
 
 ### Workspaces
 ```
-GET    /api/v1/workspaces              → listar workspaces acessíveis
-POST   /api/v1/workspaces             → criar workspace
-PUT    /api/v1/workspaces/{id}        → atualizar workspace
-DELETE /api/v1/workspaces/{id}        → arquivar workspace
-POST   /api/v1/workspaces/{id}/acesso → conceder acesso ao workspace
+GET    /workspaces
+POST   /workspaces
+PUT    /workspaces/{id}
+PATCH  /workspaces/{id}/arquivar
+GET    /workspaces/{id}/usuarios
+POST   /workspaces/{id}/usuarios
+PATCH  /workspaces/{id}/usuarios/{usuario_id}
+DELETE /workspaces/{id}/usuarios/{usuario_id}
+GET    /workspaces/{id}/usuarios/{usuario_id}/relatorios
+PUT    /workspaces/{id}/usuarios/{usuario_id}/relatorios
 ```
 
 ### Relatórios
 ```
-GET    /api/v1/relatorios              → listar relatórios
-POST   /api/v1/relatorios             → criar relatório
-PUT    /api/v1/relatorios/{id}        → atualizar relatório
-DELETE /api/v1/relatorios/{id}        → arquivar relatório
-POST   /api/v1/relatorios/{id}/favorito → adicionar/remover favorito
+GET    /workspaces/{id}/relatorios
+POST   /workspaces/{id}/relatorios
+PUT    /workspaces/{id}/relatorios/{relatorio_id}
+DELETE /workspaces/{id}/relatorios/{relatorio_id}
+GET    /relatorios/{id}/embed          → embed URL + token Power BI
 ```
 
-### Permissões
+### Configurações
 ```
-GET    /api/v1/permissoes      → listar permissões por perfil
-PUT    /api/v1/permissoes/{id} → atualizar permissão
+GET    /configuracoes/expediente
+PUT    /configuracoes/expediente/{dia_semana}
+GET    /configuracoes/grupos-excecao
+POST   /configuracoes/grupos-excecao
+PUT    /configuracoes/grupos-excecao/{grupo_id}
+DELETE /configuracoes/grupos-excecao/{grupo_id}
+POST   /configuracoes/grupos-excecao/{grupo_id}/membros
+DELETE /configuracoes/grupos-excecao/{grupo_id}/membros/{usuario_id}
+GET    /configuracoes/pbi
+PUT    /configuracoes/pbi
 ```
 
 ### Auditoria
 ```
-GET    /api/v1/auditoria       → consultar logs (filtros: tipo_evento, modulo, email_usuario, datas)
-```
-
-### Sistema
-```
-GET    /saude                  → health check → { "situacao": "operacional" }
+GET    /auditoria                → consultar logs com filtros e paginação
+GET    /auditoria/export-csv     → exportar CSV filtrado
+GET    /auditoria/tipos          → valores de tipo_evento
+GET    /auditoria/modulos        → valores de modulo
 ```
 
 ---
@@ -277,11 +299,14 @@ JWT_EXPIRA_MINUTOS=60
 PORTA=3001
 AMBIENTE=development
 URL_FRONTEND=http://localhost:5173
+PBI_TENANT_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+PBI_CLIENT_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+PBI_CLIENT_SECRET=sua-chave-secreta-aqui
 ```
 
 **`frontend/.env`**
 ```env
-VITE_API_BASE_URL=http://localhost:3001/api/v1
+VITE_API_BASE_URL=http://localhost:8000
 VITE_NOME_APP=CGID - Centro de Governança e Inteligência de Dados
 VITE_AMBIENTE=development
 ```
@@ -294,3 +319,4 @@ VITE_AMBIENTE=development
 |--------|------|-------|-----------|
 | 1.0 | Maio/2026 | — | Criação inicial do documento (stack NestJS) |
 | 2.0 | Maio/2026 | — | Reescrita completa: migração para Python + FastAPI, SQL Server, remoção de Redis e BullMQ, nomes em Português |
+| 2.1 | Junho/2026 | Vinicius Soares | Atualização para estado atual do protótipo: rotas diretas FastAPI, sessionStorage, apiFetch com X-Usuario-Id, endpoints de favoritos, auditoria, configurações e Power BI Embedded |

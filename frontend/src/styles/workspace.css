@@ -119,7 +119,7 @@
 
 /* ─── Lista de relatórios ── */
 .ws-reports-toolbar {
-  display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap;
+  display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 14px; flex-wrap: wrap;
 }
 .ws-filter-btn {
   height: 30px; padding: 0 12px;

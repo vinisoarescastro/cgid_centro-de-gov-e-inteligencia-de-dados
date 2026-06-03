@@ -1,0 +1,153 @@
+/* ─── Página de Auditoria ──────────────────────────────────────────────────── */
+
+.aud-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+  align-items: flex-end;
+}
+.aud-filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.aud-filter-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--gray-400);
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+.aud-filter-input {
+  height: 32px;
+  padding: 0 10px;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--r-md);
+  font-size: 12px;
+  font-family: var(--font);
+  color: var(--gray-800);
+  background: var(--gray-0);
+  outline: none;
+  transition: all var(--t-base);
+  min-width: 140px;
+}
+.aud-filter-input:focus { border-color: var(--brand-400); box-shadow: 0 0 0 3px var(--brand-100); }
+.aud-filter-input.wide  { min-width: 200px; }
+
+/* ─── Badges de tipo de evento ── */
+.aud-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.aud-badge.autenticacao { background: #d1fae5; color: #065f46; }
+.aud-badge.seguranca    { background: #fef3c7; color: #92400e; }
+.aud-badge.usuario      { background: #eff6ff; color: #1d4ed8; }
+.aud-badge.permissao    { background: #f5f3ff; color: #5b21b6; }
+.aud-badge.acesso       { background: #fee2e2; color: #991b1b; }
+.aud-badge.relatorio    { background: #ecfdf5; color: #047857; }
+.aud-badge.sistema      { background: #f1f5f9; color: #475569; }
+
+/* ─── Tabela ── */
+.aud-table-wrap {
+  overflow-x: auto;
+}
+.aud-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+.aud-table th {
+  padding: 8px 12px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--gray-400);
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  border-bottom: 1px solid var(--gray-200);
+  white-space: nowrap;
+}
+.aud-table td {
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--gray-100);
+  color: var(--gray-700);
+  vertical-align: top;
+}
+.aud-table tr:last-child td { border-bottom: none; }
+.aud-table tr:hover td { background: var(--gray-50); }
+.aud-table td.detalhe {
+  max-width: 320px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--gray-600);
+}
+.aud-table td.momento {
+  white-space: nowrap;
+  color: var(--gray-400);
+  font-size: 11px;
+}
+.aud-table td.usuario-col {
+  white-space: nowrap;
+}
+.aud-table td.ip-col {
+  white-space: nowrap;
+  color: var(--gray-400);
+  font-size: 11px;
+  font-family: monospace;
+}
+
+/* ─── Paginação ── */
+.aud-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0 0;
+  font-size: 12px;
+  color: var(--gray-500);
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.aud-pagination-btns {
+  display: flex;
+  gap: 4px;
+}
+.aud-page-btn {
+  height: 30px;
+  min-width: 30px;
+  padding: 0 8px;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--r-md);
+  background: var(--gray-0);
+  font-size: 12px;
+  font-family: var(--font);
+  color: var(--gray-600);
+  cursor: pointer;
+  transition: all var(--t-base);
+}
+.aud-page-btn:hover:not(:disabled) { background: var(--brand-50); border-color: var(--brand-300); color: var(--brand-700); }
+.aud-page-btn.active { background: var(--brand-500); border-color: var(--brand-500); color: white; font-weight: 600; }
+.aud-page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ─── Detalhe expandido ── */
+.aud-detail-row td {
+  background: var(--gray-50);
+  padding: 10px 16px;
+  font-size: 12px;
+  color: var(--gray-600);
+}
+.aud-detail-pre {
+  margin: 0;
+  font-family: monospace;
+  font-size: 11px;
+  white-space: pre-wrap;
+  word-break: break-all;
+  color: var(--gray-700);
+}

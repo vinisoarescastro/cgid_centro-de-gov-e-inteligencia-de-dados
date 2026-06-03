@@ -6,6 +6,8 @@ import logoSidebarFull from '../assets/logo-sidebar-full.png'
 import logoSidebarIcon from '../assets/logo-sidebar-icon.png'
 import Avatar from '../components/Avatar'
 import IconPicker from '../components/IconPicker'
+import VisualizadorRelatorio from '../components/VisualizadorRelatorio'
+import { apiFetch } from '../utils/api'
 
 const API = 'http://localhost:8000'
 
@@ -43,12 +45,110 @@ function nivelBadge(nivel) {
   return { cls: 'ws-nivel-nenhum', label: 'Sem acesso' }
 }
 
+// ─── Modal selecionar relatórios específicos ──────────────────────────────────
+function ModalRelatoriosAcesso({ workspaceId, usuarioId, usuarioNome, relatoriosWs, onClose, onSave }) {
+  const [selecionados, setSelecionados] = useState(new Set())
+  const [loading, setLoading]           = useState(false)
+  const [loadingInicial, setLoadingInicial] = useState(true)
+
+  useEffect(() => {
+    fetch(`${API}/workspaces/${workspaceId}/usuarios/${usuarioId}/relatorios`)
+      .then(r => r.json())
+      .then(ids => setSelecionados(new Set(ids)))
+      .catch(() => {})
+      .finally(() => setLoadingInicial(false))
+  }, [])
+
+  function toggle(id) {
+    setSelecionados(prev => {
+      const next = new Set(prev)
+      next.has(id) ? next.delete(id) : next.add(id)
+      return next
+    })
+  }
+
+  async function salvar() {
+    setLoading(true)
+    try {
+      const r = await apiFetch(`/workspaces/${workspaceId}/usuarios/${usuarioId}/relatorios`, {
+        method: 'PUT',
+        body: { relatorio_ids: [...selecionados] },
+      })
+      if (!r.ok) throw new Error()
+      onSave([...selecionados])
+    } catch {
+      alert('Erro ao salvar acessos.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const publicados = relatoriosWs.filter(r => r.status === 'publicado')
+
+  return (
+    <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
+      <div className="modal-box" style={{ maxWidth: 520 }}>
+        <div className="modal-title">Relatórios específicos</div>
+        <div style={{ fontSize: 13, color: 'var(--gray-500)', marginBottom: 12 }}>
+          Selecione quais relatórios <strong>{usuarioNome}</strong> poderá acessar neste workspace.
+        </div>
+
+        {loadingInicial ? (
+          <div style={{ padding: '20px 0', textAlign: 'center', fontSize: 13, color: 'var(--gray-400)' }}>Carregando...</div>
+        ) : publicados.length === 0 ? (
+          <div style={{ padding: '20px 0', textAlign: 'center', fontSize: 13, color: 'var(--gray-400)' }}>
+            Nenhum relatório publicado neste workspace.
+          </div>
+        ) : (
+          <div style={{ maxHeight: 260, overflowY: 'auto', border: '1px solid var(--gray-200)', borderRadius: 'var(--r-md)', marginBottom: 14 }}>
+            {publicados.map(rel => {
+              const checked = selecionados.has(rel.id)
+              return (
+                <label
+                  key={rel.id}
+                  onClick={() => toggle(rel.id)}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 10,
+                    padding: '10px 14px', cursor: 'pointer',
+                    background: checked ? 'var(--brand-50)' : 'transparent',
+                    borderLeft: checked ? '3px solid var(--brand-500)' : '3px solid transparent',
+                    transition: 'all var(--t-base)',
+                  }}
+                >
+                  <input type="checkbox" readOnly checked={checked}
+                    style={{ accentColor: 'var(--brand-500)', width: 15, height: 15, flexShrink: 0 }} />
+                  <div>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--gray-800)' }}>{rel.nome}</div>
+                    {rel.categoria && <div style={{ fontSize: 11, color: 'var(--gray-400)' }}>{rel.categoria}</div>}
+                  </div>
+                </label>
+              )
+            })}
+          </div>
+        )}
+
+        <div style={{ fontSize: 12, color: 'var(--gray-400)', marginBottom: 14 }}>
+          {selecionados.size} relatório(s) selecionado(s)
+        </div>
+
+        <div className="modal-actions">
+          <button className="btn btn-ghost" onClick={onClose} disabled={loading}>Cancelar</button>
+          <button className="btn btn-primary" onClick={salvar} disabled={loading || loadingInicial}>
+            {loading ? 'Salvando...' : 'Salvar acessos'}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ─── Modal adicionar usuário ao workspace ────────────────────────────────────
-function ModalAdicionarUsuario({ workspaceId, usuariosJaVinculados, onClose, onAdd }) {
+function ModalAdicionarUsuario({ workspaceId, relatoriosWs, usuariosJaVinculados, onClose, onAdd }) {
   const [todos, setTodos]       = useState([])
   const [busca, setBusca]       = useState('')
   const [selecionado, setSel]   = useState(null)
   const [nivel, setNivel]       = useState('total')
+  const [relsSelecionadas, setRelsSelecionadas] = useState(new Set())
   const [loading, setLoading]   = useState(false)
   const [loadingList, setLoadingList] = useState(true)
 
@@ -68,17 +168,30 @@ function ModalAdicionarUsuario({ workspaceId, usuariosJaVinculados, onClose, onA
     u.email?.toLowerCase().includes(busca.toLowerCase())
   )
 
+  function toggleRel(id) {
+    setRelsSelecionadas(prev => {
+      const next = new Set(prev)
+      next.has(id) ? next.delete(id) : next.add(id)
+      return next
+    })
+  }
+
   async function confirmar() {
     if (!selecionado) return
     setLoading(true)
     try {
-      const r = await fetch(`${API}/workspaces/${workspaceId}/usuarios`, {
+      const r = await apiFetch(`/workspaces/${workspaceId}/usuarios`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ usuario_id: selecionado.id, nivel_acesso: nivel }),
+        body: { usuario_id: selecionado.id, nivel_acesso: nivel },
       })
       if (!r.ok) throw new Error()
       const novo = await r.json()
+      if (nivel === 'apenas_relatorios' && relsSelecionadas.size > 0) {
+        await apiFetch(`/workspaces/${workspaceId}/usuarios/${selecionado.id}/relatorios`, {
+          method: 'PUT',
+          body: { relatorio_ids: [...relsSelecionadas] },
+        })
+      }
       onAdd(novo)
     } catch {
       alert('Erro ao vincular usuário.')
@@ -174,10 +287,138 @@ function ModalAdicionarUsuario({ workspaceId, usuariosJaVinculados, onClose, onA
           </div>
         </div>
 
+        {nivel === 'apenas_relatorios' && (
+          <div className="modal-field">
+            <label className="modal-label">Relatórios permitidos</label>
+            {relatoriosWs.filter(r => r.status === 'publicado').length === 0 ? (
+              <div style={{ fontSize: 13, color: 'var(--gray-400)', padding: '10px 0' }}>
+                Nenhum relatório publicado neste workspace.
+              </div>
+            ) : (
+              <div style={{ maxHeight: 180, overflowY: 'auto', border: '1px solid var(--gray-200)', borderRadius: 'var(--r-md)' }}>
+                {relatoriosWs.filter(r => r.status === 'publicado').map(rel => {
+                  const checked = relsSelecionadas.has(rel.id)
+                  return (
+                    <label
+                      key={rel.id}
+                      onClick={() => toggleRel(rel.id)}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: 10,
+                        padding: '9px 14px', cursor: 'pointer',
+                        background: checked ? 'var(--brand-50)' : 'transparent',
+                        borderLeft: checked ? '3px solid var(--brand-500)' : '3px solid transparent',
+                        transition: 'all var(--t-base)',
+                      }}
+                    >
+                      <input type="checkbox" readOnly checked={checked}
+                        style={{ accentColor: 'var(--brand-500)', width: 14, height: 14, flexShrink: 0 }} />
+                      <div>
+                        <div style={{ fontSize: 13, fontWeight: checked ? 600 : 400, color: 'var(--gray-800)' }}>{rel.nome}</div>
+                        {rel.categoria && <div style={{ fontSize: 11, color: 'var(--gray-400)' }}>{rel.categoria}</div>}
+                      </div>
+                    </label>
+                  )
+                })}
+              </div>
+            )}
+            <div style={{ fontSize: 11, color: 'var(--gray-400)', marginTop: 4 }}>
+              {relsSelecionadas.size} selecionado(s)
+            </div>
+          </div>
+        )}
+
         <div className="modal-actions">
           <button className="btn btn-ghost" onClick={onClose} disabled={loading}>Cancelar</button>
           <button className="btn btn-primary" onClick={confirmar} disabled={loading || !selecionado}>
             {loading ? 'Adicionando...' : 'Adicionar usuário'}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── Modal criar/editar relatório ────────────────────────────────────────────
+function ModalRelatorio({ workspaceId, relatorio, onClose, onSave }) {
+  const editando = !!relatorio
+  const [form, setForm] = useState({
+    nome:             relatorio?.nome             ?? '',
+    categoria:        relatorio?.categoria        ?? '',
+    status:           relatorio?.status           ?? 'publicado',
+    descricao:        relatorio?.descricao        ?? '',
+    id_relatorio_pbi: relatorio?.id_relatorio_pbi ?? '',
+  })
+  const [loading, setLoading] = useState(false)
+  const [erro, setErro] = useState('')
+
+  function set(field, val) { setForm(f => ({ ...f, [field]: val })) }
+
+  async function salvar() {
+    if (!form.nome.trim()) { setErro('O nome é obrigatório.'); return }
+    setLoading(true); setErro('')
+    try {
+      const path   = editando
+        ? `/workspaces/${workspaceId}/relatorios/${relatorio.id}`
+        : `/workspaces/${workspaceId}/relatorios`
+      const method = editando ? 'PUT' : 'POST'
+      const r = await apiFetch(path, {
+        method,
+        body: {
+          nome:             form.nome.trim(),
+          categoria:        form.categoria.trim() || null,
+          status:           form.status,
+          descricao:        form.descricao.trim() || null,
+          id_relatorio_pbi: form.id_relatorio_pbi.trim() || null,
+        },
+      })
+      if (!r.ok) { const d = await r.json(); throw new Error(d.detail || 'Erro ao salvar.') }
+      const salvo = await r.json()
+      onSave(salvo, editando)
+    } catch (e) {
+      setErro(e.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
+      <div className="modal-box">
+        <div className="modal-title">{editando ? 'Editar Relatório' : 'Novo Relatório'}</div>
+
+        <div className="modal-field">
+          <label className="modal-label">Nome *</label>
+          <input className="modal-input" autoFocus value={form.nome} onChange={e => set('nome', e.target.value)} placeholder="Ex: Painel de Vendas" />
+        </div>
+        <div className="modal-field">
+          <label className="modal-label">Categoria</label>
+          <input className="modal-input" value={form.categoria} onChange={e => set('categoria', e.target.value)} placeholder="Ex: Financeiro, Operacional..." />
+        </div>
+        <div className="modal-field">
+          <label className="modal-label">Status</label>
+          <select className="modal-input" value={form.status} onChange={e => set('status', e.target.value)}>
+            <option value="publicado">Publicado</option>
+            <option value="rascunho">Rascunho</option>
+          </select>
+        </div>
+        <div className="modal-field">
+          <label className="modal-label">ID Relatório Power BI</label>
+          <input className="modal-input" value={form.id_relatorio_pbi} onChange={e => set('id_relatorio_pbi', e.target.value)} placeholder="UUID do relatório no Power BI" />
+          <div style={{ fontSize: 11, color: 'var(--gray-400)', marginTop: 4 }}>
+            Encontre na URL do Power BI: app.powerbi.com/groups/.../reports/<strong>{'<este-id>'}</strong>
+          </div>
+        </div>
+        <div className="modal-field">
+          <label className="modal-label">Descrição</label>
+          <textarea className="modal-textarea" value={form.descricao} onChange={e => set('descricao', e.target.value)} placeholder="Descrição opcional..." />
+        </div>
+
+        {erro && <div style={{ fontSize: 12, color: 'var(--red-500)', marginBottom: 8 }}>{erro}</div>}
+
+        <div className="modal-actions">
+          <button className="btn btn-ghost" onClick={onClose} disabled={loading}>Cancelar</button>
+          <button className="btn btn-primary" onClick={salvar} disabled={loading}>
+            {loading ? 'Salvando...' : editando ? 'Salvar alterações' : 'Criar relatório'}
           </button>
         </div>
       </div>
@@ -204,18 +445,17 @@ function ModalWorkspace({ workspace, onClose, onSave }) {
     if (!form.nome.trim()) { setErro('O nome é obrigatório.'); return }
     setLoading(true); setErro('')
     try {
-      const url    = editando ? `${API}/workspaces/${workspace.id}` : `${API}/workspaces`
+      const path   = editando ? `/workspaces/${workspace.id}` : `/workspaces`
       const method = editando ? 'PUT' : 'POST'
-      const r = await fetch(url, {
+      const r = await apiFetch(path, {
         method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+        body: {
           nome:             form.nome.trim(),
           icone:            form.icone.trim() || null,
           cor:              form.cor || null,
           descricao:        form.descricao.trim() || null,
           id_workspace_pbi: form.id_workspace_pbi.trim() || null,
-        }),
+        },
       })
       if (!r.ok) { const d = await r.json(); throw new Error(d.detail || 'Erro ao salvar.') }
       const salvo = await r.json()
@@ -310,6 +550,14 @@ export default function WorkspacePage() {
   const [modal, setModal] = useState(null) // null | 'criar' | workspace_obj
   // modal adicionar usuário
   const [modalUsuario, setModalUsuario] = useState(false)
+  // modal gerenciar relatórios específicos de um usuário já vinculado
+  const [modalRelAcesso, setModalRelAcesso] = useState(null) // null | usuario_obj
+  // modal relatório
+  const [modalRelatorio, setModalRelatorio] = useState(null) // null | 'criar' | relatorio_obj
+  // visualizador Power BI
+  const [relatorioAberto, setRelatorioAberto] = useState(null)
+  // favoritos do usuário (Set de relatorio_id)
+  const [favoritos, setFavoritos] = useState(new Set())
 
   // stats cache (from dashboard)
   const [stats, setStats] = useState({})
@@ -320,36 +568,50 @@ export default function WorkspacePage() {
   }
 
   useEffect(() => {
-    carregarWorkspaces()
+    // carrega workspaces
+    const uid = user.id
+    const admin = isAdmin
+    ;(async () => {
+      try {
+        let data
+        if (admin) {
+          const r = await fetch(`${API}/workspaces`)
+          data = (await r.json()).map(ws => ({ ...ws, espaco_trabalho_id: ws.id, nivel_acesso: 'total' }))
+        } else {
+          const r = await fetch(`${API}/usuarios/${uid}/acessos`)
+          data = (await r.json()).map(a => ({ ...a, id: a.espaco_trabalho_id }))
+        }
+        setWorkspaces(data)
+      } catch {
+        setWorkspaces([])
+      } finally {
+        setLoading(false)
+      }
+    })()
+
     fetch(`${API}/dashboard/workspaces`)
       .then(r => r.json())
-      .then(data => {
-        const map = {}
-        data.forEach(d => { map[d.nome] = d })
-        setStats(map)
-      })
+      .then(data => { const map = {}; data.forEach(d => { map[d.nome] = d }); setStats(map) })
       .catch(() => {})
-  }, [])
 
-  async function carregarWorkspaces() {
-    setLoading(true)
-    try {
-      let data
-      if (isAdmin) {
-        const r = await fetch(`${API}/workspaces`)
-        data = await r.json()
-        // normalize to same shape as acessos
-        data = data.map(ws => ({ ...ws, espaco_trabalho_id: ws.id, nivel_acesso: 'total' }))
-      } else {
-        const r = await fetch(`${API}/usuarios/${user.id}/acessos`)
-        data = await r.json()
-        data = data.map(a => ({ ...a, id: a.espaco_trabalho_id }))
-      }
-      setWorkspaces(data)
-    } catch {
-      setWorkspaces([])
-    } finally {
-      setLoading(false)
+    fetch(`${API}/usuarios/${uid}/favoritos`)
+      .then(r => r.json())
+      .then(data => setFavoritos(new Set(data.map(f => f.relatorio_id))))
+      .catch(() => {})
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  async function toggleFavorito(relatorioId) {
+    const isFav = favoritos.has(relatorioId)
+    if (isFav) {
+      await fetch(`${API}/usuarios/${user.id}/favoritos/${relatorioId}`, { method: 'DELETE' })
+      setFavoritos(prev => { const next = new Set(prev); next.delete(relatorioId); return next })
+    } else {
+      await fetch(`${API}/usuarios/${user.id}/favoritos`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ relatorio_id: relatorioId }),
+      })
+      setFavoritos(prev => new Set([...prev, relatorioId]))
     }
   }
 
@@ -360,8 +622,11 @@ export default function WorkspacePage() {
     setLoadingRel(true)
     setLoadingUsr(true)
     try {
+      const relUrl = isAdmin
+        ? `${API}/workspaces/${ws.id}/relatorios`
+        : `${API}/workspaces/${ws.id}/relatorios?usuario_id=${user.id}`
       const [resRel, resUsr] = await Promise.all([
-        fetch(`${API}/workspaces/${ws.id}/relatorios`),
+        fetch(relUrl),
         fetch(`${API}/workspaces/${ws.id}/usuarios`),
       ])
       setRelatorios(await resRel.json())
@@ -383,17 +648,16 @@ export default function WorkspacePage() {
 
   async function arquivarWorkspace(ws) {
     if (!confirm(`Arquivar o workspace "${ws.nome}"? Ele não ficará mais visível para os usuários.`)) return
-    await fetch(`${API}/workspaces/${ws.id}/arquivar`, { method: 'PATCH' })
+    await apiFetch(`/workspaces/${ws.id}/arquivar`, { method: 'PATCH' })
     setWorkspaces(prev => prev.filter(w => w.id !== ws.id))
     if (wsAtivo?.id === ws.id) fecharDetalhe()
   }
 
   async function alterarNivelUsuario(usuarioId, novoNivel) {
     try {
-      const r = await fetch(`${API}/workspaces/${wsAtivo.id}/usuarios/${usuarioId}`, {
+      const r = await apiFetch(`/workspaces/${wsAtivo.id}/usuarios/${usuarioId}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nivel_acesso: novoNivel }),
+        body: { nivel_acesso: novoNivel },
       })
       if (!r.ok) throw new Error()
       setUsuarios(prev => prev.map(u => u.usuario_id === usuarioId ? { ...u, nivel_acesso: novoNivel } : u))
@@ -405,7 +669,7 @@ export default function WorkspacePage() {
   async function removerUsuario(usuarioId, nomeUsuario) {
     if (!confirm(`Remover "${nomeUsuario}" deste workspace?`)) return
     try {
-      const r = await fetch(`${API}/workspaces/${wsAtivo.id}/usuarios/${usuarioId}`, { method: 'DELETE' })
+      const r = await apiFetch(`/workspaces/${wsAtivo.id}/usuarios/${usuarioId}`, { method: 'DELETE' })
       if (!r.ok && r.status !== 204) throw new Error()
       setUsuarios(prev => prev.filter(u => u.usuario_id !== usuarioId))
     } catch {
@@ -416,6 +680,26 @@ export default function WorkspacePage() {
   function aoAdicionarUsuario(novoUsuario) {
     setUsuarios(prev => [...prev, novoUsuario].sort((a, b) => (a.nome || '').localeCompare(b.nome || '')))
     setModalUsuario(false)
+  }
+
+  function aoSalvarRelatorio(salvo, editando) {
+    if (editando) {
+      setRelatorios(prev => prev.map(r => r.id === salvo.id ? salvo : r))
+    } else {
+      setRelatorios(prev => [...prev, salvo].sort((a, b) => a.nome.localeCompare(b.nome)))
+    }
+    setModalRelatorio(null)
+  }
+
+  async function excluirRelatorio(relatorio) {
+    if (!confirm(`Excluir o relatório "${relatorio.nome}"? Esta ação não pode ser desfeita.`)) return
+    try {
+      const r = await apiFetch(`/workspaces/${wsAtivo.id}/relatorios/${relatorio.id}`, { method: 'DELETE' })
+      if (!r.ok && r.status !== 204) throw new Error()
+      setRelatorios(prev => prev.filter(rel => rel.id !== relatorio.id))
+    } catch {
+      alert('Erro ao excluir relatório.')
+    }
   }
 
   function aoSalvarModal(salvo, editando) {
@@ -468,14 +752,22 @@ export default function WorkspacePage() {
             <div className="sb-icon"><i className="fa-solid fa-building-columns" /></div>
             <span className="sb-label">Workspace</span>
           </div>
-          <div className="sb-link">
+          <div className="sb-link" onClick={() => navigate('/favoritos')}>
             <div className="sb-icon"><i className="fa-solid fa-bookmark" /></div>
             <span className="sb-label">Favoritos</span>
           </div>
-          <div className="sb-link">
-            <div className="sb-icon"><i className="fa-solid fa-gear" /></div>
-            <span className="sb-label">Configurações</span>
-          </div>
+          {user.perfil === 'super_administrador' && (
+            <div className="sb-link" onClick={() => navigate('/auditoria')}>
+              <div className="sb-icon"><i className="fa-solid fa-file-lines" /></div>
+              <span className="sb-label">Auditoria</span>
+            </div>
+          )}
+          {isAdmin && (
+            <div className="sb-link" onClick={() => navigate('/configuracoes')}>
+              <div className="sb-icon"><i className="fa-solid fa-gear" /></div>
+              <span className="sb-label">Configurações</span>
+            </div>
+          )}
         </nav>
 
         <div className="sb-footer">
@@ -584,13 +876,20 @@ export default function WorkspacePage() {
                   <div className="card">
                     <div className="card-bd">
                       <div className="ws-reports-toolbar">
-                        {['todos', 'publicado', 'rascunho'].map(f => (
-                          <button key={f}
-                            className={`ws-filter-btn${filtroStatus === f ? ' active' : ''}`}
-                            onClick={() => setFiltroStatus(f)}>
-                            {f === 'todos' ? 'Todos' : STATUS_RELATORIO_LABEL[f]}
+                        <div style={{ display: 'flex', gap: 6 }}>
+                          {['todos', 'publicado', 'rascunho'].map(f => (
+                            <button key={f}
+                              className={`ws-filter-btn${filtroStatus === f ? ' active' : ''}`}
+                              onClick={() => setFiltroStatus(f)}>
+                              {f === 'todos' ? 'Todos' : STATUS_RELATORIO_LABEL[f]}
+                            </button>
+                          ))}
+                        </div>
+                        {isAdmin && (
+                          <button className="btn btn-primary btn-sm" onClick={() => setModalRelatorio('criar')}>
+                            <i className="fa-solid fa-plus" /> Novo relatório
                           </button>
-                        ))}
+                        )}
                       </div>
 
                       {loadingRel ? (
@@ -622,10 +921,35 @@ export default function WorkspacePage() {
                                 <span className={`badge ${r.status === 'publicado' ? 'badge-green' : 'badge-gray'}`}>
                                   {STATUS_RELATORIO_LABEL[r.status] ?? r.status}
                                 </span>
-                                {r.id_relatorio_pbi && (
-                                  <button className="btn btn-ghost btn-sm" title="Abrir no Power BI">
-                                    <i className="fa-solid fa-arrow-up-right-from-square" /> Abrir
-                                  </button>
+                                <button
+                                  className="btn btn-ghost btn-sm"
+                                  title={favoritos.has(r.id) ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
+                                  onClick={() => toggleFavorito(r.id)}
+                                  style={{ color: favoritos.has(r.id) ? 'var(--brand-500)' : 'var(--gray-300)' }}
+                                >
+                                  <i className={`fa-${favoritos.has(r.id) ? 'solid' : 'regular'} fa-star`} />
+                                </button>
+                                <button
+                                  className="btn btn-ghost btn-sm"
+                                  title={r.id_relatorio_pbi ? 'Visualizar relatório' : 'Sem link configurado'}
+                                  disabled={!r.id_relatorio_pbi}
+                                  onClick={() => r.id_relatorio_pbi && setRelatorioAberto(r)}
+                                  style={!r.id_relatorio_pbi ? { opacity: 0.4, cursor: 'not-allowed' } : {}}
+                                >
+                                  <i className="fa-solid fa-arrow-up-right-from-square" /> Abrir
+                                </button>
+                                {isAdmin && (
+                                  <>
+                                    <button className="btn btn-ghost btn-sm" title="Editar relatório"
+                                      onClick={() => setModalRelatorio(r)}>
+                                      <i className="fa-solid fa-pen" />
+                                    </button>
+                                    <button className="btn btn-ghost btn-sm" title="Excluir relatório"
+                                      style={{ color: 'var(--red-500)' }}
+                                      onClick={() => excluirRelatorio(r)}>
+                                      <i className="fa-solid fa-trash" />
+                                    </button>
+                                  </>
                                 )}
                               </div>
                             </div>
@@ -711,7 +1035,17 @@ export default function WorkspacePage() {
                                     )}
                                   </td>
                                   {isAdmin && (
-                                    <td>
+                                    <td style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+                                      {u.nivel_acesso === 'apenas_relatorios' && (
+                                        <button
+                                          className="btn btn-ghost btn-sm"
+                                          title="Gerenciar relatórios específicos"
+                                          style={{ padding: '4px 8px' }}
+                                          onClick={() => setModalRelAcesso(u)}
+                                        >
+                                          <i className="fa-solid fa-list-check" />
+                                        </button>
+                                      )}
                                       <button
                                         className="btn btn-ghost btn-sm"
                                         title="Remover acesso"
@@ -836,9 +1170,40 @@ export default function WorkspacePage() {
       {modalUsuario && wsAtivo && (
         <ModalAdicionarUsuario
           workspaceId={wsAtivo.id}
+          relatoriosWs={relatorios}
           usuariosJaVinculados={usuarios}
           onClose={() => setModalUsuario(false)}
           onAdd={aoAdicionarUsuario}
+        />
+      )}
+
+      {/* ── Modal gerenciar relatórios específicos ── */}
+      {modalRelAcesso && wsAtivo && (
+        <ModalRelatoriosAcesso
+          workspaceId={wsAtivo.id}
+          usuarioId={modalRelAcesso.usuario_id}
+          usuarioNome={modalRelAcesso.nome || modalRelAcesso.email}
+          relatoriosWs={relatorios}
+          onClose={() => setModalRelAcesso(null)}
+          onSave={() => setModalRelAcesso(null)}
+        />
+      )}
+
+      {/* ── Modal relatório ── */}
+      {modalRelatorio && wsAtivo && (
+        <ModalRelatorio
+          workspaceId={wsAtivo.id}
+          relatorio={modalRelatorio === 'criar' ? null : modalRelatorio}
+          onClose={() => setModalRelatorio(null)}
+          onSave={aoSalvarRelatorio}
+        />
+      )}
+
+      {/* ── Visualizador Power BI ── */}
+      {relatorioAberto && (
+        <VisualizadorRelatorio
+          relatorio={relatorioAberto}
+          onClose={() => setRelatorioAberto(null)}
         />
       )}
     </div>
