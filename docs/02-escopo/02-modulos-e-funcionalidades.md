@@ -53,21 +53,23 @@ O sistema é composto por **10 módulos funcionais** organizados em duas camadas
 
 ### MOD-02 — Home / Dashboard
 
-**Descrição:** Tela inicial após autenticação, adaptada ao perfil do usuário. Admins veem KPIs globais do portal; operadores veem seus relatórios e atividade recente.
+**Descrição:** Tela inicial após autenticação, adaptada ao perfil do usuário. Admins e Super Admins veem KPIs globais do portal; demais perfis veem seus workspaces acessíveis, relatórios e status de expediente.
 
 **Funcionalidades:**
 
 | ID | Funcionalidade | Versão | Prioridade |
 |----|---------------|--------|-----------|
 | F-DASH-01 | KPIs globais para Admin (usuários ativos, bloqueados, acessos negados, workspaces) | v1.0 | 🔴 Obrigatório |
-| F-DASH-02 | KPIs pessoais para Operador (meus relatórios, meus workspaces) | v1.0 | 🔴 Obrigatório |
+| F-DASH-02 | Card de boas-vindas personalizado com nome e perfil do usuário (não-admin) | v1.0 | 🔴 Obrigatório |
 | F-DASH-03 | Eventos críticos recentes (admin) | v1.0 | 🔴 Obrigatório |
-| F-DASH-04 | Atividade recente do usuário (operador) | v1.0 | 🟡 Recomendado |
+| F-DASH-04 | Listagem de workspaces acessíveis com relatórios expansíveis (não-admin) | v1.0 | 🔴 Obrigatório |
 | F-DASH-05 | Status dos serviços integrados (PBI, auth, banco) | v1.0 | 🟡 Recomendado |
-| F-DASH-06 | Tabela de relatórios PBI com filtros | v1.0 | 🔴 Obrigatório |
-| F-DASH-07 | Tiles de workspaces com estatísticas | v1.0 | 🔴 Obrigatório |
+| F-DASH-06 | Tabela de relatórios PBI com filtros (admin) | v1.0 | 🔴 Obrigatório |
+| F-DASH-07 | Tiles de workspaces com estatísticas (admin) | v1.0 | 🔴 Obrigatório |
 | F-DASH-08 | Gráficos de acesso por período | v1.1 | 🟡 Recomendado |
-| F-DASH-09 | Card de expediente atual calculado pelo servidor | v1.0 | 🔴 Obrigatório |
+| F-DASH-09 | Indicador de expediente no topbar calculado pelo servidor (todos os perfis) | v1.0 | 🔴 Obrigatório |
+| F-DASH-10 | Botão "Abrir" em relatório da home: navega direto para o relatório na página de Workspaces (deep-link via query params) | v1.0 | 🔴 Obrigatório |
+| F-DASH-11 | Botão "Abrir" desabilitado para relatórios sem `id_relatorio_pbi` configurado (mesmo layout, estado inativo) | v1.0 | 🔴 Obrigatório |
 
 ---
 
@@ -97,6 +99,8 @@ O sistema é composto por **10 módulos funcionais** organizados em duas camadas
 | F-WS-16 | CRUD de relatórios dentro do workspace, incluindo categoria, status, descrição e ID Power BI | v1.0 | 🔴 Obrigatório |
 | F-WS-17 | Visualizador inline de relatório via Power BI Embedded em tela modal | v1.0 | 🔴 Obrigatório |
 | F-WS-18 | Gestão de permissões de relatórios específicos para usuários com `apenas_relatorios` | v1.0 | 🔴 Obrigatório |
+| F-WS-19 | Deep-link via query params `?ws=&rel=` para abrir workspace e relatório específico diretamente ao navegar para a página | v1.0 | 🔴 Obrigatório |
+| F-WS-20 | Lista de usuários vinculados exclui admins e super_admins (acesso implícito universal) | v1.0 | 🔴 Obrigatório |
 
 ---
 
@@ -133,6 +137,7 @@ O sistema é composto por **10 módulos funcionais** organizados em duas camadas
 | F-USR-06 | Associação de usuário a workspaces e relatórios | v1.0 | 🔴 Obrigatório |
 | F-USR-07 | Importação em massa via CSV | v2.0 | 🟢 Opcional |
 | F-USR-08 | Exportação da lista de usuários | v1.1 | 🟢 Opcional |
+| F-USR-09 | Coluna Workspaces exibe badge "Todos os workspaces" para admins/super_admins em vez de listar individualmente | v1.0 | 🔴 Obrigatório |
 
 ---
 
@@ -168,6 +173,7 @@ O sistema é composto por **10 módulos funcionais** organizados em duas camadas
 | F-SCHED-04 | Ativação/desativação de exceções | v1.0 | 🔴 Obrigatório |
 | F-SCHED-05 | Mensagem personalizada exibida ao usuário bloqueado por expediente | v1.0 | 🔴 Obrigatório |
 | F-SCHED-06 | Grade compacta de expediente com uma linha por dia, toggles e salvamento independente | v1.0 | 🔴 Obrigatório |
+| F-SCHED-07 | Flag `ignora_dia_inativo` no grupo de exceção: permite que membros acessem o sistema em dias bloqueados (`ativo=false`) | v1.0 | 🔴 Obrigatório |
 
 ---
 
@@ -245,3 +251,4 @@ O sistema é composto por **10 módulos funcionais** organizados em duas camadas
 | 1.3    | Jun/2026  | Vinicius Soares | Adicionados F-WS-13 a F-WS-15 (gerenciamento de usuários do workspace: adicionar, alterar nível, remover) |
 | 1.4    | Jun/2026  | Vinicius Soares | Correção: ícones de workspace no modal de usuário passam a usar prefixo fa-solid; acessos carregados atomicamente via Promise.all e pré-populados do cache da página mãe |
 | 1.5    | Jun/2026  | Vinicius Soares | Adicionados módulos implementados de favoritos, CRUD de relatórios, permissões específicas, auditoria CSV e configurações por abas |
+| 1.6    | Jun/2026  | Vinicius Soares | MOD-02: descrição atualizada para home não-admin; F-DASH-02 revisado; F-DASH-10/11 (deep-link e botão desabilitado). F-WS-19/20, F-SCHED-07, F-USR-09 adicionados |
