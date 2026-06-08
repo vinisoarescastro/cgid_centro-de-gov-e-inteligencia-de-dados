@@ -69,9 +69,9 @@ Visitante     (nível 1) → Acesso read-only temporário, apenas relatórios au
 
 | Módulo | Ação | Super Admin | Admin | Gerente | Operador | Visitante |
 |--------|------|:-----------:|:-----:|:-------:|:--------:|:---------:|
-| **Logs de Auditoria** | Visualizar (todos) | ✅ | ✅ | ❌ | ❌ | ❌ |
+| **Logs de Auditoria** | Visualizar (todos) | ✅ | ❌ | ❌ | ❌ | ❌ |
 | | Visualizar (próprios) | ✅ | ✅ | ✅ | ✅ | ✅ |
-| | Exportar | ✅ | ✅ | ❌ | ❌ | ❌ |
+| | Exportar | ✅ | ❌ | ❌ | ❌ | ❌ |
 | **Segurança** | Visualizar checklist | ✅ | ✅ | ❌ | ❌ | ❌ |
 | | Ver eventos suspeitos | ✅ | ✅ | ❌ | ❌ | ❌ |
 | **Configurações** | Visualizar | ✅ | ✅ | ❌ | ❌ | ❌ |
@@ -139,7 +139,20 @@ Admins podem alterar a lista de relatórios específicos por `PUT /workspaces/{w
 ```python
 # Verifica se o usuário pode acessar com base no horário de expediente
 # Consultado a cada requisição autenticada
-# Verifica: regras_expediente + grupos_excecao + membros_grupo_excecao
+# Admins e super_admins: acesso irrestrito (retorna imediatamente sem checar expediente)
+# Fluxo para demais perfis:
+#   1. Busca regra do dia atual (sem filtro ativo=True — busca sempre)
+#   2. Se não existe regra → configurado=False (acesso liberado)
+#   3. Se ativo=False (dia bloqueado):
+#      → Verifica se usuário pertence a grupo com ignora_dia_inativo=True
+#      → SIM: retorna dentro_expediente=True, excecao_ativa=True, hora_inicio=None
+#      → NÃO: retorna dia_inativo=True, dentro_expediente=False
+#   4. Se bloquear_fora=False → dentro_expediente=True (não obrigatório)
+#   5. Se within(hora_inicio, hora_fim) → dentro_expediente=True
+#   6. Caso contrário: verifica grupos_excecao com fora_horario=True
+#      → Se janela definida: verifica janela_inicio/fim
+#      → Se dentro da janela: excecao_ativa=True, retorna dentro_expediente=True
+#      → Fora da janela ou sem grupo: dentro_expediente=False
 ```
 
 ---
@@ -203,9 +216,20 @@ def pode_acessar_relatorio(usuario_id: str, relatorio_id: str) -> bool:
 
 ---
 
+## 8. Vinculação Automática de Admins a Workspaces
+
+Ao criar ou reativar um workspace, o sistema executa `_vincular_admins_workspace(workspace_id, db)`, que itera todos os usuários com perfil `administrador` ou `super_administrador` com status `ativo` e cria registros em `acessos_workspace` com `nivel_acesso = "total"` para os que ainda não possuem vínculo.
+
+- Admins nunca precisam ser vinculados manualmente a workspaces novos ou reativados.
+- Apesar de terem registros em `acessos_workspace`, eles **não aparecem na listagem de usuários do workspace** — a query filtra `perfil NOT IN ('administrador', 'super_administrador')`.
+- O contador de usuários no card do workspace também exclui admins.
+
+---
+
 ## Histórico de Alterações
 
 | Versão | Data | Autor | Descrição |
 |--------|------|-------|-----------|
 | 1.0 | Maio/2026 | — | Criação inicial do documento |
 | 1.1 | Junho/2026 | Vinicius Soares | Atualizada matriz: Configurações para Admin/Super Admin, credenciais PBI exclusivas do Super Admin e filtro server-side para relatórios específicos |
+| 1.2 | Junho/2026 | Vinicius Soares | Corrigida matriz de Auditoria: "Visualizar (todos)" e "Exportar" são exclusivos do Super Admin (RN-AUD-05); pseudocódigo `validar_expediente` atualizado com `ativo=false`, `ignora_dia_inativo` e janelas de exceção; adicionada seção 8 sobre auto-vínculo de admins a workspaces |
