@@ -45,12 +45,16 @@
 | ID | Regra | Origem |
 |----|-------|--------|
 | RN-SCHED-01 | **O acesso fora do horário de expediente é bloqueado por padrão** para todos os usuários, exceto `administrador` e `super_administrador`, que têm acesso irrestrito independente do horário | Política de segurança; hierarquia de perfis |
-| RN-SCHED-02 | Um grupo de exceção concede acesso **apenas dentro da janela de horário configurada** para aquele grupo - não é um acesso irrestrito | Precisão na gestão de exceções |
+| RN-SCHED-02 | Um grupo de exceção concede acesso **apenas dentro da janela de horário configurada** para aquele grupo — a janela de exceção é **aditiva** ao horário base (ex: expediente 08h–18h + exceção 18h–20h = acesso até 20h) | Precisão na gestão de exceções |
 | RN-SCHED-03 | Uma exceção individual **prevalece sobre a regra geral do grupo** ao qual o usuário pertence (pode ser mais restritiva ou mais permissiva) | Flexibilidade com controle granular |
 | RN-SCHED-04 | A configuração de expediente **aplica-se globalmente** a todos os workspaces e relatórios - não é possível ter expediente diferente por workspace nesta versão | Simplicidade do MVP |
 | RN-SCHED-05 | Alterações nas regras de expediente **entram em vigor imediatamente** - não há necessidade de reinicialização do sistema | Requisito operacional |
 | RN-SCHED-06 | A verificação do horário de expediente **deve usar exclusivamente o relógio do servidor** (`datetime.now()`) — o cliente nunca envia parâmetros de tempo e não pode influenciar o resultado | Segurança — impede que o usuário burle a restrição manipulando data/hora no dispositivo |
-| RN-SCHED-07 | Quando **não há regra configurada** para o dia atual, o sistema retorna `configurado = false` e `dentro_expediente = false` — sem regra equivale a sem acesso garantido | Princípio do menor privilégio |
+| RN-SCHED-07 | Quando **não há regra configurada** para o dia atual, o sistema retorna `configurado = false` — sem regra equivale a acesso liberado (nenhuma restrição) | Sem restrição por padrão quando não configurado |
+| RN-SCHED-08 | Um dia com `ativo = false` **bloqueia o acesso por completo** (ex: sábado e domingo desativados). Diferente de `bloquear_fora = false`, que mantém o dia visível no indicador sem bloquear o acesso | Distinção entre "dia desativado" e "expediente não obrigatório" |
+| RN-SCHED-09 | Um grupo de exceção com `ignora_dia_inativo = true` **permite que seus membros acessem o sistema mesmo em dias bloqueados** (`ativo = false`). Grupos sem esse flag continuam bloqueados em dias inativos | Controle granular de exceções por dia bloqueado |
+| RN-SCHED-10 | O indicador de expediente no topbar exibe o estado atual para **todos os perfis**: admins veem informativamente; usuários comuns veem seu estado de acesso com indicadores de exceção quando aplicável | Transparência e visibilidade do estado do sistema |
+| RN-SCHED-11 | O badge de exceção (`excecao_ativa`) **só é exibido quando a exceção é o que está garantindo o acesso** — se o usuário já está dentro do horário base, a exceção não é destacada mesmo que ele pertença a um grupo | Clareza visual; evita informação redundante |
 
 ---
 
@@ -85,6 +89,7 @@
 | RN-AUD-03 | A remoção de um workspace **não exclui** os logs de acesso históricos a ele | Rastreabilidade permanente |
 | RN-AUD-04 | Alterações de dados sensíveis (permissões, perfis, configurações PBI) devem registrar o **estado anterior ("de") e o novo estado ("para")** | Rastreabilidade de mudanças |
 | RN-AUD-05 | O acesso ao módulo de Logs é **exclusivo do Super Admin** — outros perfis são redirecionados para Home ao tentar acessar `/auditoria` | Confidencialidade dos eventos |
+| RN-AUD-06 | Na exibição de logs, o sistema **resolve o nome e e-mail atuais** do usuário quando ele ainda existe no banco — o snapshot (`nome_usuario`, `email_usuario`) é usado apenas como fallback para usuários já excluídos | Consistência da informação; o snapshot preserva rastreabilidade histórica pós-exclusão |
 
 ---
 
@@ -98,6 +103,10 @@
 | RN-SYS-04 | O sistema deve exibir o **ambiente atual** (Produção / Homologação) de forma visível para Admins, para evitar operações acidentais em produção | Operações seguras |
 | RN-SYS-05 | Um usuário não deve conseguir duplicar o mesmo relatório nos favoritos; a combinação usuário + relatório é única | Integridade da lista pessoal |
 | RN-SYS-06 | Remover um favorito não altera o relatório, o workspace nem permissões de acesso; remove apenas o vínculo pessoal na tabela `favoritos` | Separação entre preferência de navegação e controle de acesso |
+| RN-SYS-07 | Ao **criar ou reativar** um workspace, o sistema vincula automaticamente todos os usuários `administrador` e `super_administrador` ativos com `nivel_acesso = total` — sem necessidade de configuração manual | Consistência; admins sempre têm acesso a todos os workspaces |
+| RN-SYS-08 | **Admins e Super Admins não aparecem na lista de usuários vinculados** de um workspace — seu acesso é implícito e universal, exibir individualmente seria redundante | UX — clareza da listagem |
+| RN-SYS-09 | A página Home de usuários não-admin exibe o **status do expediente no topbar** (dot colorido + label + horário), os workspaces acessíveis e seus relatórios com botão "Abrir" | Visibilidade do estado de acesso |
+| RN-SYS-10 | O **footer da sidebar** exibe nome completo, e-mail e perfil do usuário logado em todas as páginas; as iniciais no avatar refletem o primeiro e segundo nome | Identificação contextual permanente |
 
 ---
 
@@ -113,3 +122,4 @@
 | 1.5 | Junho/2026 | Vinicius Soares | RN-AUD-05 refinado: acesso à Auditoria exclusivo do Super Admin com redirecionamento para Home |
 | 1.6 | Junho/2026 | Vinicius Soares | Corrigido ID duplicado de token Power BI para RN-PBI-06 e adicionadas RN-SYS-05/06 sobre favoritos |
 | 1.7 | Junho/2026 | Vinicius Soares | RN-SCHED-01 atualizado: `administrador` e `super_administrador` são isentos da restrição de expediente; demais perfis (incluindo gerente e operador) obedecem a regra, salvo grupo de exceção |
+| 1.8 | Junho/2026 | Vinicius Soares | RN-SCHED-08/09: semantica de `ativo=false` (dia bloqueado) vs `bloquear_fora=false`; `ignora_dia_inativo` em grupos de exceção. RN-SCHED-10/11: indicador de expediente no topbar para todos os perfis. RN-AUD-06: resolução de nome atual nos logs. RN-SYS-07–10: auto-vínculo de admins em workspaces, ocultação da lista, home não-admin, footer da sidebar |
