@@ -228,31 +228,52 @@ A cada tentativa de login:
 validar_expediente(usuario_id, agora):
         │
         ▼
+┌─────────────────────────────────┐
+│ Existe regra para o dia atual?  │──── NÃO ──→ Permitir acesso (sem restrição)
+└──────────┬──────────────────────┘
+           │ SIM
+           ▼
+┌────────────────────────────────┐
+│ Dia está ativo? (ativo = true) │──── NÃO (dia bloqueado) ──→ Usuário pertence a grupo
+└──────────┬─────────────────────┘                            com ignora_dia_inativo = true?
+           │ SIM                                               │ SIM → Permitir acesso ✓
+           ▼                                                   │ NÃO → Bloquear 403 + log
 ┌──────────────────────────┐
-│ Bloqueio ativo fora do   │──── NÃO ──→ Permitir acesso (expediente
-│ expediente? (toggle ON)  │            não configurado)
+│ bloquear_fora = true?    │──── NÃO ──→ Permitir acesso (expediente não obrigatório)
 └──────────┬───────────────┘
            │ SIM
            ▼
 ┌──────────────────────────────────────────┐
-│ now está dentro do horário de expediente │──── SIM ──→ Permitir acesso
-│ para o dia da semana atual?              │
+│ now está dentro do horário de expediente │──── SIM ──→ Permitir acesso ✓
+│ (hora_inicio ≤ now ≤ hora_fim)?          │
 └──────────┬───────────────────────────────┘
-           │ NÃO
-           ▼
-┌────────────────────────────────────────────┐
-│ Usuário pertence a grupo de exceção ativo? │──── NÃO ──→ Bloquear acesso
-└──────────┬─────────────────────────────────┘             403 + log
-           │ SIM
+           │ NÃO (fora do horário base)
            ▼
 ┌──────────────────────────────────────────────────────┐
-│ now está dentro da janela de horário do grupo/       │──── NÃO ──→ Bloquear
-│ ou da exceção individual do usuário?                 │
+│ Usuário pertence a grupo de exceção ativo com        │──── NÃO ──→ Bloquear 403 + log
+│ fora_horario = true?                                 │
 └──────────┬───────────────────────────────────────────┘
            │ SIM
            ▼
-Permitir acesso ✓
+┌──────────────────────────────────────────────────────┐
+│ Grupo tem janela definida (janela_inicio/fim)?        │
+│ SIM → now dentro da janela?                          │──── NÃO ──→ Bloquear
+│ NÃO → acesso irrestrito pelo grupo                   │
+└──────────┬───────────────────────────────────────────┘
+           │ SIM
+           ▼
+Permitir acesso ✓ (excecao_ativa = true → exibido no topbar)
 ```
+
+### Estados do indicador de expediente (topbar)
+
+| Estado | Dot | Label | Badge |
+|--------|-----|-------|-------|
+| Dentro do expediente (base) | Verde | Expediente · HH:MM–HH:MM | — |
+| Fora do expediente (bloqueado) | Vermelho | Fora do expediente · HH:MM–HH:MM | — |
+| Acesso via exceção de horário | Verde | Expediente · HH:MM–HH:MM (janela exceção) | 🛡 Exceção |
+| Dia bloqueado + ignora_dia_inativo | Âmbar | Acesso especial | 🛡 Dia bloqueado |
+| Dia bloqueado sem exceção | Vermelho | Acesso bloqueado | — |
 
 ---
 
@@ -319,3 +340,4 @@ Frontend redireciona para tela de login ✓
 | Versão | Data | Autor | Descrição |
 |--------|------|-------|-----------|
 | 1.0 | Maio/2026 | Vinicius Soares | Criação inicial do documento |
+| 1.1 | Junho/2026 | Vinicius Soares | Fluxo de expediente reescrito: adiciona `ativo=false` (dia bloqueado), `ignora_dia_inativo`, lógica aditiva de exceções e tabela de estados do indicador no topbar |
