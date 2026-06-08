@@ -536,6 +536,7 @@ export default function WorkspacePage() {
   const [workspaces, setWorkspaces] = useState([])
   const [busca, setBusca] = useState('')
   const [loading, setLoading] = useState(true)
+  const [mostrarArquivados, setMostrarArquivados] = useState(false)
 
   // detail state
   const [wsAtivo, setWsAtivo] = useState(null)
@@ -575,7 +576,8 @@ export default function WorkspacePage() {
       try {
         let data
         if (admin) {
-          const r = await fetch(`${API}/workspaces`)
+          const url = mostrarArquivados ? `${API}/workspaces?incluir_arquivados=true` : `${API}/workspaces`
+          const r = await fetch(url)
           data = (await r.json()).map(ws => ({ ...ws, espaco_trabalho_id: ws.id, nivel_acesso: 'total' }))
         } else {
           const r = await fetch(`${API}/usuarios/${uid}/acessos`)
@@ -598,7 +600,7 @@ export default function WorkspacePage() {
       .then(r => r.json())
       .then(data => setFavoritos(new Set(data.map(f => f.relatorio_id))))
       .catch(() => {})
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [mostrarArquivados]) // eslint-disable-line react-hooks/exhaustive-deps
 
   async function toggleFavorito(relatorioId) {
     const isFav = favoritos.has(relatorioId)
@@ -649,8 +651,18 @@ export default function WorkspacePage() {
   async function arquivarWorkspace(ws) {
     if (!confirm(`Arquivar o workspace "${ws.nome}"? Ele não ficará mais visível para os usuários.`)) return
     await apiFetch(`/workspaces/${ws.id}/arquivar`, { method: 'PATCH' })
-    setWorkspaces(prev => prev.filter(w => w.id !== ws.id))
+    setWorkspaces(prev => mostrarArquivados
+      ? prev.map(w => w.id === ws.id ? { ...w, status: 'arquivado' } : w)
+      : prev.filter(w => w.id !== ws.id)
+    )
     if (wsAtivo?.id === ws.id) fecharDetalhe()
+  }
+
+  async function reativarWorkspace(ws) {
+    if (!confirm(`Reativar o workspace "${ws.nome}"? Ele voltará a ficar visível para os usuários.`)) return
+    await apiFetch(`/workspaces/${ws.id}/reativar`, { method: 'PATCH' })
+    setWorkspaces(prev => prev.map(w => w.id === ws.id ? { ...w, status: 'ativo' } : w))
+    if (wsAtivo?.id === ws.id) setWsAtivo(w => ({ ...w, status: 'ativo' }))
   }
 
   async function alterarNivelUsuario(usuarioId, novoNivel) {
@@ -839,14 +851,27 @@ export default function WorkspacePage() {
                     </div>
                   </div>
                   {isAdmin && (
-                    <div style={{ display: 'flex', gap: 8 }}>
+                    <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                      {wsAtivo.status === 'arquivado' && (
+                        <span className="badge badge-gray">
+                          <i className="fa-solid fa-box-archive" style={{ marginRight: 4 }} />
+                          Arquivado
+                        </span>
+                      )}
                       <button className="btn btn-ghost btn-sm" onClick={() => setModal(wsAtivo)}>
                         <i className="fa-solid fa-pen" /> Editar
                       </button>
-                      <button className="btn btn-ghost btn-sm" style={{ color: 'var(--red-500)' }}
-                        onClick={() => arquivarWorkspace(wsAtivo)}>
-                        <i className="fa-solid fa-box-archive" /> Arquivar
-                      </button>
+                      {wsAtivo.status === 'arquivado' ? (
+                        <button className="btn btn-ghost btn-sm" style={{ color: 'var(--brand-600)' }}
+                          onClick={() => reativarWorkspace(wsAtivo)}>
+                          <i className="fa-solid fa-rotate-left" /> Reativar
+                        </button>
+                      ) : (
+                        <button className="btn btn-ghost btn-sm" style={{ color: 'var(--red-500)' }}
+                          onClick={() => arquivarWorkspace(wsAtivo)}>
+                          <i className="fa-solid fa-box-archive" /> Arquivar
+                        </button>
+                      )}
                     </div>
                   )}
                 </div>
@@ -861,14 +886,16 @@ export default function WorkspacePage() {
                     Relatórios
                     <span className="ws-tab-count">{relatorios.length}</span>
                   </button>
-                  <button
-                    className={`ws-tab${abaAtiva === 'usuarios' ? ' active' : ''}`}
-                    onClick={() => setAbaAtiva('usuarios')}
-                  >
-                    <i className="fa-solid fa-users" />
-                    Usuários vinculados
-                    <span className="ws-tab-count">{usuarios.length}</span>
-                  </button>
+                  {isAdmin && (
+                    <button
+                      className={`ws-tab${abaAtiva === 'usuarios' ? ' active' : ''}`}
+                      onClick={() => setAbaAtiva('usuarios')}
+                    >
+                      <i className="fa-solid fa-users" />
+                      Usuários vinculados
+                      <span className="ws-tab-count">{usuarios.length}</span>
+                    </button>
+                  )}
                 </div>
 
                 {/* ── Aba: Relatórios ── */}
@@ -1095,6 +1122,15 @@ export default function WorkspacePage() {
                       onChange={e => setBusca(e.target.value)}
                     />
                   </div>
+                  {isAdmin && (
+                    <button
+                      className={`ws-filter-btn${mostrarArquivados ? ' active' : ''}`}
+                      onClick={() => setMostrarArquivados(v => !v)}
+                    >
+                      <i className="fa-solid fa-box-archive" />
+                      {mostrarArquivados ? 'Ocultar arquivados' : 'Mostrar arquivados'}
+                    </button>
+                  )}
                 </div>
 
                 {loading ? (
@@ -1114,37 +1150,59 @@ export default function WorkspacePage() {
                     {wsFiltrados.map(ws => {
                       const s = stats[ws.nome]
                       const badge = nivelBadge(ws.nivel_acesso)
+                      const arquivado = ws.status === 'arquivado'
                       return (
-                        <div className="ws-card" key={ws.id} onClick={() => abrirWorkspace(ws)}>
+                        <div
+                          className={`ws-card${arquivado ? ' ws-card-arquivado' : ''}`}
+                          key={ws.id}
+                          onClick={() => (!arquivado || isAdmin) && abrirWorkspace(ws)}
+                          style={arquivado && !isAdmin ? { cursor: 'default' } : {}}
+                        >
+                          {arquivado && (
+                            <div className="ws-card-arquivado-bar">
+                              <i className="fa-solid fa-box-archive" />
+                              Arquivado
+                              <button
+                                className="ws-card-reativar-btn"
+                                onClick={e => { e.stopPropagation(); reativarWorkspace(ws) }}
+                              >
+                                <i className="fa-solid fa-rotate-left" /> Reativar
+                              </button>
+                            </div>
+                          )}
+
                           <div className="ws-card-header">
                             <div className="ws-card-icon" style={wsIconStyle(ws)}>
                               <WsIcone icone={ws.icone} size={18} />
                             </div>
-                            <div>
+                            <div style={{ flex: 1, minWidth: 0 }}>
                               <div className="ws-card-title">{ws.nome}</div>
                               {ws.descricao && <div className="ws-card-desc">{ws.descricao}</div>}
                             </div>
                           </div>
 
-                          <div className="ws-card-stats">
-                            <div className="ws-stat">
-                              <i className="fa-solid fa-chart-bar" />
-                              {s ? `${s.reports} relatório(s)` : '— relatórios'}
-                            </div>
-                            <div className="ws-stat">
-                              <i className="fa-solid fa-users" />
-                              {s ? `${s.totalAccess + s.partialAccess} usuário(s)` : '— usuários'}
-                            </div>
-                          </div>
-
-                          <div className="ws-card-footer">
-                            {!isAdmin && (
-                              <span className={`ws-nivel-badge ${badge.cls}`}>{badge.label}</span>
-                            )}
-                            <span style={{ fontSize: 12, color: 'var(--gray-400)', marginLeft: 'auto' }}>
-                              Ver relatórios <i className="fa-solid fa-chevron-right" style={{ fontSize: 10 }} />
-                            </span>
-                          </div>
+                          {!arquivado && (
+                            <>
+                              <div className="ws-card-stats">
+                                <div className="ws-stat">
+                                  <i className="fa-solid fa-chart-bar" />
+                                  {s ? `${s.reports} relatório(s)` : '— relatórios'}
+                                </div>
+                                <div className="ws-stat">
+                                  <i className="fa-solid fa-users" />
+                                  {s ? `${s.totalAccess + s.partialAccess} usuário(s)` : '— usuários'}
+                                </div>
+                              </div>
+                              <div className="ws-card-footer">
+                                {!isAdmin && (
+                                  <span className={`ws-nivel-badge ${badge.cls}`}>{badge.label}</span>
+                                )}
+                                <span style={{ fontSize: 12, color: 'var(--gray-400)', marginLeft: 'auto' }}>
+                                  Ver relatórios <i className="fa-solid fa-chevron-right" style={{ fontSize: 10 }} />
+                                </span>
+                              </div>
+                            </>
+                          )}
                         </div>
                       )
                     })}

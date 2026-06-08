@@ -57,6 +57,10 @@ function ModalUsuario({ usuario, acessosIniciais = [], onClose, onSave }) {
   const [acessos, setAcessos]   = useState(
     acessosIniciais.map(a => ({ espaco_trabalho_id: a.espaco_trabalho_id, nivel_acesso: a.nivel_acesso }))
   )
+  // { wsId: [{ id, nome }] } — relatórios disponíveis por workspace
+  const [relatoriosWs, setRelatoriosWs] = useState({})
+  // { wsId: Set<relatorioId> } — relatórios selecionados por workspace
+  const [relatoriosSel, setRelatoriosSel] = useState({})
 
   // carrega workspaces e — se não vieram acessos do pai — busca do backend
   useEffect(() => {
@@ -68,12 +72,37 @@ function ModalUsuario({ usuario, acessosIniciais = [], onClose, onSave }) {
     Promise.all([fetchWs, fetchAcessos])
       .then(([wsData, acessosData]) => {
         setWorkspaces(wsData)
-        if (acessosData !== null) {
-          setAcessos(acessosData.map(a => ({ espaco_trabalho_id: a.espaco_trabalho_id, nivel_acesso: a.nivel_acesso })))
-        }
+        const acessosFinais = acessosData !== null
+          ? acessosData.map(a => ({ espaco_trabalho_id: a.espaco_trabalho_id, nivel_acesso: a.nivel_acesso }))
+          : acessosIniciais.map(a => ({ espaco_trabalho_id: a.espaco_trabalho_id, nivel_acesso: a.nivel_acesso }))
+        if (acessosData !== null) setAcessos(acessosFinais)
+
+        // para cada workspace com acesso "apenas_relatorios", carrega relatórios já selecionados
+        const parciais = acessosFinais.filter(a => a.nivel_acesso === 'apenas_relatorios')
+        parciais.forEach(a => carregarRelatoriosWs(a.espaco_trabalho_id, true))
       })
       .catch(() => {})
   }, [])
+
+  async function carregarRelatoriosWs(wsId, carregarSelecionados = false) {
+    // busca lista de relatórios do workspace (só uma vez)
+    setRelatoriosWs(prev => {
+      if (prev[wsId]) return prev
+      fetch(`${API}/workspaces/${wsId}/relatorios`)
+        .then(r => r.json())
+        .then(data => setRelatoriosWs(p => ({ ...p, [wsId]: data })))
+        .catch(() => {})
+      return { ...prev, [wsId]: [] }
+    })
+    if (carregarSelecionados && editando) {
+      fetch(`${API}/workspaces/${wsId}/usuarios/${usuario.id}/relatorios`)
+        .then(r => r.json())
+        .then(ids => setRelatoriosSel(p => ({ ...p, [wsId]: new Set(ids) })))
+        .catch(() => setRelatoriosSel(p => ({ ...p, [wsId]: new Set() })))
+    } else if (!editando) {
+      setRelatoriosSel(p => ({ ...p, [wsId]: p[wsId] ?? new Set() }))
+    }
+  }
 
   function set(campo, valor) {
     setForm(f => ({ ...f, [campo]: valor }))
@@ -90,6 +119,16 @@ function ModalUsuario({ usuario, acessosIniciais = [], onClose, onSave }) {
 
   function setNivel(wsId, nivel) {
     setAcessos(prev => prev.map(a => a.espaco_trabalho_id === wsId ? { ...a, nivel_acesso: nivel } : a))
+    if (nivel === 'apenas_relatorios') carregarRelatoriosWs(wsId, true)
+  }
+
+  function toggleRelatorio(wsId, relId) {
+    setRelatoriosSel(prev => {
+      const atual = new Set(prev[wsId] ?? [])
+      if (atual.has(relId)) atual.delete(relId)
+      else atual.add(relId)
+      return { ...prev, [wsId]: atual }
+    })
   }
 
   function validar() {
@@ -124,6 +163,15 @@ function ModalUsuario({ usuario, acessosIniciais = [], onClose, onSave }) {
 
       // 2. salva os acessos
       await apiFetch(`/usuarios/${data.id}/acessos`, { method: 'PUT', body: acessos })
+
+      // 3. salva relatórios específicos para cada workspace com acesso parcial
+      const parciais = acessos.filter(a => a.nivel_acesso === 'apenas_relatorios')
+      await Promise.all(parciais.map(a =>
+        apiFetch(`/workspaces/${a.espaco_trabalho_id}/usuarios/${data.id}/relatorios`, {
+          method: 'PUT',
+          body: { relatorio_ids: [...(relatoriosSel[a.espaco_trabalho_id] ?? [])] },
+        })
+      ))
 
       onSave(data)
     } catch {
@@ -219,26 +267,53 @@ function ModalUsuario({ usuario, acessosIniciais = [], onClose, onSave }) {
                     const ativo  = !!acesso
                     return (
                       <div key={ws.id} className={`ws-acesso-row${ativo ? ' ws-acesso-ativo' : ''}`}>
-                        <label className="ws-acesso-check">
-                          <input
-                            type="checkbox"
-                            checked={ativo}
-                            onChange={() => toggleWorkspace(ws.id)}
-                          />
-                          <span className="ws-acesso-icon" style={{ background: ws.cor ? ws.cor + '22' : 'var(--gray-100)', color: ws.cor ?? 'var(--gray-500)' }}>
-                            <i className={ws.icone ? `fa-solid ${ws.icone}` : 'fa-solid fa-building'} />
-                          </span>
-                          <span className="ws-acesso-nome">{ws.nome}</span>
-                        </label>
-                        {ativo && (
-                          <select
-                            className="ws-acesso-nivel"
-                            value={acesso.nivel_acesso}
-                            onChange={e => setNivel(ws.id, e.target.value)}
-                          >
-                            <option value="total">Acesso total</option>
-                            <option value="apenas_relatorios">Relatórios específicos</option>
-                          </select>
+                        <div className="ws-acesso-row-top">
+                          <label className="ws-acesso-check">
+                            <input
+                              type="checkbox"
+                              checked={ativo}
+                              onChange={() => toggleWorkspace(ws.id)}
+                            />
+                            <span className="ws-acesso-icon" style={{ background: ws.cor ? ws.cor + '22' : 'var(--gray-100)', color: ws.cor ?? 'var(--gray-500)' }}>
+                              <i className={ws.icone ? `fa-solid ${ws.icone}` : 'fa-solid fa-building'} />
+                            </span>
+                            <span className="ws-acesso-nome">{ws.nome}</span>
+                          </label>
+                          {ativo && (
+                            <select
+                              className="ws-acesso-nivel"
+                              value={acesso.nivel_acesso}
+                              onChange={e => setNivel(ws.id, e.target.value)}
+                            >
+                              <option value="total">Acesso total</option>
+                              <option value="apenas_relatorios">Relatórios específicos</option>
+                            </select>
+                          )}
+                        </div>
+                        {ativo && acesso.nivel_acesso === 'apenas_relatorios' && (
+                          <div className="ws-relatorios">
+                            <div className="ws-relatorios-header">
+                              <i className="fa-solid fa-chart-bar" style={{ marginRight: 5 }} />
+                              Relatórios permitidos
+                            </div>
+                            {relatoriosWs[ws.id] === undefined || (relatoriosWs[ws.id] ?? []).length === 0 ? (
+                              <span className="ws-relatorios-empty">
+                                {relatoriosWs[ws.id] === undefined ? 'Carregando…' : 'Nenhum relatório publicado neste workspace.'}
+                              </span>
+                            ) : (relatoriosWs[ws.id]).map(rel => {
+                              const marcado = (relatoriosSel[ws.id] ?? new Set()).has(rel.id)
+                              return (
+                                <label key={rel.id} className={`ws-relatorio-item${marcado ? ' checked' : ''}`}>
+                                  <input
+                                    type="checkbox"
+                                    checked={marcado}
+                                    onChange={() => toggleRelatorio(ws.id, rel.id)}
+                                  />
+                                  {rel.nome}
+                                </label>
+                              )
+                            })}
+                          </div>
                         )}
                       </div>
                     )

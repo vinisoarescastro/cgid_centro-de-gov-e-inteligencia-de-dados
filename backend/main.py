@@ -130,10 +130,10 @@ def login(dados: LoginInput, db: Session = Depends(get_db)):
         return LoginResponse(sucesso=False, mensagem="E-mail ou senha incorretos.")
 
     if usuario.status == "bloqueado":
-        return LoginResponse(sucesso=False, mensagem="Conta bloqueada. Entre em contato com o administrador.")
+        return LoginResponse(sucesso=False, mensagem="[B401] Acesso indisponível. Fale com o administrador.")
 
     if usuario.status == "inativo":
-        return LoginResponse(sucesso=False, mensagem="Conta inativa. Entre em contato com o administrador.")
+        return LoginResponse(sucesso=False, mensagem="[I401] Acesso indisponível. Fale com o administrador.")
 
     if not pwd.verify(dados.senha, usuario.hash_senha):
         usuario.tentativas_login += 1
@@ -345,8 +345,11 @@ class AcessoWorkspaceInput(BaseModel):
 NIVEIS_VALIDOS = {"total", "apenas_relatorios", "nenhum"}
 
 @app.get("/workspaces", response_model=List[WorkspaceItem])
-def listar_workspaces(db: Session = Depends(get_db)):
-    return db.query(EspacoTrabalho).filter(EspacoTrabalho.status == "ativo").order_by(EspacoTrabalho.nome).all()
+def listar_workspaces(incluir_arquivados: bool = False, db: Session = Depends(get_db)):
+    q = db.query(EspacoTrabalho)
+    if not incluir_arquivados:
+        q = q.filter(EspacoTrabalho.status == "ativo")
+    return q.order_by(EspacoTrabalho.nome).all()
 
 
 @app.get("/usuarios/{usuario_id}/acessos", response_model=List[AcessoWorkspaceItem])
@@ -354,7 +357,7 @@ def listar_acessos_usuario(usuario_id: str, db: Session = Depends(get_db)):
     acessos = (
         db.query(AcessoWorkspace, EspacoTrabalho)
         .join(EspacoTrabalho, AcessoWorkspace.espaco_trabalho_id == EspacoTrabalho.id)
-        .filter(AcessoWorkspace.usuario_id == usuario_id)
+        .filter(AcessoWorkspace.usuario_id == usuario_id, EspacoTrabalho.status == "ativo")
         .all()
     )
     return [
@@ -803,6 +806,18 @@ def arquivar_workspace(workspace_id: str, request: Request, db: Session = Depend
     registrar_log(db, "sistema", "espacos_trabalho", f"Workspace arquivado: {ws.nome}", usuario=autor)
     db.commit()
     return {"mensagem": "Workspace arquivado com sucesso."}
+
+@app.patch("/workspaces/{workspace_id}/reativar", status_code=200)
+def reativar_workspace(workspace_id: str, request: Request, db: Session = Depends(get_db)):
+    ws = db.query(EspacoTrabalho).filter(EspacoTrabalho.id == workspace_id).first()
+    if not ws:
+        raise HTTPException(status_code=404, detail="Workspace não encontrado.")
+    autor = get_usuario_requisicao(request, db)
+    ws.status = "ativo"
+    db.commit()
+    registrar_log(db, "sistema", "espacos_trabalho", f"Workspace reativado: {ws.nome}", usuario=autor)
+    db.commit()
+    return {"mensagem": "Workspace reativado com sucesso."}
 
 class UsuarioWorkspaceItem(BaseModel):
     usuario_id: str

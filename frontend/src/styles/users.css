@@ -204,14 +204,19 @@
 /* ─── Workspace acesso rows ──────────────────────────────────────────────── */
 .ws-acesso-row {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
+  flex-direction: column;
+  gap: 0;
   padding: 8px 12px;
   border-radius: var(--r-md);
   border: 1px solid var(--gray-200);
   background: var(--gray-50);
   transition: all var(--t-fast);
+}
+.ws-acesso-row-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
 }
 .ws-acesso-row.ws-acesso-ativo {
   border-color: var(--brand-300);
@@ -255,3 +260,51 @@
   flex-shrink: 0;
 }
 .ws-acesso-nivel:focus { border-color: var(--brand-400); }
+
+/* ─── Relatórios específicos ─────────────────────────────────────────────── */
+.ws-relatorios {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 12px;
+  margin-top: 4px;
+  background: var(--gray-0);
+  border: 1px solid var(--brand-200);
+  border-radius: var(--r-md);
+}
+.ws-relatorios-header {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--brand-500);
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  margin-bottom: 6px;
+}
+.ws-relatorio-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 6px;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  transition: background var(--t-fast);
+  font-size: 13px;
+  color: var(--gray-700);
+  user-select: none;
+}
+.ws-relatorio-item:hover { background: var(--brand-50); }
+.ws-relatorio-item input[type="checkbox"] {
+  width: 15px; height: 15px;
+  accent-color: var(--brand-500);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.ws-relatorio-item.checked {
+  color: var(--gray-900);
+  font-weight: 500;
+}
+.ws-relatorios-empty {
+  font-size: 12px;
+  color: var(--gray-400);
+  padding: 2px 0;
+}

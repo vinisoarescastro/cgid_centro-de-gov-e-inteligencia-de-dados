@@ -53,6 +53,50 @@
   border-color: var(--brand-300);
   transform: translateY(-2px);
 }
+.ws-card-arquivado {
+  background: var(--gray-50);
+  border-color: var(--gray-200);
+  opacity: 0.8;
+  overflow: hidden;
+}
+.ws-card-arquivado:hover {
+  box-shadow: none;
+  border-color: var(--gray-200);
+  transform: none;
+}
+.ws-card-arquivado-bar {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin: -14px -14px 12px -14px;
+  padding: 5px 12px;
+  background: var(--gray-50);
+  border-bottom: 1px solid var(--gray-100);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--gray-400);
+}
+.ws-card-reativar-btn {
+  margin-left: auto;
+  padding: 3px 10px;
+  border: 1px solid var(--brand-300);
+  border-radius: 99px;
+  background: var(--gray-0);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--brand-600);
+  cursor: pointer;
+  font-family: var(--font);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: all var(--t-fast);
+  text-transform: none;
+  letter-spacing: 0;
+}
+.ws-card-reativar-btn:hover {
+  background: var(--brand-50);
+}
 
 .ws-card-header {
   display: flex;
@@ -123,6 +167,7 @@
 }
 .ws-filter-btn {
   height: 30px; padding: 0 12px;
+  display: inline-flex; align-items: center; gap: 6px;
   border: 1px solid var(--gray-200);
   border-radius: 99px;
   background: var(--gray-0);

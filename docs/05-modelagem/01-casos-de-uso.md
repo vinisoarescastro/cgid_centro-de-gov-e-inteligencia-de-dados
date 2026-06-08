@@ -85,22 +85,18 @@
 **Pós-condição:** Permissões salvas; log de auditoria registrado  
 
 ### Fluxo Principal
-1. Admin acessa o módulo de Permissões.
-2. Sistema exibe as tabs: Por Perfil, Por Usuário, Por Workspace, Por Relatório.
-3. Admin seleciona a dimensão de permissão e o alvo (perfil, usuário ou workspace).
-4. Sistema carrega as permissões atuais do alvo selecionado.
-5. Admin altera os checkboxes de permissão (Visualizar, Criar, Editar, Excluir, Exportar, Gerenciar).
-6. Para permissões PBI: Admin define nível de acesso ao workspace (total ou relatórios específicos).
-7. Admin clica em "Salvar".
-8. Backend valida que o Admin tem autoridade para alterar as permissões do alvo.
-9. Sistema persiste as alterações no banco de dados.
-10. Sistema registra no log: quem alterou, o quê, de qual estado para qual (de → para).
-11. Sistema invalida cache de permissões do usuário afetado.
-12. Frontend exibe toast de confirmação.
+1. Admin acessa o módulo de Usuários.
+2. Admin cria ou edita um usuário.
+3. Sistema exibe os workspaces disponíveis com checkbox de acesso e seletor de nível (`Acesso total` ou `Relatórios específicos`).
+4. Ao selecionar `Relatórios específicos`, sistema exibe checklist com os relatórios publicados do workspace.
+5. Admin marca os relatórios permitidos.
+6. Admin clica em "Salvar".
+7. Sistema persiste os acessos por workspace (`PUT /usuarios/{id}/acessos`) e, para cada workspace parcial, os relatórios selecionados (`PUT /workspaces/{ws}/usuarios/{id}/relatorios`).
+8. Sistema registra no log: quem alterou, workspaces e relatórios afetados.
 
 ### Fluxos Alternativos
-- **A1: Admin tenta alterar permissão de Super Admin:** Sistema retorna 403; Super Admin não pode ter permissões reduzidas por Admin.
-- **A2: Erro de validação:** Sistema retorna mensagem de erro específica; alterações não são salvas.
+- **A1: Admin tenta alterar permissão de Super Admin:** Sistema retorna 403.
+- **A2: Erro de validação:** Sistema retorna mensagem de erro; alterações não são salvas.
 - **A3: Admin cancela:** Alterações são descartadas; log não é gerado.
 
 ---
@@ -215,8 +211,40 @@
 
 ---
 
+## UC-09 — Arquivar e Reativar Workspace
+
+**Ator principal:** Admin, Super Admin  
+**Pré-condição:** Ator autenticado; workspace existe  
+**Pós-condição:** Status do workspace atualizado; log de auditoria registrado  
+
+### Fluxo Principal — Arquivar
+1. Admin acessa o detalhe de um workspace.
+2. Admin clica em "Arquivar".
+3. Sistema exibe modal de confirmação.
+4. Admin confirma.
+5. Sistema atualiza `status = "arquivado"` via `PATCH /workspaces/{id}/arquivar`.
+6. Workspace deixa de aparecer para usuários não-admin.
+7. Sistema registra no log de auditoria.
+
+### Fluxo Principal — Reativar
+1. Admin acessa a lista de workspaces e ativa o toggle "Mostrar arquivados".
+2. Sistema exibe workspaces arquivados com faixa visual de status e botão "Reativar".
+3. Admin clica em "Reativar" no card ou no detalhe do workspace.
+4. Sistema exibe modal de confirmação.
+5. Admin confirma.
+6. Sistema atualiza `status = "ativo"` via `PATCH /workspaces/{id}/reativar`.
+7. Workspace volta a aparecer normalmente para todos os usuários vinculados.
+8. Sistema registra no log de auditoria.
+
+### Fluxos Alternativos
+- **A1: Usuário não-admin tenta acessar workspace arquivado:** Workspace não aparece na listagem; acesso bloqueado.
+- **A2: Admin acessa workspace arquivado:** Admin pode visualizar e gerenciar o workspace, inclusive reativá-lo.
+
+---
+
 ## Histórico de Alterações
 
 | Versão | Data | Autor | Descrição |
 |--------|------|-------|-----------|
 | 1.0 | Maio/2026 | Vinicius Soares | Criação inicial do documento |
+| 1.1 | Junho/2026 | Vinicius Soares | UC-03 atualizado com fluxo real de permissões por relatório; UC-09 adicionado (arquivar/reativar workspace) |

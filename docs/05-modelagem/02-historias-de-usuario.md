@@ -169,10 +169,11 @@ QUERO conceder a um usuário específico acesso apenas a determinados relatório
 PARA seguir o princípio do menor privilégio sem criar um perfil inteiro para isso.
 
 *Critérios de aceite:*
-- [ ] Interface de permissão por usuário com seleção de relatórios específicos
-- [ ] Permissão individual sobrepõe a permissão do perfil do usuário
-- [ ] Alteração registrada no log com estado anterior e novo
-- [ ] Usuário passa a ver apenas os relatórios permitidos individualmente
+- [x] Ao selecionar "Relatórios específicos" no modal de usuário, sistema exibe checklist com relatórios publicados do workspace
+- [x] Relatórios pré-selecionados ao editar usuário existente com permissões já configuradas
+- [x] Salvar persiste os relatórios via `PUT /workspaces/{ws}/usuarios/{id}/relatorios`
+- [x] Alteração registrada no log de auditoria com lista de relatórios selecionados
+- [x] Usuário passa a ver apenas os relatórios permitidos individualmente
 
 ---
 
@@ -257,8 +258,40 @@ PARA ativar ou reconfigurar a integração sem precisar acessar o servidor ou o 
 
 ---
 
+---
+
+**US-18: Arquivar e reativar workspace**
+
+COMO administrador,  
+QUERO arquivar um workspace sem excluí-lo e poder reativá-lo quando necessário,  
+PARA desativar temporariamente workspaces sem perder configurações, relatórios ou vínculos de usuários.
+
+*Critérios de aceite:*
+- [x] Botão "Arquivar" disponível no detalhe do workspace para admins
+- [x] Workspace arquivado não aparece na listagem de usuários não-admin
+- [x] Toggle "Mostrar arquivados" na listagem de workspaces (visível apenas para admins)
+- [x] Cards de workspaces arquivados exibem faixa visual de status e botão "Reativar"
+- [x] Admin pode acessar e visualizar workspaces arquivados normalmente
+- [x] Reativar workspace restaura visibilidade para todos os usuários vinculados
+- [x] Arquivamento e reativação registrados no log de auditoria
+
+---
+
+**US-19: Aba de usuários vinculados restrita a admins**
+
+COMO usuário comum,  
+QUERO visualizar apenas os relatórios do workspace ao acessá-lo,  
+PARA que informações sobre outros usuários vinculados não fiquem expostas.
+
+*Critérios de aceite:*
+- [x] Aba "Usuários vinculados" visível apenas para Admin e Super Admin
+- [x] Usuários com perfil Operador ou Gerente veem somente a aba "Relatórios"
+
+---
+
 ## Histórico de Alterações
 
 | Versão | Data | Autor | Descrição |
 |--------|------|-------|-----------|
 | 1.0 | Maio/2026 | Vinicius Soares | Criação inicial do documento |
+| 1.1 | Junho/2026 | Vinicius Soares | US-11 atualizada com critérios implementados; US-18 e US-19 adicionadas |

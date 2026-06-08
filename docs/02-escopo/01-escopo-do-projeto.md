@@ -26,7 +26,7 @@ O projeto compreende o desenvolvimento do **CGID - Centro de Governança e Intel
 | E05 | Integração real com Power BI Embedded (token server-side) | Core do produto |
 | E06 | Renderização inline de relatórios PBI no portal | Core do produto |
 | E07 | Gestão de usuários (CRUD com status: ativo/inativo/bloqueado) | Gestão de acesso |
-| E08 | Gestão de workspaces e relatórios (CRUD) | Gestão de ativos |
+| E08 | Gestão de workspaces e relatórios (CRUD + arquivar/reativar workspace) | Gestão de ativos |
 | E09 | Controle de expediente (horário de acesso por dia da semana) | Diferencial de segurança |
 | E10 | Grupos de exceção ao expediente | Necessidade operacional |
 | E11 | Log de auditoria imutável (append-only) | Conformidade e segurança |
@@ -95,3 +95,4 @@ O projeto compreende o desenvolvimento do **CGID - Centro de Governança e Intel
 | Versão | Data | Autor | Descrição |
 |--------|------|-------|-----------|
 | 1.0 | Maio/2026 | Vinicius Soares | Criação inicial do documento |
+| 1.1 | Junho/2026 | Vinicius Soares | E08 atualizado: arquivar/reativar workspace implementado |
