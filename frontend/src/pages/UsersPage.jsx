@@ -5,6 +5,7 @@ import '../styles/users.css'
 import logoSidebarFull from '../assets/logo-sidebar-full.png'
 import logoSidebarIcon from '../assets/logo-sidebar-icon.png'
 import Avatar from '../components/Avatar'
+import TopbarExpediente from '../components/TopbarExpediente'
 import { apiFetch } from '../utils/api'
 
 const API = 'http://localhost:8000'
@@ -513,6 +514,7 @@ export default function UsersPage() {
             <span className="bc-current">Usuários</span>
           </div>
           <div className="topbar-actions">
+            <TopbarExpediente />
             <button className="topbar-btn topbar-btn-danger" title="Sair" onClick={handleLogout}>
               <i className="fa-solid fa-right-from-bracket" />
             </button>

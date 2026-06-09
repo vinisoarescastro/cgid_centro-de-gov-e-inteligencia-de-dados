@@ -5,6 +5,7 @@ import '../styles/workspace.css'
 import logoSidebarFull from '../assets/logo-sidebar-full.png'
 import logoSidebarIcon from '../assets/logo-sidebar-icon.png'
 import Avatar from '../components/Avatar'
+import TopbarExpediente from '../components/TopbarExpediente'
 
 const API = 'http://localhost:8000'
 
@@ -28,7 +29,6 @@ export default function HomePage() {
   const [events, setEvents] = useState([])
   const [workspaces, setWorkspaces] = useState([])
   const [expediente, setExpediente] = useState(null)
-
   // estado para usuário não-admin
   const [minhaHome, setMinhaHome] = useState(null)
   const [wsExpandido, setWsExpandido] = useState({})
@@ -44,10 +44,6 @@ export default function HomePage() {
       fetch(`${API}/dashboard/workspaces`)
         .then(r => r.json()).then(setWorkspaces).catch(console.error)
     } else {
-      fetch(`${API}/usuarios/${user.id}/expediente`, {
-        headers: { 'X-Usuario-Id': user.id },
-      }).then(r => r.json()).then(setExpediente).catch(console.error)
-
       fetch(`${API}/usuarios/${user.id}/minha-home`, {
         headers: { 'X-Usuario-Id': user.id },
       }).then(r => r.json()).then(data => {
@@ -141,46 +137,7 @@ export default function HomePage() {
             <span className="bc-current">Home</span>
           </div>
 
-          {expediente && expediente.configurado && (() => {
-            const ok = expediente.dentro_expediente
-            const diaInativo = expediente.dia_inativo
-            const excecaoDia = expediente.excecao_ativa && !expediente.hora_inicio
-            const excecaoHora = expediente.excecao_ativa && !!expediente.hora_inicio
-
-            let label, horario, stateClass
-            if (isAdmin) {
-              label = ok ? 'Expediente' : 'Fora do expediente'
-              horario = expediente.hora_inicio ? `${expediente.hora_inicio} – ${expediente.hora_fim}` : null
-              stateClass = ok ? 'exp-ok' : 'exp-neutral'
-            } else if (diaInativo) {
-              label = 'Acesso bloqueado'; stateClass = 'exp-off'
-            } else if (excecaoDia) {
-              label = 'Acesso especial'; stateClass = 'exp-warn'
-            } else if (ok) {
-              label = 'Expediente'
-              horario = excecaoHora ? expediente.janela_excecao : `${expediente.hora_inicio} – ${expediente.hora_fim}`
-              stateClass = 'exp-ok'
-            } else {
-              label = 'Fora do expediente'
-              horario = `${expediente.hora_inicio} – ${expediente.hora_fim}`
-              stateClass = 'exp-off'
-            }
-
-            return (
-              <div className={`topbar-exp ${stateClass}`}>
-                <span className="topbar-exp-dot" />
-                <span className="topbar-exp-label">{label}</span>
-                {horario && <span className="topbar-exp-divider" />}
-                {horario && <span className="topbar-exp-horario">{horario}</span>}
-                {!isAdmin && expediente.excecao_ativa && (
-                  <span className="topbar-exp-badge">
-                    <i className="fa-solid fa-shield-halved" />
-                    {excecaoDia ? 'Dia bloqueado' : 'Exceção'}
-                  </span>
-                )}
-              </div>
-            )
-          })()}
+          <TopbarExpediente />
 
           <div className="topbar-actions">
             <button className="topbar-btn topbar-btn-danger" title="Sair" onClick={handleLogout}>

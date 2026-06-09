@@ -35,12 +35,13 @@ export default function VisualizadorRelatorio({ relatorio, onClose }) {
           settings: {
             navContentPaneEnabled: false,
             filterPaneEnabled:     false,
+            displayOption:         pbi.models.DisplayOption.FitToPage,
           },
         }
 
         report = powerbi.embed(containerRef.current, config)
-        report.on('loaded',  () => setStatus('ok'))
-        report.on('error',   () => { setStatus('erro'); setErro('O relatório retornou um erro ao carregar.') })
+        report.on('loaded', () => setStatus('ok'))
+        report.on('error', () => { setStatus('erro'); setErro('O relatório retornou um erro ao carregar.') })
       } catch (e) {
         setStatus('erro')
         setErro(e.message)
@@ -122,8 +123,9 @@ export default function VisualizadorRelatorio({ relatorio, onClose }) {
         {/* Container do Power BI */}
         <div
           ref={containerRef}
+          className="pbi-container"
           style={{
-            width: '100%', height: '100%',
+            position: 'absolute', inset: 0,
             opacity: status === 'ok' ? 1 : 0,
             transition: 'opacity 0.3s',
           }}

@@ -1,9 +1,9 @@
 # Integrações Necessárias e Recomendadas
 
-> **Documento:** 07-estrategias/03-integracoes.md  
-> **Status:** Rascunho  
+> **Documento:** 07-estrategias/04-integracoes.md  
+> **Status:** Aprovado  
 > **Criado em:** Maio/2026  
-> **Atualizado em:** Maio/2026
+> **Atualizado em:** Junho/2026
 
 ---
 
@@ -95,42 +95,42 @@ PBI_CLIENT_SECRET=<valor do secret>
 
 ### Endpoints Utilizados
 
-| Endpoint | Propósito | Versão |
-|----------|-----------|--------|
-| `GET /v1.0/myorg/groups/{groupId}/reports` | Listar relatórios do workspace | v1.0 |
-| `POST /v1.0/myorg/groups/{groupId}/reports/{reportId}/GenerateToken` | Gerar embed token | v1.0 |
-| `GET /v1.0/myorg/groups` | Listar workspaces do tenant | v1.1 (sync) |
+| Endpoint | Propósito | Observação |
+|----------|-----------|------------|
+| `GET /v1.0/myorg/groups/{groupId}/reports/{reportId}` | Buscar embed URL e dataset ID do relatório | Usado antes de gerar o token |
+| `POST /v1.0/myorg/GenerateToken` | Gerar embed token (V2) | Obrigatório para datasets DirectLake/Fabric |
 
-### Geração de Embed Token
+> **Importante:** O endpoint V1 por relatório (`/groups/{id}/reports/{id}/GenerateToken`) **não suporta datasets DirectLake** (Microsoft Fabric/OneLake). O CGID usa o endpoint V2 (`/myorg/GenerateToken`) para garantir compatibilidade com todos os tipos de dataset.
+
+### Geração de Embed Token (V2)
 
 ```python
-# services/power_bi.py
-async def gerar_embed_token(workspace_id: str, relatorio_id: str) -> dict:
-    # 1. Obter access token do Azure AD (com cache temporário no backend)
-    azure_token = await obter_token_azure()
+# Fluxo implementado em backend/main.py
 
-    # 2. Chamar API do Power BI
-    url = (
-        f"https://api.powerbi.com/v1.0/myorg/groups/"
-        f"{workspace_id}/reports/{relatorio_id}/GenerateToken"
-    )
-    resposta = await cliente_http.post(
-        url,
-        json={"accessLevel": "View"},
-        headers={"Authorization": f"Bearer {azure_token}"},
-    )
-    resposta.raise_for_status()
-    dados = resposta.json()
+# 1. Busca embed URL e dataset ID do relatório
+report_resp = requests.get(
+    f"https://api.powerbi.com/v1.0/myorg/groups/{workspace_id}/reports/{report_id}",
+    headers={"Authorization": f"Bearer {access_token}"},
+)
+embed_url  = report_resp.json()["embedUrl"]
+dataset_id = report_resp.json()["datasetId"]
 
-    return {
-        "embedToken": dados["token"],
-        "embedUrl": dados.get(
-            "embedUrl",
-            f"https://app.powerbi.com/reportEmbed?reportId={relatorio_id}&groupId={workspace_id}",
-        ),
-        "tokenExpiry": dados["expiration"],
-    }
+# 2. Gera embed token V2 (suporta DirectLake)
+token_resp = requests.post(
+    "https://api.powerbi.com/v1.0/myorg/GenerateToken",
+    headers={"Authorization": f"Bearer {access_token}", "Content-Type": "application/json"},
+    json={
+        "reports":          [{"id": report_id, "allowEdit": False}],
+        "datasets":         [{"id": dataset_id}],
+        "targetWorkspaces": [{"id": workspace_id}],
+    },
+)
+embed_token = token_resp.json()["token"]
 ```
+
+### Credenciais — Lidas do Banco, Não do .env
+
+As credenciais PBI (`PBI_TENANT_ID`, `PBI_CLIENT_ID`, `PBI_CLIENT_SECRET`) são configuradas pela interface do CGID em **Configurações → Power BI** e armazenadas na tabela `configuracoes_sistema`. O backend as lê do banco em cada requisição de embed — não do arquivo `.env`.
 
 ### Limites e Throttling da API PBI
 
@@ -259,3 +259,4 @@ Fluent Bit (sidecar container)
 | Versão | Data | Autor | Descrição |
 |--------|------|-------|-----------|
 | 1.0 | Maio/2026 | — | Criação inicial do documento |
+| 1.1 | Junho/2026 | — | Atualização da seção Power BI: endpoint V2, suporte a DirectLake, credenciais lidas do banco |

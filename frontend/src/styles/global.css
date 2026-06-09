@@ -1,6 +1,17 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
 @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css');
 
+/* ─── Power BI embed iframe ──────────────────────────────────── */
+/* O SDK injeta um iframe com dimensões inline — !important via   */
+/* classe específica é a única forma de sobrescrever              */
+.pbi-container,
+.pbi-container > div,
+.pbi-container iframe {
+  width: 100% !important;
+  height: 100% !important;
+  border: none !important;
+}
+
 /* ─── Design Tokens ──────────────────────────────────────────── */
 :root {
   --brand-50:  #f5f8f6;

@@ -3,7 +3,7 @@
 > **Documento:** 03-requisitos/03-regras-de-negocio.md  
 > **Status:** Rascunho  
 > **Criado em:** Maio/2026  
-> **Atualizado em:** Maio/2026
+> **Atualizado em:** Junho/2026
 
 ---
 
@@ -68,6 +68,20 @@
 | RN-PBI-04 | Um relatório só é acessível no portal se: (a) existe no PBI Service, (b) está cadastrado no banco do portal, e (c) o usuário tem permissão | Tripla validação de acesso |
 | RN-PBI-05 | Relatórios **sem `id_relatorio_pbi` configurado** devem exibir o botão "Abrir" no estado desabilitado — nunca ocultá-lo. Isso comunica ao usuário que o recurso existe mas ainda não foi vinculado ao Power BI | UX — visibilidade do estado do sistema |
 | RN-PBI-06 | O token de embed Power BI **deve ser gerado server-side** e nunca exposto ao cliente como credencial reutilizável | Segurança - client_secret nunca no front-end |
+| RN-PBI-07 | A geração de embed token **deve usar o endpoint V2** (`POST /v1.0/myorg/GenerateToken`) com `reports`, `datasets` e `targetWorkspaces` — o V1 não suporta datasets DirectLake (Microsoft Fabric) | Compatibilidade técnica com todos os tipos de dataset |
+| RN-PBI-08 | As credenciais PBI são **lidas do banco de dados** (`configuracoes_sistema`) em cada requisição — não de variáveis de ambiente. Isso permite atualização via interface sem reinicialização do servidor | Operabilidade; configuração via UI |
+
+---
+
+## RN-CONF - Segurança de Configurações Críticas
+
+| ID | Regra | Origem |
+|----|-------|--------|
+| RN-CONF-01 | Campos críticos (`id_workspace_pbi`, `id_relatorio_pbi`, `pbi_client_id`, `pbi_tenant_id`, `pbi_client_secret`) são **exibidos somente-leitura** por padrão — o usuário precisa clicar em "Editar" para alterar | Prevenção de alterações acidentais |
+| RN-CONF-02 | Toda alteração de campo crítico **exige confirmação explícita** via digitação da palavra "CONFIRMAR" em um modal de confirmação — o botão de salvar permanece desabilitado até a digitação exata | Prevenção de alterações acidentais; barreira intencional |
+| RN-CONF-03 | Toda alteração de campo crítico gera **log de auditoria** com `tipo_evento='critico'` contendo o valor anterior e o novo valor | Rastreabilidade de mudanças sensíveis |
+| RN-CONF-04 | Toda alteração de campo crítico salva **backup automático** na tabela `historico_config_critica` com os valores anterior e novo, usuário responsável e timestamp | Reversibilidade; histórico completo de alterações |
+| RN-CONF-05 | O histórico de alterações de um campo crítico pode ser **consultado a qualquer momento** via botão de histórico que abre o `ModalHistoricoCritico` com comparação visual ANTES → DEPOIS | Transparência; auditoria visual |
 
 ## RN-PERM - Acesso a Relatórios Específicos
 
@@ -107,6 +121,20 @@
 | RN-SYS-08 | **Admins e Super Admins não aparecem na lista de usuários vinculados** de um workspace — seu acesso é implícito e universal, exibir individualmente seria redundante | UX — clareza da listagem |
 | RN-SYS-09 | A página Home de usuários não-admin exibe o **status do expediente no topbar** (dot colorido + label + horário), os workspaces acessíveis e seus relatórios com botão "Abrir" | Visibilidade do estado de acesso |
 | RN-SYS-10 | O **footer da sidebar** exibe nome completo, e-mail e perfil do usuário logado em todas as páginas; as iniciais no avatar refletem o primeiro e segundo nome | Identificação contextual permanente |
+| RN-SYS-11 | O **indicador de expediente** (`TopbarExpediente`) é exibido no topbar de **todas as páginas** do portal (Home, Workspaces, Usuários, Favoritos, Auditoria e Configurações) — não apenas na Home | Visibilidade consistente do estado de acesso em qualquer contexto |
+| RN-SYS-12 | A **exclusão de um workspace é permanente e irreversível** — remove o workspace, todos os seus relatórios, vínculos de usuários (`acessos_workspace`) e acessos a relatórios individuais (`acessos_relatorio`) via cascade. Diferente do arquivamento, que mantém os dados mas oculta o workspace | Distinção semântica: arquivar ≠ excluir |
+| RN-SYS-13 | A exclusão de um workspace **não remove os logs de auditoria** históricos a ele relacionados — apenas o workspace e seus dados operacionais são apagados | Rastreabilidade permanente; ver também RN-AUD-03 |
+
+---
+
+## RN-WS - Workspaces
+
+| ID | Regra | Origem |
+|----|-------|--------|
+| RN-WS-01 | Excluir um workspace **exige confirmação explícita** via modal de variante `danger` informando que a ação é permanente e irreversível | Prevenção de exclusão acidental |
+| RN-WS-02 | A exclusão permanente está disponível tanto no **painel de detalhe** do workspace ativo quanto no **card de workspace arquivado** | Consistência de acesso à ação |
+| RN-WS-03 | Toda exclusão de workspace gera **log de auditoria** com `tipo_evento='sistema'` registrando o nome do workspace excluído e o usuário responsável | Rastreabilidade |
+| RN-WS-04 | Ao excluir um workspace que está **atualmente aberto no painel de detalhe**, o painel é fechado automaticamente | UX — evitar estado inconsistente (painel exibindo workspace que não existe mais) |
 
 ---
 
@@ -123,3 +151,5 @@
 | 1.6 | Junho/2026 | Vinicius Soares | Corrigido ID duplicado de token Power BI para RN-PBI-06 e adicionadas RN-SYS-05/06 sobre favoritos |
 | 1.7 | Junho/2026 | Vinicius Soares | RN-SCHED-01 atualizado: `administrador` e `super_administrador` são isentos da restrição de expediente; demais perfis (incluindo gerente e operador) obedecem a regra, salvo grupo de exceção |
 | 1.8 | Junho/2026 | Vinicius Soares | RN-SCHED-08/09: semantica de `ativo=false` (dia bloqueado) vs `bloquear_fora=false`; `ignora_dia_inativo` em grupos de exceção. RN-SCHED-10/11: indicador de expediente no topbar para todos os perfis. RN-AUD-06: resolução de nome atual nos logs. RN-SYS-07–10: auto-vínculo de admins em workspaces, ocultação da lista, home não-admin, footer da sidebar |
+| 1.9 | Junho/2026 | Vinicius Soares | RN-PBI-07/08: endpoint V2 GenerateToken e credenciais lidas do banco. Nova seção RN-CONF (01–05): segurança de campos críticos — somente-leitura, confirmação digitada, log critico, backup automático e histórico visual |
+| 2.0 | Junho/2026 | Vinicius Soares | RN-SYS-11: TopbarExpediente em todas as páginas. RN-SYS-12/13: exclusão permanente de workspace com cascade (≠ arquivamento). Nova seção RN-WS (01–04): regras de exclusão — confirmação, disponibilidade, log de auditoria e fechamento do painel |

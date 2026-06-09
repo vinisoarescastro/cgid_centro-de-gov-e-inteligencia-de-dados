@@ -3,7 +3,7 @@
 > **Documento:** 03-requisitos/01-requisitos-funcionais.md  
 > **Status:** Rascunho  
 > **Criado em:** Maio/2026  
-> **Atualizado em:** Maio/2026
+> **Atualizado em:** Junho/2026
 
 ---
 
@@ -64,6 +64,20 @@
 
 ---
 
+## RF-WS — Gestão de Workspaces
+
+| ID | Descrição | Critério de Aceite | Versão | Prioridade |
+|----|-----------|-------------------|--------|-----------|
+| RF-WS-01 | Admins devem criar workspaces com nome, ícone, cor e ID do workspace PBI | Workspace criado aparece na lista; log de auditoria registra a criação | v1.0 | 🔴 |
+| RF-WS-02 | Admins devem editar metadados de um workspace (nome, ícone, cor, IDs PBI) | Alterações persistidas; log de auditoria registra o que foi alterado e por quem | v1.0 | 🔴 |
+| RF-WS-03 | Admins devem arquivar e reativar workspaces | Workspace arquivado fica invisível para usuários comuns mas acessível na aba "Arquivados"; reativação restaura visibilidade | v1.0 | 🔴 |
+| RF-WS-04 | Admins devem excluir permanentemente um workspace | Endpoint `DELETE /workspaces/{id}` remove o workspace e todos os seus relatórios e vínculos de acesso (cascade); ação exige confirmação via modal com variante `danger`; log de auditoria registra a exclusão com o nome do workspace; workspace ativo no painel é fechado automaticamente | v1.0 | 🔴 |
+| RF-WS-05 | Admins devem gerenciar os relatórios de um workspace (criar, editar, arquivar, excluir) | CRUD de relatórios dentro do detalhe do workspace; criação e exclusão geram log de auditoria | v1.0 | 🔴 |
+| RF-WS-06 | Admins devem vincular e desvincular usuários a um workspace com nível de acesso | Vínculo reflete imediatamente nas permissões; ação gera log de auditoria | v1.0 | 🔴 |
+| RF-WS-07 | O indicador de expediente (`TopbarExpediente`) deve ser exibido no topbar de **todas as páginas** do portal | Pill de expediente visível em: Home, Workspaces, Usuários, Favoritos, Auditoria e Configurações; comportamento idêntico ao da página Home | v1.0 | 🔴 |
+
+---
+
 ## RF-SCHED — Controle de Expediente
 
 | ID | Descrição | Critério de Aceite | Versão | Prioridade |
@@ -90,6 +104,8 @@
 | RF-PBI-04 | O sistema deve sincronizar workspaces e relatórios disponíveis no PBI Service | Lista de relatórios do portal reflete o que existe no PBI Service após sincronização | v1.1 | 🟡 |
 | RF-PBI-05 | O sistema deve suportar Row-Level Security (RLS) via username no token de embed | Token de embed inclui o username do usuário para aplicação de RLS no Power BI | v2.0 | 🟡 |
 | RF-PBI-06 | O botão "Abrir" deve ser exibido para todos os relatórios, independentemente de ter ID do Power BI configurado | Relatórios com `id_relatorio_pbi` preenchido: botão ativo abre o visualizador. Relatórios sem `id_relatorio_pbi`: botão exibido desabilitado (opacidade reduzida) com tooltip "Sem link configurado" | v1.0 | 🔴 |
+| RF-PBI-07 | O sistema deve usar o endpoint V2 (`POST /v1.0/myorg/GenerateToken`) para gerar tokens de embed, incluindo o `datasetId` do relatório | Token gerado com sucesso para relatórios em datasets DirectLake (Microsoft Fabric/OneLake) e convencionais | v1.0 | 🔴 |
+| RF-PBI-08 | As credenciais Power BI (Client ID, Tenant ID, Client Secret) devem ser lidas do banco de dados (`configuracoes_sistema`) em cada requisição de embed | Backend não depende de variáveis de ambiente para PBI; alteração das credenciais via UI reflete imediatamente | v1.0 | 🔴 |
 
 ---
 
@@ -138,6 +154,10 @@
 | RF-CONF-02 | Somente Admin e Super Admin podem acessar o módulo de configurações; aba de Credenciais PBI é exclusiva do Super Admin | Perfis sem permissão são redirecionados para Home; aba PBI não aparece para Admins comuns | v1.0 | 🔴 |
 | RF-CONF-03 | O sistema deve exibir o ambiente atual (produção/homologação) no header | Badge de ambiente visível para todos os admins | v1.0 | 🟡 |
 | RF-CONF-04 | A página de Configurações deve ter abas: Expediente, Grupos de Exceção e Credenciais Power BI | Cada aba carrega e salva dados de forma independente; alterações refletem imediatamente no comportamento do sistema. A grade de Expediente é exibida em formato de tabela compacta (cabeçalho + uma linha por dia da semana) | v1.0 | 🔴 |
+| RF-CONF-05 | Campos críticos (`id_workspace_pbi`, `id_relatorio_pbi`, credenciais PBI) devem ser exibidos somente-leitura por padrão, com botão "Editar" para entrar no modo de edição | Campo crítico em modo visualização: valor mascarado ou exibido, sem inputs editáveis. Botão "Editar" ativa o formulário | v1.0 | 🔴 |
+| RF-CONF-06 | Alteração de campos críticos deve exigir confirmação com digitação explícita de "CONFIRMAR" | Modal abre com campo de texto; botão confirmar fica desabilitado até que o usuário digite exatamente "CONFIRMAR" (maiúsculas) | v1.0 | 🔴 |
+| RF-CONF-07 | Toda alteração de campo crítico deve ser registrada em `logs_auditoria` com `tipo_evento='critico'` e salvar backup em `historico_config_critica` | Log gerado com valor anterior e novo; backup salvo com entidade, entidade_id, campo, valores e usuário responsável | v1.0 | 🔴 |
+| RF-CONF-08 | Deve existir botão de histórico ("Histórico") junto a cada campo crítico que abre modal exibindo todas as alterações com ANTES → DEPOIS | Modal `ModalHistoricoCritico` carrega `GET /historico-critico?entidade=...&entidade_id=...`; exibe cada alteração com timestamp, usuário e comparação visual | v1.0 | 🔴 |
 
 ---
 
@@ -168,3 +188,5 @@
 | 1.7 | Junho/2026 | Vinicius Soares | Adicionada seção RF-FAV: favoritos pessoais com listagem, busca, remoção e abertura via visualizador Power BI |
 | 1.8 | Junho/2026 | Vinicius Soares | RF-AUD-02 atualizado: IP capturado via `X-Forwarded-For` com fallback; adicionada seção RF-UX com RF-UX-01 (modais customizados) e RF-UX-02 (KPIs dinâmicos com comparação semanal) |
 | 1.9 | Junho/2026 | Vinicius Soares | RF-SCHED-08/09 atualizados: semântica de `ativo=false` (dia bloqueado) e `ignora_dia_inativo`; RF-SCHED-10 (indicador de expediente no topbar para todos os perfis); RF-AUD-06 (resolução de nome atual nos logs); RF-UX-03 a 06: footer da sidebar, home não-admin, filtro de admins em workspaces, badge "Todos os workspaces" |
+| 2.0 | Junho/2026 | Vinicius Soares | RF-PBI-07/08: endpoint V2 GenerateToken (suporte DirectLake) e credenciais lidas do banco. RF-CONF-05 a 08: segurança de campos críticos (somente-leitura, confirmação digitada, log crítico, backup automático, histórico visual) |
+| 2.1 | Junho/2026 | Vinicius Soares | Adicionada seção RF-WS (gestão de workspaces): RF-WS-01 a 06 (CRUD, arquivamento, exclusão permanente com cascade, vínculos) e RF-WS-07 (TopbarExpediente em todas as páginas) |

@@ -3,8 +3,8 @@
 > **Documento:** 05-modelagem/04-entidades-e-banco-de-dados.md  
 > **Status:** Vigente  
 > **Criado em:** Maio/2026  
-> **Atualizado em:** Maio/2026  
-> **Banco de dados:** Microsoft SQL Server 2019+ (on-premise)
+> **Atualizado em:** Junho/2026  
+> **Banco de dados:** SQLite (desenvolvimento) / Microsoft SQL Server 2019+ (produção)
 
 ---
 
@@ -38,15 +38,20 @@ regras_expediente
   └── Uma por dia da semana (7 registros)
 
 configuracoes_sistema
-  └── Configurações globais (chave-valor)
+  └── Configurações globais (chave-valor); inclui credenciais PBI
 
 logs_auditoria
   └── Append-only; sem FK para preservar histórico após exclusões
+
+historico_config_critica
+  └── Backup automático de valores anteriores/novos de campos críticos (IDs PBI, credenciais)
 ```
 
 ---
 
-## 2. Definição das Tabelas (SQL Server)
+## 2. Definição das Tabelas
+
+> **Nota de implementação:** O backend usa **SQLAlchemy 2.0** com `String(36)` para UUIDs gerados em Python (não `UNIQUEIDENTIFIER` nativo), `DateTime` para timestamps e `Text` para texto longo. Em desenvolvimento o banco é **SQLite**; em produção recomenda-se **SQL Server 2019+**. A documentação SQL a seguir usa a sintaxe SQL Server para referência.
 
 > **Convenções SQL Server adotadas:**
 > - Identificadores: `UNIQUEIDENTIFIER` com `DEFAULT NEWID()`
@@ -70,7 +75,9 @@ logs_auditoria
 | `perfil` | NVARCHAR(30) | NOT NULL, CHECK | super_administrador, administrador, gerente, operador, visitante |
 | `status` | NVARCHAR(20) | NOT NULL, DEFAULT 'ativo' | ativo, inativo, bloqueado |
 | `tentativas_login` | SMALLINT | DEFAULT 0 | Contador de tentativas falhas |
+| `senha_provisoria` | BIT | NOT NULL, DEFAULT 0 | Se verdadeiro, exige troca de senha no próximo login |
 | `ultimo_login` | DATETIME2(7) | NULL | Último login bem-sucedido (UTC) |
+| `foto_url` | NVARCHAR(500) | NULL | URL do avatar do usuário |
 | `mfa_ativo` | BIT | DEFAULT 0 | MFA ativado para o usuário |
 | `mfa_segredo` | NVARCHAR(255) | NULL | Secret TOTP (criptografado) |
 | `criado_em` | DATETIME2(7) | NOT NULL, DEFAULT GETUTCDATE() | Data de criação (UTC) |
@@ -90,7 +97,9 @@ CREATE TABLE usuarios (
   status           NVARCHAR(20)      NOT NULL DEFAULT 'ativo'
                      CONSTRAINT CK_usuarios_status CHECK (status IN ('ativo','inativo','bloqueado')),
   tentativas_login SMALLINT          NOT NULL DEFAULT 0,
+  senha_provisoria BIT               NOT NULL DEFAULT 0,
   ultimo_login     DATETIME2(7)      NULL,
+  foto_url         NVARCHAR(500)     NULL,
   mfa_ativo        BIT               NOT NULL DEFAULT 0,
   mfa_segredo      NVARCHAR(255)     NULL,
   criado_em        DATETIME2(7)      NOT NULL DEFAULT GETUTCDATE(),
@@ -402,8 +411,9 @@ CREATE TABLE logs_auditoria (
   email_usuario NVARCHAR(255)     NULL,            -- snapshot imutável do e-mail
   tipo_evento   NVARCHAR(50)      NOT NULL
                   CONSTRAINT CK_la_tipo_evento CHECK (tipo_evento IN (
-                    'autenticacao','usuario','permissao','acesso','relatorio','seguranca','sistema'
+                    'autenticacao','usuario','permissao','acesso','relatorio','seguranca','sistema','critico'
                   )),
+  -- 'critico': alterações em campos sensíveis (IDs PBI, credenciais PBI)
   modulo        NVARCHAR(100)     NOT NULL,
   detalhe       NVARCHAR(MAX)     NOT NULL,
   endereco_ip   NVARCHAR(45)      NULL,
@@ -445,14 +455,55 @@ CREATE TABLE configuracoes_sistema (
 );
 
 -- Registros iniciais (seed)
+-- Credenciais PBI são configuradas pela interface em Configurações → Power BI
+-- e lidas do banco em cada requisição de embed (não do arquivo .env)
 INSERT INTO configuracoes_sistema (chave, valor, eh_secreto) VALUES
   ('nome_portal',          '"CGID - Centro de Governança e Inteligência de Dados"', 0),
   ('ambiente',             '"producao"',         0),
   ('pbi_client_id',        '""',                 0),
   ('pbi_tenant_id',        '""',                 0),
-  ('pbi_workspace_id',     '""',                 0),
   ('pbi_client_secret',    '""',                 1),
   ('pbi_integracao_ativa', 'false',              0);
+```
+
+> **Nota:** As chaves `pbi_client_id`, `pbi_tenant_id` e `pbi_client_secret` são tratadas como **campos críticos**: exibidas somente-leitura na UI, exigem digitação de "CONFIRMAR" para edição, geram log com `tipo_evento='critico'` e disparam backup automático em `historico_config_critica`.
+
+---
+
+### Tabela: `historico_config_critica`
+
+Tabela de backup append-only para rastrear o valor anterior e novo de campos críticos (IDs Power BI, credenciais). Complementa os `logs_auditoria` com foco em reversibilidade.
+
+| Coluna | Tipo | Restrições | Descrição |
+|--------|------|-----------|-----------|
+| `id` | NVARCHAR(36) | PK | UUID gerado em Python |
+| `momento` | DATETIME2(7) | NOT NULL, DEFAULT GETUTCDATE() | Timestamp da alteração (UTC) |
+| `entidade` | NVARCHAR(50) | NOT NULL | `workspace`, `relatorio` ou `pbi_credenciais` |
+| `entidade_id` | NVARCHAR(36) | NULL | ID do workspace/relatório; NULL para credenciais PBI |
+| `campo` | NVARCHAR(100) | NOT NULL | Nome do campo alterado (ex: `id_workspace_pbi`) |
+| `valor_anterior` | NVARCHAR(MAX) | NULL | Valor antes da alteração |
+| `valor_novo` | NVARCHAR(MAX) | NULL | Valor após a alteração |
+| `alterado_por_id` | NVARCHAR(36) | NULL | ID do usuário que fez a alteração |
+| `alterado_por_nome` | NVARCHAR(255) | NULL | Snapshot do nome do usuário |
+| `alterado_por_email` | NVARCHAR(255) | NULL | Snapshot do e-mail do usuário |
+
+```sql
+CREATE TABLE historico_config_critica (
+  id                  NVARCHAR(36)      NOT NULL CONSTRAINT PK_historico_config_critica PRIMARY KEY,
+  momento             DATETIME2(7)      NOT NULL DEFAULT GETUTCDATE(),
+  entidade            NVARCHAR(50)      NOT NULL,  -- workspace | relatorio | pbi_credenciais
+  entidade_id         NVARCHAR(36)      NULL,      -- NULL para pbi_credenciais
+  campo               NVARCHAR(100)     NOT NULL,
+  valor_anterior      NVARCHAR(MAX)     NULL,
+  valor_novo          NVARCHAR(MAX)     NULL,
+  alterado_por_id     NVARCHAR(36)      NULL,
+  alterado_por_nome   NVARCHAR(255)     NULL,
+  alterado_por_email  NVARCHAR(255)     NULL
+);
+
+CREATE INDEX IX_hcc_momento    ON historico_config_critica(momento DESC);
+CREATE INDEX IX_hcc_entidade   ON historico_config_critica(entidade);
+CREATE INDEX IX_hcc_entidade_id ON historico_config_critica(entidade_id);
 ```
 
 ---
@@ -478,7 +529,8 @@ usuarios 1──────N acessos_workspace N──────1 espacos_tra
 
 permissoes_perfil (standalone — sem FK para usuarios)
 regras_expediente (standalone — regra global)
-configuracoes_sistema (standalone — configurações chave-valor)
+configuracoes_sistema (standalone — configurações chave-valor; credenciais PBI)
+historico_config_critica (standalone — backup append-only de campos críticos)
 ```
 
 ---
@@ -556,3 +608,4 @@ Cada script deve ter:
 | 1.1 | Maio/2026 | — | Reescrita para SQL Server: tipos nativos, triggers INSTEAD OF, índices |
 | 2.0 | Maio/2026 | — | Migração completa para nomes em Português do Brasil; substituição de Prisma Migrate por SQLAlchemy create_all |
 | 2.1 | Junho/2026 | Vinicius Soares | Adicionada coluna `ignora_dia_inativo` (BIT DEFAULT 0) em `grupos_excecao`; documentação de migration para bancos existentes |
+| 2.2 | Junho/2026 | Vinicius Soares | Adicionadas colunas `senha_provisoria` e `foto_url` em `usuarios`; adicionado `critico` ao enum `tipo_evento` de `logs_auditoria`; nova tabela 15 `historico_config_critica` para backup de campos críticos; nota sobre credenciais PBI lidas do banco (não do .env); banco de desenvolvimento é SQLite |

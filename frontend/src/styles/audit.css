@@ -53,6 +53,7 @@
 .aud-badge.acesso       { background: #fee2e2; color: #991b1b; }
 .aud-badge.relatorio    { background: #ecfdf5; color: #047857; }
 .aud-badge.sistema      { background: #f1f5f9; color: #475569; }
+.aud-badge.critico      { background: #fef2f2; color: #991b1b; font-weight: 700; border: 1px solid #fecaca; }
 
 /* ─── Tabela ── */
 .aud-table-wrap {

@@ -12,7 +12,7 @@ import csv, io, json, os
 import requests as http_requests
 
 from database import engine, get_db, Base
-from models import Usuario, LogAuditoria, EspacoTrabalho, Relatorio, AcessoWorkspace, AcessoRelatorio, RegraExpediente, GrupoExcecao, MembroGrupoExcecao, ConfiguracaoSistema, Favorito
+from models import Usuario, LogAuditoria, EspacoTrabalho, Relatorio, AcessoWorkspace, AcessoRelatorio, RegraExpediente, GrupoExcecao, MembroGrupoExcecao, ConfiguracaoSistema, Favorito, HistoricoConfigCritica
 
 PBI_TENANT_ID     = os.getenv("PBI_TENANT_ID", "")
 PBI_CLIENT_ID     = os.getenv("PBI_CLIENT_ID", "")
@@ -94,6 +94,20 @@ def registrar_log(db: Session, tipo: str, modulo: str, detalhe: str,
         endereco_ip    = ip,
         valor_anterior = valor_anterior,
         valor_novo     = valor_novo,
+    ))
+
+def salvar_backup_critico(db: Session, entidade: str, entidade_id: Optional[str],
+                          campo: str, valor_anterior: Optional[str], valor_novo: Optional[str],
+                          usuario: Optional[Usuario] = None):
+    db.add(HistoricoConfigCritica(
+        entidade           = entidade,
+        entidade_id        = entidade_id,
+        campo              = campo,
+        valor_anterior     = valor_anterior,
+        valor_novo         = valor_novo,
+        alterado_por_id    = usuario.id    if usuario else None,
+        alterado_por_nome  = usuario.nome  if usuario else None,
+        alterado_por_email = usuario.email if usuario else None,
     ))
 
 def get_ip(request: Request) -> Optional[str]:
@@ -431,6 +445,8 @@ class WorkspaceItem(BaseModel):
     nome: str
     icone: Optional[str] = None
     cor: Optional[str] = None
+    descricao: Optional[str] = None
+    id_workspace_pbi: Optional[str] = None
     status: str
     model_config = {"from_attributes": True}
 
@@ -1074,15 +1090,33 @@ def atualizar_workspace(workspace_id: str, request: Request, dados: WorkspaceCre
     autor   = get_usuario_requisicao(request, db)
     anterior = json.dumps({"nome": ws.nome, "icone": ws.icone, "cor": ws.cor,
                             "descricao": ws.descricao, "id_workspace_pbi": ws.id_workspace_pbi}, ensure_ascii=False)
+    id_pbi_anterior = ws.id_workspace_pbi
     ws.nome = dados.nome; ws.icone = dados.icone; ws.cor = dados.cor
     ws.descricao = dados.descricao; ws.id_workspace_pbi = dados.id_workspace_pbi
     db.commit(); db.refresh(ws)
-    registrar_log(db, "sistema", "espacos_trabalho", f"Workspace atualizado: {ws.nome}",
+    id_pbi_mudou = id_pbi_anterior != ws.id_workspace_pbi
+    tipo_log = "critico" if id_pbi_mudou else "sistema"
+    detalhe  = f"ID Power BI do workspace '{ws.nome}' alterado" if id_pbi_mudou else f"Workspace atualizado: {ws.nome}"
+    registrar_log(db, tipo_log, "espacos_trabalho", detalhe,
                   usuario=autor, request=request, valor_anterior=anterior,
                   valor_novo=json.dumps({"nome": ws.nome, "icone": ws.icone, "cor": ws.cor,
                                          "descricao": ws.descricao, "id_workspace_pbi": ws.id_workspace_pbi}, ensure_ascii=False))
+    if id_pbi_mudou:
+        salvar_backup_critico(db, "workspace", ws.id, "id_workspace_pbi", id_pbi_anterior, ws.id_workspace_pbi, autor)
     db.commit()
     return ws
+
+@app.delete("/workspaces/{workspace_id}", status_code=204)
+def excluir_workspace(workspace_id: str, request: Request, db: Session = Depends(get_db)):
+    ws = db.query(EspacoTrabalho).filter(EspacoTrabalho.id == workspace_id).first()
+    if not ws:
+        raise HTTPException(status_code=404, detail="Workspace não encontrado.")
+    autor = get_usuario_requisicao(request, db)
+    nome = ws.nome
+    db.delete(ws)
+    db.commit()
+    registrar_log(db, "sistema", "espacos_trabalho", f"Workspace excluído permanentemente: {nome}", usuario=autor, request=request)
+    db.commit()
 
 @app.patch("/workspaces/{workspace_id}/arquivar", status_code=200)
 def arquivar_workspace(workspace_id: str, request: Request, db: Session = Depends(get_db)):
@@ -1371,13 +1405,20 @@ def atualizar_relatorio(workspace_id: str, relatorio_id: str, request: Request, 
         raise HTTPException(status_code=404, detail="Relatório não encontrado.")
     autor    = get_usuario_requisicao(request, db)
     anterior = _rel_snapshot(rel)
+    id_pbi_anterior = rel.id_relatorio_pbi
     rel.nome = dados.nome; rel.categoria = dados.categoria or None
     rel.status = dados.status; rel.descricao = dados.descricao or None
     rel.id_relatorio_pbi = dados.id_relatorio_pbi or None
     db.commit()
     db.refresh(rel)
-    registrar_log(db, "sistema", "relatorios", f"Relatório atualizado: {rel.nome}",
+    id_pbi_mudou = id_pbi_anterior != rel.id_relatorio_pbi
+    tipo_log = "critico" if id_pbi_mudou else "sistema"
+    detalhe  = f"ID Power BI do relatório '{rel.nome}' alterado" if id_pbi_mudou else f"Relatório atualizado: {rel.nome}"
+    registrar_log(db, tipo_log, "relatorios", detalhe,
                   usuario=autor, request=request, valor_anterior=anterior, valor_novo=_rel_snapshot(rel))
+    if id_pbi_mudou:
+        salvar_backup_critico(db, "relatorio", rel.id, "id_relatorio_pbi", id_pbi_anterior, rel.id_relatorio_pbi, autor)
+    db.commit()
     return RelatorioItem(
         id=rel.id, nome=rel.nome, categoria=rel.categoria, status=rel.status,
         descricao=rel.descricao, id_relatorio_pbi=rel.id_relatorio_pbi,
@@ -1620,6 +1661,26 @@ class CredenciaisPBIInput(BaseModel):
     client_id:     str
     client_secret: str  # vazio = não alterar
 
+@app.get("/historico-critico")
+def listar_historico_critico(entidade: str, entidade_id: Optional[str] = None, db: Session = Depends(get_db)):
+    q = db.query(HistoricoConfigCritica).filter(HistoricoConfigCritica.entidade == entidade)
+    if entidade_id:
+        q = q.filter(HistoricoConfigCritica.entidade_id == entidade_id)
+    registros = q.order_by(HistoricoConfigCritica.momento.desc()).limit(20).all()
+    return [
+        {
+            "id":                  r.id,
+            "momento":             r.momento.isoformat(),
+            "campo":               r.campo,
+            "valor_anterior":      r.valor_anterior,
+            "valor_novo":          r.valor_novo,
+            "alterado_por_nome":   r.alterado_por_nome,
+            "alterado_por_email":  r.alterado_por_email,
+        }
+        for r in registros
+    ]
+
+
 @app.get("/configuracoes/pbi", response_model=CredenciaisPBIItem)
 def listar_credenciais_pbi(db: Session = Depends(get_db)):
     def _get(chave):
@@ -1634,38 +1695,70 @@ def listar_credenciais_pbi(db: Session = Depends(get_db)):
 
 @app.put("/configuracoes/pbi", response_model=CredenciaisPBIItem)
 def salvar_credenciais_pbi(request: Request, dados: CredenciaisPBIInput, db: Session = Depends(get_db)):
+    def _get(chave):
+        r = db.query(ConfiguracaoSistema).filter(ConfiguracaoSistema.chave == chave).first()
+        return r.valor if r else ""
     def _upsert(chave, valor):
         r = db.query(ConfiguracaoSistema).filter(ConfiguracaoSistema.chave == chave).first()
         if r:
             r.valor = valor
         else:
             db.add(ConfiguracaoSistema(chave=chave, valor=valor, eh_secreto=chave == "PBI_CLIENT_SECRET"))
+
+    tenant_anterior = _get("PBI_TENANT_ID")
+    client_anterior = _get("PBI_CLIENT_ID")
+
     _upsert("PBI_TENANT_ID", dados.tenant_id)
     _upsert("PBI_CLIENT_ID", dados.client_id)
     if dados.client_secret and dados.client_secret != "••••••••":
         _upsert("PBI_CLIENT_SECRET", dados.client_secret)
     db.commit()
+
     autor = get_usuario_requisicao(request, db)
-    registrar_log(db, "sistema", "configuracoes_pbi", "Credenciais Power BI atualizadas", usuario=autor, request=request)
+    campos_alterados = []
+    if tenant_anterior != dados.tenant_id:
+        salvar_backup_critico(db, "pbi_credenciais", None, "PBI_TENANT_ID", tenant_anterior, dados.tenant_id, autor)
+        campos_alterados.append("Tenant ID")
+    if client_anterior != dados.client_id:
+        salvar_backup_critico(db, "pbi_credenciais", None, "PBI_CLIENT_ID", client_anterior, dados.client_id, autor)
+        campos_alterados.append("Client ID")
+    if dados.client_secret and dados.client_secret != "••••••••":
+        salvar_backup_critico(db, "pbi_credenciais", None, "PBI_CLIENT_SECRET", "••••••••", "••••••••", autor)
+        campos_alterados.append("Client Secret")
+
+    tipo_log = "critico" if campos_alterados else "sistema"
+    detalhe  = f"Credenciais Power BI alteradas: {', '.join(campos_alterados)}" if campos_alterados else "Credenciais Power BI atualizadas (sem alteração)"
+    registrar_log(db, tipo_log, "configuracoes_pbi", detalhe, usuario=autor, request=request)
     db.commit()
     return listar_credenciais_pbi(db)
 
 
 # ─── Power BI Embed ───────────────────────────────────────────────────────────
 
-def _pbi_access_token() -> str:
+def _pbi_access_token(db: Session = None) -> str:
     """Obtém access token do Azure AD via client credentials (Service Principal)."""
-    if not all([PBI_TENANT_ID, PBI_CLIENT_ID, PBI_CLIENT_SECRET]):
+    def _cfg(chave):
+        if db:
+            r = db.query(ConfiguracaoSistema).filter(ConfiguracaoSistema.chave == chave).first()
+            if r and r.valor:
+                return r.valor
+        return os.getenv(chave, "")
+
+    tenant_id     = _cfg("PBI_TENANT_ID")
+    client_id     = _cfg("PBI_CLIENT_ID")
+    client_secret = _cfg("PBI_CLIENT_SECRET")
+
+    if not all([tenant_id, client_id, client_secret]):
         raise HTTPException(
             status_code=503,
-            detail="Credenciais do Power BI não configuradas. Defina PBI_TENANT_ID, PBI_CLIENT_ID e PBI_CLIENT_SECRET no .env.",
+            detail="Credenciais do Power BI não configuradas. Acesse Configurações → Power BI para definir Tenant ID, Client ID e Client Secret.",
         )
     resp = http_requests.post(
-        f"https://login.microsoftonline.com/{PBI_TENANT_ID}/oauth2/v2.0/token",
+        f"https://login.microsoftonline.com/{tenant_id}/oauth2/v2.0/token",
         data={
             "grant_type":    "client_credentials",
-            "client_id":     PBI_CLIENT_ID,
-            "client_secret": PBI_CLIENT_SECRET,
+            "client_id":     client_id,
+            "client_secret": client_secret,
             "scope":         "https://analysis.windows.net/powerbi/api/.default",
         },
         timeout=15,
@@ -1695,7 +1788,7 @@ def embed_relatorio(relatorio_id: str, request: Request, db: Session = Depends(g
     if not ws or not ws.id_workspace_pbi:
         raise HTTPException(status_code=422, detail="O workspace deste relatório não possui ID do Power BI configurado.")
 
-    access_token = _pbi_access_token()
+    access_token = _pbi_access_token(db)
     headers = {"Authorization": f"Bearer {access_token}"}
 
     # Busca a embed URL do relatório
@@ -1708,11 +1801,20 @@ def embed_relatorio(relatorio_id: str, request: Request, db: Session = Depends(g
         raise HTTPException(status_code=502, detail=f"Falha ao buscar relatório no Power BI: {report_resp.text}")
     embed_url = report_resp.json().get("embedUrl", "")
 
-    # Gera o embed token
+    # Busca o dataset ID do relatório (necessário para o token V2)
+    dataset_id = report_resp.json().get("datasetId", "")
+    if not dataset_id:
+        raise HTTPException(status_code=502, detail="Não foi possível obter o dataset ID do relatório no Power BI.")
+
+    # Gera o embed token (V2 — suporta DirectLake e datasets Fabric)
     token_resp = http_requests.post(
-        f"https://api.powerbi.com/v1.0/myorg/groups/{ws.id_workspace_pbi}/reports/{rel.id_relatorio_pbi}/GenerateToken",
+        "https://api.powerbi.com/v1.0/myorg/GenerateToken",
         headers={**headers, "Content-Type": "application/json"},
-        json={"accessLevel": "View"},
+        json={
+            "reports":          [{"id": rel.id_relatorio_pbi, "allowEdit": False}],
+            "datasets":         [{"id": dataset_id}],
+            "targetWorkspaces": [{"id": ws.id_workspace_pbi}],
+        },
         timeout=15,
     )
     if not token_resp.ok:

@@ -5,6 +5,7 @@ import '../styles/audit.css'
 import logoSidebarFull from '../assets/logo-sidebar-full.png'
 import logoSidebarIcon from '../assets/logo-sidebar-icon.png'
 import Avatar from '../components/Avatar'
+import TopbarExpediente from '../components/TopbarExpediente'
 
 const API = 'http://localhost:8000'
 
@@ -27,7 +28,8 @@ const TIPO_META = {
   permissao:    { icon: 'fa-key',              label: 'Permissão'    },
   acesso:       { icon: 'fa-ban',              label: 'Acesso'       },
   relatorio:    { icon: 'fa-chart-bar',        label: 'Relatório'    },
-  sistema:      { icon: 'fa-gear',             label: 'Sistema'      },
+  sistema:      { icon: 'fa-gear',                label: 'Sistema'      },
+  critico:      { icon: 'fa-shield-exclamation',  label: 'Crítico'      },
 }
 
 function TipoBadge({ tipo }) {
@@ -218,6 +220,7 @@ export default function AuditPage() {
             <span className="bc-current">Auditoria</span>
           </div>
           <div className="topbar-actions">
+            <TopbarExpediente />
             <button className="topbar-btn topbar-btn-danger" title="Sair" onClick={handleLogout}>
               <i className="fa-solid fa-right-from-bracket" />
             </button>
@@ -341,11 +344,19 @@ export default function AuditPage() {
                                 }
                               </td>
                               <td className="detalhe" title={log.detalhe}>
-                                {log.detalhe}
-                                {(log.valor_anterior || log.valor_novo) && (
-                                  <i className={`fa-solid ${expandido === log.id ? 'fa-chevron-up' : 'fa-chevron-down'}`}
-                                    style={{ marginLeft: 6, fontSize: 9, color: 'var(--gray-400)' }} />
-                                )}
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                  <span>{log.detalhe}</span>
+                                  {(log.valor_anterior || log.valor_novo) && (
+                                    <button
+                                      className="btn btn-ghost btn-sm"
+                                      style={{ fontSize: 11, padding: '2px 8px', whiteSpace: 'nowrap', flexShrink: 0 }}
+                                      onClick={e => { e.stopPropagation(); setExpandido(v => v === log.id ? null : log.id) }}
+                                    >
+                                      <i className={`fa-solid ${expandido === log.id ? 'fa-chevron-up' : 'fa-eye'}`} style={{ marginRight: 4 }} />
+                                      {expandido === log.id ? 'Ocultar' : 'Ver detalhes'}
+                                    </button>
+                                  )}
+                                </div>
                               </td>
                               <td className="ip-col">{log.endereco_ip || '—'}</td>
                             </tr>

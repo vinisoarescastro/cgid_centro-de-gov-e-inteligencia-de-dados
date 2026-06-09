@@ -249,3 +249,19 @@ class ConfiguracaoSistema(Base):
     eh_secreto         = Column(Boolean, nullable=False, default=False)
     atualizado_em      = Column(DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
     atualizado_por_id  = Column(String(36), ForeignKey("usuarios.id", ondelete="SET NULL"), nullable=True)
+
+
+# ─── 15. Histórico de Configurações Críticas ─────────────────────────────────
+class HistoricoConfigCritica(Base):
+    __tablename__ = "historico_config_critica"
+
+    id                  = Column(String(36), primary_key=True, default=new_uuid)
+    momento             = Column(DateTime, nullable=False, server_default=func.now(), index=True)
+    entidade            = Column(String(50),  nullable=False, index=True)  # workspace | relatorio | pbi_credenciais
+    entidade_id         = Column(String(36),  nullable=True,  index=True)  # id do workspace/relatório; null para credenciais PBI
+    campo               = Column(String(100), nullable=False)
+    valor_anterior      = Column(Text, nullable=True)
+    valor_novo          = Column(Text, nullable=True)
+    alterado_por_id     = Column(String(36),  nullable=True)
+    alterado_por_nome   = Column(String(255), nullable=True)
+    alterado_por_email  = Column(String(255), nullable=True)

@@ -5,6 +5,7 @@ import '../styles/workspace.css'
 import logoSidebarFull from '../assets/logo-sidebar-full.png'
 import logoSidebarIcon from '../assets/logo-sidebar-icon.png'
 import Avatar from '../components/Avatar'
+import TopbarExpediente from '../components/TopbarExpediente'
 import VisualizadorRelatorio from '../components/VisualizadorRelatorio'
 
 const API = 'http://localhost:8000'
@@ -147,6 +148,7 @@ export default function FavoritosPage() {
             <span className="bc-current">Favoritos</span>
           </div>
           <div className="topbar-actions">
+            <TopbarExpediente />
             <button className="topbar-btn topbar-btn-danger" title="Sair" onClick={handleLogout}>
               <i className="fa-solid fa-right-from-bracket" />
             </button>

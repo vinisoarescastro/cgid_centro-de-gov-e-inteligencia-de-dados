@@ -5,8 +5,10 @@ import '../styles/settings.css'
 import logoSidebarFull from '../assets/logo-sidebar-full.png'
 import logoSidebarIcon from '../assets/logo-sidebar-icon.png'
 import Avatar from '../components/Avatar'
+import TopbarExpediente from '../components/TopbarExpediente'
 import { apiFetch } from '../utils/api'
 import ModalConfirmacao from '../components/ModalConfirmacao'
+import ModalHistoricoCritico from '../components/ModalHistoricoCritico'
 
 const API = 'http://localhost:8000'
 
@@ -491,33 +493,47 @@ function AbaGrupos() {
 
 // ─── Aba Credenciais Power BI ─────────────────────────────────────────────────
 function AbaCredenciaisPBI() {
+  const [original, setOriginal] = useState({ tenant_id: '', client_id: '', client_secret: '' })
   const [form, setForm]         = useState({ tenant_id: '', client_id: '', client_secret: '' })
   const [loading, setLoading]   = useState(true)
-  const [salvando, setSalvando] = useState(false)
+  const [editando, setEditando]         = useState(false)
+  const [salvando, setSalvando]         = useState(false)
   const [mostrarSecret, setMostrarSecret] = useState(false)
+  const [pendente, setPendente]         = useState(false)
+  const [verHistorico, setVerHistorico] = useState(false)
   const [feedback, setFeedback] = useState('')
   const [erro, setErro]         = useState('')
 
   useEffect(() => {
     fetch(`${API}/configuracoes/pbi`)
       .then(r => r.json())
-      .then(d => setForm({ tenant_id: d.tenant_id, client_id: d.client_id, client_secret: d.client_secret }))
+      .then(d => {
+        const vals = { tenant_id: d.tenant_id, client_id: d.client_id, client_secret: d.client_secret }
+        setOriginal(vals)
+        setForm(vals)
+      })
       .catch(() => {})
       .finally(() => setLoading(false))
   }, [])
 
   function set(k, v) { setForm(f => ({ ...f, [k]: v })) }
 
-  async function salvar() {
+  function tentarSalvar() {
+    setErro('')
+    setPendente(true)
+  }
+
+  async function executarSalvar() {
+    setPendente(false)
     setSalvando(true); setErro(''); setFeedback('')
     try {
-      const r = await apiFetch(`/configuracoes/pbi`, {
-        method: 'PUT',
-        body: form,
-      })
+      const r = await apiFetch(`/configuracoes/pbi`, { method: 'PUT', body: form })
       if (!r.ok) { const d = await r.json(); throw new Error(d.detail) }
       const salvo = await r.json()
-      setForm(f => ({ ...f, client_secret: salvo.client_secret }))
+      const vals = { tenant_id: salvo.tenant_id, client_id: salvo.client_id, client_secret: salvo.client_secret }
+      setOriginal(vals)
+      setForm(vals)
+      setEditando(false)
       setFeedback('Credenciais salvas com sucesso.')
       setTimeout(() => setFeedback(''), 3000)
     } catch (e) {
@@ -527,57 +543,127 @@ function AbaCredenciaisPBI() {
     }
   }
 
+  function cancelarEdicao() {
+    setForm(original)
+    setEditando(false)
+    setErro('')
+  }
+
   if (loading) return (
     <div style={{ padding: '40px 0', textAlign: 'center', fontSize: 13, color: 'var(--gray-400)' }}>Carregando...</div>
   )
 
+  const temCredenciais = original.tenant_id || original.client_id
+
   return (
+    <>
     <div>
       <div style={{ fontSize: 13, color: 'var(--gray-500)', marginBottom: 20 }}>
         Credenciais do <strong>Service Principal</strong> no Azure AD usadas para gerar tokens de embed do Power BI. Armazenadas de forma segura no banco de dados.
       </div>
-      <div className="pbi-form">
-        <div className="modal-field">
-          <label className="modal-label">Tenant ID (Directory ID)</label>
-          <input className="modal-input" value={form.tenant_id} onChange={e => set('tenant_id', e.target.value)} placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" />
-        </div>
-        <div className="modal-field">
-          <label className="modal-label">Client ID (Application ID)</label>
-          <input className="modal-input" value={form.client_id} onChange={e => set('client_id', e.target.value)} placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" />
-        </div>
-        <div className="modal-field">
-          <label className="modal-label">Client Secret</label>
-          <div className="pbi-secret-wrap">
-            <input
-              className="modal-input"
-              type={mostrarSecret ? 'text' : 'password'}
-              value={form.client_secret}
-              onChange={e => set('client_secret', e.target.value)}
-              placeholder="Deixe em branco para manter o atual"
-            />
-            <button className="pbi-secret-toggle" onClick={() => setMostrarSecret(v => !v)} type="button">
-              <i className={`fa-solid ${mostrarSecret ? 'fa-eye-slash' : 'fa-eye'}`} />
+
+      {!editando && temCredenciais ? (
+        <div className="pbi-form">
+          {[
+            { label: 'Tenant ID (Directory ID)', valor: original.tenant_id },
+            { label: 'Client ID (Application ID)', valor: original.client_id },
+            { label: 'Client Secret', valor: original.client_secret },
+          ].map(({ label, valor }) => (
+            <div className="modal-field" key={label}>
+              <label className="modal-label">{label}</label>
+              <div style={{
+                padding: '8px 12px', background: 'var(--gray-50)',
+                border: '1px solid var(--gray-200)', borderRadius: 'var(--r-md)',
+                fontSize: 13, color: 'var(--gray-600)', fontFamily: 'monospace',
+              }}>
+                {valor || <span style={{ color: 'var(--gray-300)' }}>não configurado</span>}
+              </div>
+            </div>
+          ))}
+          <div className="cfg-save-bar">
+            {feedback && (
+              <span className="cfg-save-feedback">
+                <i className="fa-solid fa-circle-check" /> {feedback}
+              </span>
+            )}
+            <button className="btn btn-ghost" onClick={() => setVerHistorico(true)}
+              title="Ver histórico de alterações">
+              <i className="fa-solid fa-clock-rotate-left" /> Histórico
+            </button>
+            <button className="btn btn-ghost" onClick={() => setEditando(true)}>
+              <i className="fa-solid fa-pen" /> Editar credenciais
             </button>
           </div>
-          <div style={{ fontSize: 11, color: 'var(--gray-400)', marginTop: 4 }}>
-            O secret é exibido mascarado após salvar. Preencha apenas para alterar.
+        </div>
+      ) : (
+        <div className="pbi-form">
+          {temCredenciais && (
+            <div style={{ fontSize: 12, color: '#f59e0b', marginBottom: 12, padding: '8px 12px', background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 'var(--r-md)', display: 'flex', alignItems: 'center', gap: 8 }}>
+              <i className="fa-solid fa-triangle-exclamation" />
+              Alterar credenciais afeta todos os relatórios do sistema. Será solicitada confirmação ao salvar.
+            </div>
+          )}
+          <div className="modal-field">
+            <label className="modal-label">Tenant ID (Directory ID)</label>
+            <input className="modal-input" value={form.tenant_id} onChange={e => set('tenant_id', e.target.value)} placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" />
+          </div>
+          <div className="modal-field">
+            <label className="modal-label">Client ID (Application ID)</label>
+            <input className="modal-input" value={form.client_id} onChange={e => set('client_id', e.target.value)} placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" />
+          </div>
+          <div className="modal-field">
+            <label className="modal-label">Client Secret</label>
+            <div className="pbi-secret-wrap">
+              <input
+                className="modal-input"
+                type={mostrarSecret ? 'text' : 'password'}
+                value={form.client_secret}
+                onChange={e => set('client_secret', e.target.value)}
+                placeholder="Deixe em branco para manter o atual"
+              />
+              <button className="pbi-secret-toggle" onClick={() => setMostrarSecret(v => !v)} type="button">
+                <i className={`fa-solid ${mostrarSecret ? 'fa-eye-slash' : 'fa-eye'}`} />
+              </button>
+            </div>
+            <div style={{ fontSize: 11, color: 'var(--gray-400)', marginTop: 4 }}>
+              O secret é exibido mascarado após salvar. Preencha apenas para alterar.
+            </div>
+          </div>
+
+          {erro && <div style={{ fontSize: 12, color: 'var(--red-500)' }}>{erro}</div>}
+
+          <div className="cfg-save-bar">
+            {temCredenciais && (
+              <button className="btn btn-ghost" onClick={cancelarEdicao} disabled={salvando}>Cancelar</button>
+            )}
+            <button className="btn btn-primary" onClick={tentarSalvar} disabled={salvando}>
+              {salvando ? 'Salvando...' : 'Salvar credenciais'}
+            </button>
           </div>
         </div>
-
-        {erro && <div style={{ fontSize: 12, color: 'var(--red-500)' }}>{erro}</div>}
-
-        <div className="cfg-save-bar">
-          {feedback && (
-            <span className="cfg-save-feedback">
-              <i className="fa-solid fa-circle-check" /> {feedback}
-            </span>
-          )}
-          <button className="btn btn-primary" onClick={salvar} disabled={salvando}>
-            {salvando ? 'Salvando...' : 'Salvar credenciais'}
-          </button>
-        </div>
-      </div>
+      )}
     </div>
+
+    {pendente && (
+      <ModalConfirmacao
+        titulo="Confirmar alteração de credenciais"
+        mensagem="As credenciais do Power BI serão alteradas. Isso afeta o carregamento de todos os relatórios do sistema. Se as novas credenciais forem inválidas, nenhum relatório carregará."
+        variante="danger"
+        labelConfirmar="Alterar credenciais"
+        labelCancelar="Cancelar"
+        digitarConfirmar={true}
+        onConfirmar={executarSalvar}
+        onCancelar={() => setPendente(false)}
+      />
+    )}
+    {verHistorico && (
+      <ModalHistoricoCritico
+        entidade="pbi_credenciais"
+        titulo="Histórico — Credenciais Power BI"
+        onClose={() => setVerHistorico(false)}
+      />
+    )}
+    </>
   )
 }
 
@@ -672,6 +758,7 @@ export default function SettingsPage() {
             <span className="bc-current">Configurações</span>
           </div>
           <div className="topbar-actions">
+            <TopbarExpediente />
             <button className="topbar-btn topbar-btn-danger" title="Sair" onClick={handleLogout}>
               <i className="fa-solid fa-right-from-bracket" />
             </button>

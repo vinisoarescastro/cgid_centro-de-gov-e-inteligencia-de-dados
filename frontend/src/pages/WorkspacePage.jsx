@@ -9,6 +9,8 @@ import IconPicker from '../components/IconPicker'
 import VisualizadorRelatorio from '../components/VisualizadorRelatorio'
 import { apiFetch } from '../utils/api'
 import ModalConfirmacao from '../components/ModalConfirmacao'
+import ModalHistoricoCritico from '../components/ModalHistoricoCritico'
+import TopbarExpediente from '../components/TopbarExpediente'
 
 const API = 'http://localhost:8000'
 
@@ -363,13 +365,25 @@ function ModalRelatorio({ workspaceId, relatorio, onClose, onSave }) {
     descricao:        relatorio?.descricao        ?? '',
     id_relatorio_pbi: relatorio?.id_relatorio_pbi ?? '',
   })
-  const [loading, setLoading] = useState(false)
-  const [erro, setErro] = useState('')
+  const [loading, setLoading]       = useState(false)
+  const [erro, setErro]               = useState('')
+  const [editandoId, setEditandoId]   = useState(false)
+  const [pendente, setPendente]       = useState(false)
+  const [verHistorico, setVerHistorico] = useState(false)
+
+  const idOriginal    = relatorio?.id_relatorio_pbi ?? ''
+  const idFoiAlterado = editando && editandoId && form.id_relatorio_pbi.trim() !== idOriginal
 
   function set(field, val) { setForm(f => ({ ...f, [field]: val })) }
 
-  async function salvar() {
+  function tentarSalvar() {
     if (!form.nome.trim()) { setErro('O nome é obrigatório.'); return }
+    if (idFoiAlterado) { setPendente(true); return }
+    executarSalvar()
+  }
+
+  async function executarSalvar() {
+    setPendente(false)
     setLoading(true); setErro('')
     try {
       const path   = editando
@@ -397,6 +411,7 @@ function ModalRelatorio({ workspaceId, relatorio, onClose, onSave }) {
   }
 
   return (
+    <>
     <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
       <div className="modal-box">
         <div className="modal-title">{editando ? 'Editar Relatório' : 'Novo Relatório'}</div>
@@ -418,10 +433,50 @@ function ModalRelatorio({ workspaceId, relatorio, onClose, onSave }) {
         </div>
         <div className="modal-field">
           <label className="modal-label">ID Relatório Power BI</label>
-          <input className="modal-input" value={form.id_relatorio_pbi} onChange={e => set('id_relatorio_pbi', e.target.value)} placeholder="UUID do relatório no Power BI" />
-          <div style={{ fontSize: 11, color: 'var(--gray-400)', marginTop: 4 }}>
-            Encontre na URL do Power BI: app.powerbi.com/groups/.../reports/<strong>{'<este-id>'}</strong>
-          </div>
+          {editando && idOriginal && !editandoId ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{
+                flex: 1, padding: '8px 12px', background: 'var(--gray-50)',
+                border: '1px solid var(--gray-200)', borderRadius: 'var(--r-md)',
+                fontSize: 13, color: 'var(--gray-600)', fontFamily: 'monospace',
+                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+              }}>
+                {idOriginal}
+              </div>
+              <button type="button" className="btn btn-ghost btn-sm" onClick={() => setVerHistorico(true)}
+                title="Ver histórico de alterações">
+                <i className="fa-solid fa-clock-rotate-left" />
+              </button>
+              <button type="button" className="btn btn-ghost btn-sm" onClick={() => setEditandoId(true)}
+                title="Editar ID (requer confirmação)">
+                <i className="fa-solid fa-pen" /> Editar
+              </button>
+            </div>
+          ) : (
+            <>
+              {editandoId && (
+                <div style={{ fontSize: 11, color: '#f59e0b', marginBottom: 6, display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <i className="fa-solid fa-triangle-exclamation" />
+                  Alterar este ID pode fazer o relatório parar de carregar. Será solicitada confirmação ao salvar.
+                </div>
+              )}
+              <input className="modal-input" value={form.id_relatorio_pbi}
+                onChange={e => set('id_relatorio_pbi', e.target.value)}
+                placeholder="UUID do relatório no Power BI" autoFocus={editandoId} />
+              <div style={{ fontSize: 11, color: 'var(--gray-400)', marginTop: 4 }}>
+                Encontre na URL do Power BI: app.powerbi.com/groups/.../reports/<strong>{'<este-id>'}</strong>
+              </div>
+            </>
+          )}
+          {verHistorico && relatorio && (
+            <ModalHistoricoCritico
+              entidade="relatorio"
+              entidadeId={relatorio.id}
+              campo="id_relatorio_pbi"
+              titulo="Histórico — ID Relatório Power BI"
+              onClose={() => setVerHistorico(false)}
+            />
+          )}
         </div>
         <div className="modal-field">
           <label className="modal-label">Descrição</label>
@@ -432,12 +487,26 @@ function ModalRelatorio({ workspaceId, relatorio, onClose, onSave }) {
 
         <div className="modal-actions">
           <button className="btn btn-ghost" onClick={onClose} disabled={loading}>Cancelar</button>
-          <button className="btn btn-primary" onClick={salvar} disabled={loading}>
+          <button className="btn btn-primary" onClick={tentarSalvar} disabled={loading}>
             {loading ? 'Salvando...' : editando ? 'Salvar alterações' : 'Criar relatório'}
           </button>
         </div>
       </div>
     </div>
+
+    {pendente && (
+      <ModalConfirmacao
+        titulo="Confirmar alteração crítica"
+        mensagem={`O ID Power BI do relatório será alterado de "${idOriginal || '(vazio)'}" para "${form.id_relatorio_pbi.trim() || '(vazio)'}". O relatório pode parar de carregar se o novo ID for inválido.`}
+        variante="danger"
+        labelConfirmar="Alterar"
+        labelCancelar="Cancelar"
+        digitarConfirmar={true}
+        onConfirmar={executarSalvar}
+        onCancelar={() => setPendente(false)}
+      />
+    )}
+    </>
   )
 }
 
@@ -451,13 +520,25 @@ function ModalWorkspace({ workspace, onClose, onSave }) {
     descricao:        workspace?.descricao        ?? '',
     id_workspace_pbi: workspace?.id_workspace_pbi ?? '',
   })
-  const [loading, setLoading] = useState(false)
-  const [erro, setErro] = useState('')
+  const [loading, setLoading]         = useState(false)
+  const [erro, setErro]               = useState('')
+  const [editandoId, setEditandoId]   = useState(false)
+  const [pendente, setPendente]       = useState(false)
+  const [verHistorico, setVerHistorico] = useState(false)
+
+  const idOriginal    = workspace?.id_workspace_pbi ?? ''
+  const idFoiAlterado = editando && editandoId && form.id_workspace_pbi.trim() !== idOriginal
 
   function set(field, val) { setForm(f => ({ ...f, [field]: val })) }
 
-  async function salvar() {
+  function tentarSalvar() {
     if (!form.nome.trim()) { setErro('O nome é obrigatório.'); return }
+    if (idFoiAlterado) { setPendente(true); return }
+    executarSalvar()
+  }
+
+  async function executarSalvar() {
+    setPendente(false)
     setLoading(true); setErro('')
     try {
       const path   = editando ? `/workspaces/${workspace.id}` : `/workspaces`
@@ -483,6 +564,7 @@ function ModalWorkspace({ workspace, onClose, onSave }) {
   }
 
   return (
+    <>
     <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
       <div className="modal-box">
         <div className="modal-title">{editando ? 'Editar Workspace' : 'Novo Workspace'}</div>
@@ -520,7 +602,47 @@ function ModalWorkspace({ workspace, onClose, onSave }) {
         </div>
         <div className="modal-field">
           <label className="modal-label">ID Workspace Power BI</label>
-          <input className="modal-input" value={form.id_workspace_pbi} onChange={e => set('id_workspace_pbi', e.target.value)} placeholder="UUID do workspace no PBI" />
+          {editando && idOriginal && !editandoId ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{
+                flex: 1, padding: '8px 12px', background: 'var(--gray-50)',
+                border: '1px solid var(--gray-200)', borderRadius: 'var(--r-md)',
+                fontSize: 13, color: 'var(--gray-600)', fontFamily: 'monospace',
+                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+              }}>
+                {idOriginal}
+              </div>
+              <button type="button" className="btn btn-ghost btn-sm" onClick={() => setVerHistorico(true)}
+                title="Ver histórico de alterações">
+                <i className="fa-solid fa-clock-rotate-left" />
+              </button>
+              <button type="button" className="btn btn-ghost btn-sm" onClick={() => setEditandoId(true)}
+                title="Editar ID (requer confirmação)">
+                <i className="fa-solid fa-pen" /> Editar
+              </button>
+            </div>
+          ) : (
+            <>
+              {editandoId && (
+                <div style={{ fontSize: 11, color: '#f59e0b', marginBottom: 6, display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <i className="fa-solid fa-triangle-exclamation" />
+                  Alterar este ID pode quebrar o acesso aos relatórios. Será solicitada confirmação ao salvar.
+                </div>
+              )}
+              <input className="modal-input" value={form.id_workspace_pbi}
+                onChange={e => set('id_workspace_pbi', e.target.value)}
+                placeholder="UUID do workspace no PBI" autoFocus={editandoId} />
+            </>
+          )}
+          {verHistorico && workspace && (
+            <ModalHistoricoCritico
+              entidade="workspace"
+              entidadeId={workspace.id}
+              campo="id_workspace_pbi"
+              titulo="Histórico — ID Workspace Power BI"
+              onClose={() => setVerHistorico(false)}
+            />
+          )}
         </div>
         <div className="modal-field">
           <label className="modal-label">Descrição</label>
@@ -531,12 +653,26 @@ function ModalWorkspace({ workspace, onClose, onSave }) {
 
         <div className="modal-actions">
           <button className="btn btn-ghost" onClick={onClose} disabled={loading}>Cancelar</button>
-          <button className="btn btn-primary" onClick={salvar} disabled={loading}>
+          <button className="btn btn-primary" onClick={tentarSalvar} disabled={loading}>
             {loading ? 'Salvando...' : editando ? 'Salvar alterações' : 'Criar workspace'}
           </button>
         </div>
       </div>
     </div>
+
+    {pendente && (
+      <ModalConfirmacao
+        titulo="Confirmar alteração crítica"
+        mensagem={`O ID Power BI do workspace será alterado de "${idOriginal || '(vazio)'}" para "${form.id_workspace_pbi.trim() || '(vazio)'}". Esta ação afeta o carregamento de todos os relatórios deste workspace.`}
+        variante="danger"
+        labelConfirmar="Alterar"
+        labelCancelar="Cancelar"
+        digitarConfirmar={true}
+        onConfirmar={executarSalvar}
+        onCancelar={() => setPendente(false)}
+      />
+    )}
+    </>
   )
 }
 
@@ -699,6 +835,30 @@ export default function WorkspacePage() {
     setWsAtivo(null)
     setRelatorios([])
     setUsuarios([])
+  }
+
+  async function excluirWorkspace(ws) {
+    const ok = await abrirConfirm({
+      titulo: 'Excluir workspace',
+      mensagem: `O workspace "${ws.nome}" e todos os seus relatórios serão excluídos permanentemente. Esta ação não pode ser desfeita.`,
+      labelConfirmar: 'Excluir permanentemente',
+      variante: 'danger',
+    })
+    if (!ok) return
+    try {
+      const r = await apiFetch(`/workspaces/${ws.id}`, { method: 'DELETE' })
+      if (!r.ok && r.status !== 204) throw new Error()
+      setWorkspaces(prev => prev.filter(w => w.id !== ws.id))
+      if (wsAtivo?.id === ws.id) fecharDetalhe()
+    } catch {
+      await abrirConfirm({
+        titulo: 'Erro',
+        mensagem: 'Não foi possível excluir o workspace. Tente novamente.',
+        labelConfirmar: 'Ok',
+        variante: 'danger',
+        modo: 'alert',
+      })
+    }
   }
 
   async function arquivarWorkspace(ws) {
@@ -909,6 +1069,7 @@ export default function WorkspacePage() {
             )}
           </div>
           <div className="topbar-actions">
+            <TopbarExpediente />
             <button className="topbar-btn topbar-btn-danger" title="Sair" onClick={handleLogout}>
               <i className="fa-solid fa-right-from-bracket" />
             </button>
@@ -961,6 +1122,11 @@ export default function WorkspacePage() {
                           <i className="fa-solid fa-box-archive" /> Arquivar
                         </button>
                       )}
+                      <button className="btn btn-ghost btn-sm" style={{ color: 'var(--red-500)' }}
+                        onClick={() => excluirWorkspace(wsAtivo)}
+                        title="Excluir permanentemente">
+                        <i className="fa-solid fa-trash" /> Excluir
+                      </button>
                     </div>
                   )}
                 </div>
@@ -1256,6 +1422,13 @@ export default function WorkspacePage() {
                                 onClick={e => { e.stopPropagation(); reativarWorkspace(ws) }}
                               >
                                 <i className="fa-solid fa-rotate-left" /> Reativar
+                              </button>
+                              <button
+                                className="ws-card-reativar-btn"
+                                style={{ color: 'var(--red-500)', marginLeft: 4 }}
+                                onClick={e => { e.stopPropagation(); excluirWorkspace(ws) }}
+                              >
+                                <i className="fa-solid fa-trash" /> Excluir
                               </button>
                             </div>
                           )}

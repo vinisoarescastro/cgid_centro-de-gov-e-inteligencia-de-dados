@@ -63,8 +63,11 @@ docs/
 ├── 09-roadmap/
 │   └── 01-roadmap.md                            ← MVP, curto, médio e longo prazo
 │
-└── 10-melhorias/
-    └── 01-melhorias-e-recomendacoes.md          ← Melhorias técnicas e organizacionais
+├── 10-melhorias/
+│   └── 01-melhorias-e-recomendacoes.md          ← Melhorias técnicas e organizacionais
+│
+└── 11-guias/
+    └── 01-configurar-power-bi.md                ← Guia completo: configurar PBI Embedded no CGID
 ```
 
 ---
@@ -97,6 +100,7 @@ docs/
 | Stack Recomendada | [08-tecnologias/01-stack-recomendada.md](./08-tecnologias/01-stack-recomendada.md) |
 | Roadmap | [09-roadmap/01-roadmap.md](./09-roadmap/01-roadmap.md) |
 | Melhorias e Recomendações | [10-melhorias/01-melhorias-e-recomendacoes.md](./10-melhorias/01-melhorias-e-recomendacoes.md) |
+| **Guia: Configurar Power BI Embedded** | [11-guias/01-configurar-power-bi.md](./11-guias/01-configurar-power-bi.md) |
 
 ---
 
