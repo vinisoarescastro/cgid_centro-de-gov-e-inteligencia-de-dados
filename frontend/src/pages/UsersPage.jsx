@@ -2,9 +2,8 @@ import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import '../styles/home.css'
 import '../styles/users.css'
-import logoSidebarFull from '../assets/logo-sidebar-full.png'
-import logoSidebarIcon from '../assets/logo-sidebar-icon.png'
 import Avatar from '../components/Avatar'
+import Sidebar from '../components/Sidebar'
 import TopbarExpediente from '../components/TopbarExpediente'
 import { apiFetch } from '../utils/api'
 
@@ -369,7 +368,6 @@ function ModalConfirmar({ usuario, onClose, onConfirm }) {
 // ─── Página principal ─────────────────────────────────────────────────────────
 export default function UsersPage() {
   const navigate = useNavigate()
-  const [expanded, setExpanded] = useState(() => sessionStorage.getItem('sidebar_expanded') === '1')
   const currentUser = JSON.parse(sessionStorage.getItem('cgid_user') || '{}')
   const isAdmin = ['super_administrador', 'administrador'].includes(currentUser.perfil)
 
@@ -454,56 +452,7 @@ export default function UsersPage() {
     <div className="app-shell">
 
       {/* ── Sidebar ── */}
-      <aside className={`sidebar${expanded ? ' expanded' : ''}`}>
-        <div className="sb-header">
-          {expanded
-            ? <img src={logoSidebarFull} alt="Brasil Terrenos" className="sb-logo-full" />
-            : <img src={logoSidebarIcon} alt="Brasil Terrenos" className="sb-logo-icon-img" />
-          }
-          <button className="sb-toggle" onClick={() => setExpanded(v => { sessionStorage.setItem('sidebar_expanded', v ? '' : '1'); return !v })} title={expanded ? 'Retrair' : 'Expandir'}>
-            <i className={`fa-solid ${expanded ? 'fa-chevron-left' : 'fa-chevron-right'}`} />
-          </button>
-        </div>
-        <nav className="sb-nav">
-          <div className="sb-link" onClick={() => navigate('/')}>
-            <div className="sb-icon"><i className="fa-solid fa-house" /></div>
-            <span className="sb-label">Home</span>
-          </div>
-          <div className="sb-link active">
-            <div className="sb-icon"><i className="fa-solid fa-users" /></div>
-            <span className="sb-label">Usuários</span>
-          </div>
-          <div className="sb-link" onClick={() => navigate('/workspaces')}>
-            <div className="sb-icon"><i className="fa-solid fa-building-columns" /></div>
-            <span className="sb-label">Workspace</span>
-          </div>
-          <div className="sb-link" onClick={() => navigate('/favoritos')}>
-            <div className="sb-icon"><i className="fa-solid fa-star" /></div>
-            <span className="sb-label">Favoritos</span>
-          </div>
-          {currentUser.perfil === 'super_administrador' && (
-            <div className="sb-link" onClick={() => navigate('/auditoria')}>
-              <div className="sb-icon"><i className="fa-solid fa-file-lines" /></div>
-              <span className="sb-label">Auditoria</span>
-            </div>
-          )}
-          {isAdmin && (
-            <div className="sb-link" onClick={() => navigate('/configuracoes')}>
-              <div className="sb-icon"><i className="fa-solid fa-gear" /></div>
-              <span className="sb-label">Configurações</span>
-            </div>
-          )}
-        </nav>
-        <div className="sb-footer">
-          <div className="sb-user">
-            <Avatar user={currentUser} size={36} radius={10} />
-            <div className="sb-user-info">
-              <div className="sb-user-name">{currentUser.nome || currentUser.email}</div>
-              <div className="sb-user-role">{PERFIL_LABELS[currentUser.perfil] || 'Usuário'}</div>
-            </div>
-          </div>
-        </div>
-      </aside>
+      <Sidebar user={currentUser} active="usuarios" />
 
       {/* ── App Body ── */}
       <div className="app-body">

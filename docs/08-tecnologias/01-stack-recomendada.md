@@ -3,7 +3,7 @@
 > **Documento:** 08-tecnologias/01-stack-recomendada.md  
 > **Status:** Vigente  
 > **Criado em:** Maio/2026  
-> **Atualizado em:** Maio/2026
+> **Atualizado em:** Junho/2026
 
 ---
 
@@ -97,9 +97,13 @@ frontend/src/
 ├── routes/
 │   └── AppRoutes.jsx        ← definição de rotas + componente PrivateRoute
 ├── components/
-│   ├── Avatar.jsx           ← exibe foto de perfil ou iniciais do nome/email
-│   ├── IconPicker.jsx       ← seletor visual de ícone para workspace
-│   └── VisualizadorRelatorio.jsx ← modal de embed Power BI
+│   ├── Sidebar.jsx                 ← menu lateral compartilhado (logo, nav com active, footer de usuário)
+│   ├── Avatar.jsx                  ← exibe foto de perfil ou iniciais do nome/email
+│   ├── IconPicker.jsx              ← seletor visual de ícone para workspace
+│   ├── VisualizadorRelatorio.jsx   ← modal de embed Power BI
+│   ├── TopbarExpediente.jsx        ← badge de status do expediente exibido na topbar
+│   ├── ModalConfirmacao.jsx        ← modal genérico de confirmação de ação destrutiva
+│   └── ModalHistoricoCritico.jsx   ← modal de histórico de alterações de campos críticos
 ├── utils/
 │   └── api.js               ← helper fetch com JSON e X-Usuario-Id
 ├── assets/
@@ -107,8 +111,8 @@ frontend/src/
 │   ├── logo-bt-colorido.png
 │   ├── logo-sidebar-full.png   ← logo exibida na sidebar expandida
 │   └── logo-sidebar-icon.png   ← ícone exibido na sidebar colapsada
-├── App.jsx                  ← monta BrowserRouter + AppRoutes
-└── main.jsx                 ← ponto de entrada, importa global.css
+├── App.jsx                     ← monta BrowserRouter + AppRoutes
+└── main.jsx                    ← ponto de entrada, importa global.css
 ```
 
 ### 3.5 Design System
@@ -321,3 +325,4 @@ npm run dev
 | 2.0 | Maio/2026 | Vinicius Soares | Migração para Python + FastAPI + SQLAlchemy; remoção de Redis e BullMQ; simplificação do frontend |
 | 3.0 | Maio/2026 | Vinicius Soares | Atualização para estado real do projeto: React 19, Vite 8, React Router v7, SQLite como banco de desenvolvimento, remoção de TanStack Query/Axios/React Hook Form/Yup, estrutura de pastas atualizada (pages/, styles/, routes/, components/), endpoints de dashboard implementados |
 | 3.1 | Junho/2026 | Vinicius Soares | Inclusão de powerbi-client, requests, páginas Favoritos/Auditoria/Configurações, utilitário apiFetch e endpoints de Power BI, auditoria, favoritos e configurações |
+| 3.2 | Junho/2026 | Vinicius Soares | Extração do menu lateral para componente compartilhado `Sidebar.jsx`; adição de `TopbarExpediente.jsx`, `ModalConfirmacao.jsx` e `ModalHistoricoCritico.jsx` na lista de componentes |

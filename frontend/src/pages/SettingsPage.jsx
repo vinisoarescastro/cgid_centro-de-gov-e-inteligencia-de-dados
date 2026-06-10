@@ -2,23 +2,14 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import '../styles/home.css'
 import '../styles/settings.css'
-import logoSidebarFull from '../assets/logo-sidebar-full.png'
-import logoSidebarIcon from '../assets/logo-sidebar-icon.png'
 import Avatar from '../components/Avatar'
+import Sidebar from '../components/Sidebar'
 import TopbarExpediente from '../components/TopbarExpediente'
 import { apiFetch } from '../utils/api'
 import ModalConfirmacao from '../components/ModalConfirmacao'
 import ModalHistoricoCritico from '../components/ModalHistoricoCritico'
 
 const API = 'http://localhost:8000'
-
-const PERFIL_LABEL = {
-  super_administrador: 'Super Administrador',
-  administrador: 'Administrador',
-  gerente: 'Gerente',
-  operador: 'Operador',
-  visitante: 'Visitante',
-}
 
 const ADMIN_PERFIS = ['super_administrador', 'administrador']
 const SUPER_ADMIN  = 'super_administrador'
@@ -670,7 +661,6 @@ function AbaCredenciaisPBI() {
 // ─── Página principal ─────────────────────────────────────────────────────────
 export default function SettingsPage() {
   const navigate  = useNavigate()
-  const [expanded, setExpanded] = useState(() => sessionStorage.getItem('sidebar_expanded') === '1')
   const user    = JSON.parse(sessionStorage.getItem('cgid_user') || '{}')
   const isAdmin = ADMIN_PERFIS.includes(user.perfil)
   const isSuperAdmin = user.perfil === SUPER_ADMIN
@@ -696,58 +686,7 @@ export default function SettingsPage() {
     <div className="app-shell">
 
       {/* ── Sidebar ── */}
-      <aside className={`sidebar${expanded ? ' expanded' : ''}`}>
-        <div className="sb-header">
-          {expanded
-            ? <img src={logoSidebarFull} alt="Brasil Terrenos" className="sb-logo-full" />
-            : <img src={logoSidebarIcon} alt="Brasil Terrenos" className="sb-logo-icon-img" />
-          }
-          <button className="sb-toggle" onClick={() => setExpanded(v => { sessionStorage.setItem('sidebar_expanded', v ? '' : '1'); return !v })}
-            title={expanded ? 'Retrair menu' : 'Expandir menu'}>
-            <i className={`fa-solid ${expanded ? 'fa-chevron-left' : 'fa-chevron-right'}`} />
-          </button>
-        </div>
-        <nav className="sb-nav">
-          <div className="sb-link" onClick={() => navigate('/')}>
-            <div className="sb-icon"><i className="fa-solid fa-house" /></div>
-            <span className="sb-label">Home</span>
-          </div>
-          {isAdmin && (
-            <div className="sb-link" onClick={() => navigate('/usuarios')}>
-              <div className="sb-icon"><i className="fa-solid fa-users" /></div>
-              <span className="sb-label">Usuários</span>
-            </div>
-          )}
-          <div className="sb-link" onClick={() => navigate('/workspaces')}>
-            <div className="sb-icon"><i className="fa-solid fa-building-columns" /></div>
-            <span className="sb-label">Workspace</span>
-          </div>
-          <div className="sb-link" onClick={() => navigate('/favoritos')}>
-            <div className="sb-icon"><i className="fa-solid fa-star" /></div>
-            <span className="sb-label">Favoritos</span>
-          </div>
-          {isSuperAdmin && (
-            <div className="sb-link" onClick={() => navigate('/auditoria')}>
-              <div className="sb-icon"><i className="fa-solid fa-file-lines" /></div>
-              <span className="sb-label">Auditoria</span>
-            </div>
-          )}
-          <div className="sb-link active">
-            <div className="sb-icon"><i className="fa-solid fa-gear" /></div>
-            <span className="sb-label">Configurações</span>
-          </div>
-        </nav>
-        <div className="sb-footer">
-          <div className="sb-user">
-            <Avatar user={user} size={36} radius={10} />
-            <div className="sb-user-info">
-              <div className="sb-user-name">{user.nome}</div>
-              <div className="sb-user-email">{user.email}</div>
-              <div className="sb-user-role">{PERFIL_LABEL[user.perfil] ?? user.perfil}</div>
-            </div>
-          </div>
-        </div>
-      </aside>
+      <Sidebar user={user} active="configuracoes" />
 
       {/* ── App Body ── */}
       <div className="app-body">
